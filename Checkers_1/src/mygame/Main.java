@@ -9,12 +9,15 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.asset.plugins.ZipLocator;
+import com.jme3.bounding.BoundingBox;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.math.ColorRGBA;
+import com.jme3.util.SkyFactory;
 
 /**
  * Sample 3 - how to load an OBJ model, and OgreXML model, a material/texture,
@@ -63,7 +66,7 @@ Spatial checker_czarny;
         checker_czarny = assetManager.loadModel("Models/checkers/Checker_model_black.j3o");
         checker_czarny.scale(1f, 1f, 1f);
         checker_czarny.rotate(0.0f, 0f, 0.0f);
-        checker_czarny.setLocalTranslation(0.2f, 0.63f, -0.2f);
+        checker_czarny.setLocalTranslation(0.0f, 0.63f, 0.0f);
         rootNode.attachChild(checker_czarny);
         
         //prznies
@@ -84,6 +87,10 @@ Spatial checker_czarny;
         rootNode.addLight(sun);
         
         
+        //sky
+        //viewPort.setBackgroundColor(ColorRGBA.Blue);       
+        rootNode.attachChild(SkyFactory.createSky(
+            assetManager, "Textures/sky/BrightSky.dds", false));
         
         initKeys(); // load my custom keybinding
 
@@ -94,7 +101,15 @@ Spatial checker_czarny;
     @Override
     public void simpleUpdate(float tpf) {//time per second
         // make the player rotate:
-//        checker_czarny.scale(0.2f, 0.2f, 0.2f);
+        System.out.println(checker_czarny.getLocalTranslation());
+        
+        System.out.println(((BoundingBox)checker_czarny.getWorldBound()).getXExtent()); 
+        System.out.println(((BoundingBox)checker_czarny.getWorldBound()).getYExtent()); 
+        System.out.println(((BoundingBox)checker_czarny.getWorldBound()).getZExtent()); 
+
+
+
+
 //        checker_czarny.scale(0.3f,0.3f,0.3f);
 //        checker_czarny.scale(0.2f,0.2f,0.2f);
 //        checker_czarny.scale(0.1f,0.1f,0.1f);
