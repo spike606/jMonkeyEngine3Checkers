@@ -1,0 +1,84 @@
+<scene exported_by="Krystus" formatVersion="1.0.1" previous_export_time="0" export_time="1446493422.061" >
+  <nodes >
+    <node name="Lamp" >
+      <position y="12.718750" x="0.021695" z="-0.003848" />
+      <rotation qy="0.755880" qx="0.169076" qz="-0.272171" qw="0.570948" />
+      <scale y="1.000000" x="1.000000" z="1.000000" />
+      <user_data type="IDPropertyGroup" name="cycles_visibility" value='&lt;bpy id prop: owner="OBLamp", name="cycles_visibility", address=0x0DF6A4E0&gt;' />
+      <game >
+        <sensors />
+        <actuators />
+      </game>
+      <light shadow="true" type="point" name="Lamp" powerScale="1.0" >
+        <position y="12.718750" x="0.021695" z="-0.003848" />
+        <lightAttenuation range="5000" quadratic="0.0" constant="1.0" linear="0.03333335240683057" />
+        <colourDiffuse r="1.0" b="1.0" g="1.0" />
+        <colourSpecular r="1.0" b="1.0" g="1.0" />
+        <colourShadow r="1.0" b="1.0" g="1.0" />
+      </light>
+    </node>
+    <node name="Sun" >
+      <position y="86.944687" x="0.000000" z="74.104141" />
+      <rotation qy="-0.198853" qx="0.377608" qz="-0.106866" qw="0.898025" />
+      <scale y="6.533907" x="6.533906" z="6.533906" />
+      <user_data type="IDPropertyGroup" name="cycles_visibility" value='&lt;bpy id prop: owner="OBSun", name="cycles_visibility", address=0x0DF67D80&gt;' />
+      <game >
+        <sensors />
+        <actuators />
+      </game>
+      <light type="directional" name="Sun" powerScale="1.0" >
+        <position y="86.944687" x="0.000000" z="74.104141" />
+        <lightAttenuation range="5000" quadratic="0.0" constant="1.0" linear="0.04" />
+        <direction y="-0.692" x="0.342" z="0.636" />
+        <colourDiffuse r="1.0" b="1.0" g="1.0" />
+        <colourSpecular r="1.0" b="1.0" g="1.0" />
+      </light>
+    </node>
+    <node name="Chessboard" >
+      <position y="0.372366" x="0.012284" z="-0.012285" />
+      <rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+      <scale y="1.000000" x="1.000000" z="1.000000" />
+      <user_data type="IDPropertyGroup" name="cycles_visibility" value='&lt;bpy id prop: owner="OBChessboard", name="cycles_visibility", address=0x0DF6A120&gt;' />
+      <user_data type="IDPropertyGroup" name="cycles" value='&lt;bpy id prop: owner="OBChessboard", name="cycles", address=0x0DF6A1C0&gt;' />
+      <game >
+        <sensors />
+        <actuators />
+      </game>
+      <entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.02539999969303608" damping_rot="0.1589999943971634" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="Chessboard.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="Chessboard" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+        <user_data type="IDPropertyGroup" name="cycles" value='&lt;bpy id prop: owner="MEChessboard", name="cycles", address=0x0DF6B2A0&gt;' />
+        <user_data type="IDPropertyGroup" name="ms3d" value='&lt;bpy id prop: owner="MEChessboard", name="ms3d", address=0x0DF6A8A0&gt;' />
+      </entity>
+    </node>
+    <node name="Camera" >
+      <position y="10.480438" x="0.186853" z="11.373310" />
+      <rotation qy="-0.004927" qx="0.334657" qz="-0.002233" qw="0.942325" />
+      <scale y="1.000000" x="1.000000" z="1.000000" />
+      <game >
+        <sensors />
+        <actuators />
+      </game>
+      <camera projectionType="perspective" fov="0.8575560548920329" name="Camera" >
+        <clipping far="100.0" nearPlaneDist="0.10000000149011612" near="0.10000000149011612" farPlaneDist="100.0" />
+      </camera>
+    </node>
+  </nodes>
+  <externals >
+    <item type="material" >
+      <file name="C:\SPB_Data\chessboard1\Black.material" />
+    </item>
+    <item type="material" >
+      <file name="C:\SPB_Data\chessboard1\White.material" />
+    </item>
+    <item type="material" >
+      <file name="C:\SPB_Data\chessboard1\Wood.material" />
+    </item>
+    <item type="material" >
+      <file name="C:\SPB_Data\chessboard1\Wire.material" />
+    </item>
+  </externals>
+  <environment >
+    <colourBackground r="0.05087608844041824" b="0.05087608844041824" g="0.05087608844041824" />
+    <colourAmbient r="0.0" b="0.0" g="0.0" />
+    <colourDiffuse r="0.05087608844041824" b="0.05087608844041824" g="0.05087608844041824" />
+  </environment>
+</scene>
