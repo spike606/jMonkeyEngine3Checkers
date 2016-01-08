@@ -89,9 +89,10 @@ Spatial checker_czarny;
         
         //sky
         //viewPort.setBackgroundColor(ColorRGBA.Blue);       
-        rootNode.attachChild(SkyFactory.createSky(
-            assetManager, "Textures/sky/BrightSky.dds", false));
-        
+//        rootNode.attachChild(SkyFactory.createSky(
+//            assetManager, "Textures/sky/BrightSky.dds", false));
+                rootNode.attachChild(SkyFactory.createSky(
+            assetManager, "Textures/sky/space.dds", false));
         initKeys(); // load my custom keybinding
 
     }
