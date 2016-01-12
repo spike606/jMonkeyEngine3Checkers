@@ -20,7 +20,12 @@ import com.jme3.light.AmbientLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
+import com.jme3.post.FilterPostProcessor;
+import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Node;
+import com.jme3.shadow.BasicShadowRenderer;
+import com.jme3.shadow.DirectionalLightShadowFilter;
+import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.util.SkyFactory;
 
 /**
@@ -28,43 +33,37 @@ import com.jme3.util.SkyFactory;
  * or text.
  */
 public class Main extends SimpleApplication {
-    
+
     //przod
     private static final Vector3f cam1Loc = new Vector3f(-6.2657156f, 14.529437f, 8.240483f);
     private static final Vector3f cam1Dir = new Vector3f(-0.0028091485f, -0.7335623f, -0.67961645f);
     private static final Vector3f cam1Up = new Vector3f(-0.003032215f, 0.67962223f, -0.733556f);
     private static final Vector3f cam1Left = new Vector3f(-0.99999154f, -7.532071E-8f, -0.0041334783f);
-
     //tyl
     private static final Vector3f cam2Loc = new Vector3f(-6.150441f, 14.342193f, -20.968948f);
     private static final Vector3f cam2Dir = new Vector3f(-0.004009098f, -0.7174297f, 0.6966194f);
     private static final Vector3f cam2Up = new Vector3f(-0.0015367586f, 0.6966286f, 0.7174303f);
     private static final Vector3f cam2Left = new Vector3f(0.99999076f, -0.0018057127f, 0.0038953684f);
-    
     //z gory
     private static final Vector3f cam3Loc = new Vector3f(-6.1873684f, 19.925018f, -3.8860335f);
     private static final Vector3f cam3Dir = new Vector3f(0.0017965112f, -0.9943187f, -0.10642803f);
     private static final Vector3f cam3Up = new Vector3f(-1.7530489E-4f, 0.10642797f, -0.9943204f);
     private static final Vector3f cam3Left = new Vector3f(-0.99999833f, -0.0018049651f, -1.6890059E-5f);
-    
     //z prawej
     private static final Vector3f cam4Loc = new Vector3f(8.424002f, 14.017611f, -6.085185f);
     private static final Vector3f cam4Dir = new Vector3f(-0.7035848f, -0.7105932f, -0.005055666f);
     private static final Vector3f cam4Up = new Vector3f(-0.71059096f, 0.70360076f, -0.0025426447f);
     private static final Vector3f cam4Left = new Vector3f(-0.005363941f, -0.0018036067f, 0.9999839f);
-    
     // z rogu
     private static final Vector3f cam5Loc = new Vector3f(-16.373577f, 19.19087f, -17.024492f);
     private static final Vector3f cam5Dir = new Vector3f(0.37362808f, -0.82820004f, 0.4177161f);
     private static final Vector3f cam5Up = new Vector3f(0.55454195f, 0.5604297f, 0.6151437f);
     private static final Vector3f cam5Left = new Vector3f(0.7435626f, -0.0018061101f, -0.6686639f);
-    
-    
-    
     /*STALE DO POZYCJONOWANIA*/
     public static final float X_CELL = 1.809044164f;
     public static final float Z_CELL = 1.802715f;
-
+    //shadows
+    final int SHADOWMAP_SIZE = 2048;
     /*TABLICE DO BIEREK */
     Spatial[] black_checkers = new Spatial[12];
     Spatial[] white_checkers = new Spatial[12];
@@ -77,50 +76,51 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleInitApp() {
 
-        
-        
+
+
         /* INFO OFF*/
         setDisplayFps(false);
         setDisplayStatView(false);
-        /*****/
+
 
         /* LOAD BOARD*/
         Spatial board = assetManager.loadModel("Models/board/chessboard2.j3o");
         board.scale(1f, 1f, 1f);
         board.rotate(0.0f, 0f, 0.0f);
         board.setLocalTranslation(0f, 0f, 0f);
+        board.setShadowMode(ShadowMode.CastAndReceive);
         rootNode.attachChild(board);
-        /**
-         * ***********
-         */
-        /* LOAD CHECKER*/
-//        Spatial checker_bialy = assetManager.loadModel("Models/checkers/Checker_model_white.j3o");
-//        checker_bialy.scale(0.5f, 0.5f, 0.5f);
-//        checker_bialy.rotate(0.0f, -3.0f, 0.0f);
-//        checker_bialy.setLocalTranslation(0f, 0f, 0f);
-//        rootNode.attachChild(checker_bialy);
-        //przniesw
-//        checker_czarny.move(2f, 2f, 2f);
-//        Spatial checker_czarny_dama = assetManager.loadModel("Models/checkers/Checker_model_black_queen.j3o");
-//        checker_czarny_dama.scale(0.5f, 0.5f, 0.5f);
-//        checker_czarny_dama.rotate(0.0f, -3.0f, 0.0f);
-//        checker_czarny_dama.setLocalTranslation(20f, 20f, 20f);
-//        rootNode.attachChild(checker_czarny_dama);
-        /**
-         * ***********
-         */
+
         setUpCheckers();
 
 
         // You must add a directional light to make the model visible!
         DirectionalLight sun = new DirectionalLight();
         sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f).normalizeLocal());
+
         rootNode.addLight(sun);
 
 
+        /* Drop shadows */
+        DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(assetManager, SHADOWMAP_SIZE, 1);
+        dlsr.setLight(sun);
+        viewPort.addProcessor(dlsr);
+        DirectionalLightShadowFilter dlsf = new DirectionalLightShadowFilter(assetManager, SHADOWMAP_SIZE, 3);
+        dlsf.setLight(sun);
+        dlsf.setEnabled(true);
+        FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
+        fpp.addFilter(dlsf);
+        viewPort.addProcessor(fpp);
+        /**
+         * *
+         */
         cam.setFrame(cam1Loc, cam1Left, cam1Up, cam1Dir);
         flyCam.setMoveSpeed(10);
         //cam.lookAt(camLocVctrDir1,  Vector3f.UNIT_Y);
+
+
+
+
 
 
         //sky
@@ -136,14 +136,14 @@ public class Main extends SimpleApplication {
     /* Use the main event loop to trigger repeating actions. */
     @Override
     public void simpleUpdate(float tpf) {//time per second
-        
+
         System.out.println("Cam location: " + cam.getLocation());
         System.out.println("Cam up : " + cam.getUp());
         System.out.println("Cam left : " + cam.getLeft());
         System.out.println("Cam direction : " + cam.getDirection());
 
-        
-        
+
+
         // make the player rotate:
 //        System.out.println(checker_czarny.getLocalTranslation());
 //        
@@ -163,10 +163,10 @@ public class Main extends SimpleApplication {
         inputManager.addMapping("Cam1", new KeyTrigger(KeyInput.KEY_1));
         inputManager.addMapping("Cam2", new KeyTrigger(KeyInput.KEY_2));
         inputManager.addMapping("Cam3", new KeyTrigger(KeyInput.KEY_3));
-        inputManager.addMapping("Cam4", new KeyTrigger(KeyInput.KEY_4)); 
+        inputManager.addMapping("Cam4", new KeyTrigger(KeyInput.KEY_4));
         inputManager.addMapping("Cam5", new KeyTrigger(KeyInput.KEY_5));
-        
-        
+
+
         inputManager.addMapping("Left", new KeyTrigger(KeyInput.KEY_J));
         inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_K));
         inputManager.addMapping("Up", new KeyTrigger(KeyInput.KEY_I));
@@ -178,32 +178,31 @@ public class Main extends SimpleApplication {
         inputManager.addListener(actionListener, "Cam1", "Cam2", "Cam3", "Cam4", "Cam5");
 
     }
-    
     private ActionListener actionListener = new ActionListener() {
-    public void onAction(String name, boolean keyPressed, float tpf) {
-      if (name.equals("Cam1") && !keyPressed) {
-        cam.setFrame(cam1Loc, cam1Left, cam1Up, cam1Dir);
-      }
-      if (name.equals("Cam2") && !keyPressed) {
-        cam.setFrame(cam2Loc, cam2Left, cam2Up, cam2Dir);
-      }
-      if (name.equals("Cam3") && !keyPressed) {
-        cam.setFrame(cam3Loc, cam3Left, cam3Up, cam3Dir);
-      }
-      if (name.equals("Cam4") && !keyPressed) {
-        cam.setFrame(cam4Loc, cam4Left, cam4Up, cam4Dir);
-      }
-      if (name.equals("Cam5") && !keyPressed) {
-        cam.setFrame(cam5Loc, cam5Left, cam5Up, cam5Dir);
-      }
+        public void onAction(String name, boolean keyPressed, float tpf) {
+            if (name.equals("Cam1") && !keyPressed) {
+                cam.setFrame(cam1Loc, cam1Left, cam1Up, cam1Dir);
+            }
+            if (name.equals("Cam2") && !keyPressed) {
+                cam.setFrame(cam2Loc, cam2Left, cam2Up, cam2Dir);
+            }
+            if (name.equals("Cam3") && !keyPressed) {
+                cam.setFrame(cam3Loc, cam3Left, cam3Up, cam3Dir);
+            }
+            if (name.equals("Cam4") && !keyPressed) {
+                cam.setFrame(cam4Loc, cam4Left, cam4Up, cam4Dir);
+            }
+            if (name.equals("Cam5") && !keyPressed) {
+                cam.setFrame(cam5Loc, cam5Left, cam5Up, cam5Dir);
+            }
 
-    }
-  };
+        }
+    };
     private AnalogListener analogListener = new AnalogListener() {
         public void onAnalog(String name, float value, float tpf) {
 //        if (name.equals("Right")) {
-//          Vector3f v = checker_czarny.getLocalTranslation();
-//          checker_czarny.setLocalTranslation(v.x + value*speed, v.y , v.z);
+//          Vector3f v = white_checkers[1].getLocalTranslation();
+//          white_checkers[1].setLocalTranslation(v.x + value*speed, v.y , v.z);
 //        }
 //        if (name.equals("Right")) {
 //          Vector3f v = checker_czarny.getLocalTranslation();
@@ -261,6 +260,9 @@ public class Main extends SimpleApplication {
                 cell_pos_z = 0.0f - Z_CELL * 2;
             }
             white_checkers[i].setLocalTranslation(cell_pos_x, 1.4552078f, cell_pos_z);
+            white_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
+
+
 
             if (i < 4) {
                 cell_pos_x = 0.042778164f - X_CELL * i - X_CELL * (i);
@@ -278,11 +280,18 @@ public class Main extends SimpleApplication {
             }
 
             black_checkers[i].setLocalTranslation(cell_pos_x, 1.4552078f, cell_pos_z);
+            black_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
 
 
             white_node.attachChild(white_checkers[i]);
             black_node.attachChild(black_checkers[i]);
 
+
+//            AmbientLight light = new AmbientLight();
+//
+//        light.setColor(ColorRGBA.White.mult(3f));
+//
+//        black_checkers[i].addLight(light);
 
         }
 
