@@ -86,11 +86,16 @@ public class Main extends SimpleApplication {
 
 
         /* LOAD BOARD*/
-        Spatial board = assetManager.loadModel("Models/board/chessboard2.j3o");
+        Spatial board = assetManager.loadModel("Models/board/chessboard.j3o");
         board.scale(1f, 1f, 1f);
         board.rotate(0.0f, 0f, 0.0f);
         board.setLocalTranslation(0f, 0f, 0f);
         board.setShadowMode(ShadowMode.CastAndReceive);
+        
+
+        
+        
+        
         rootNode.attachChild(board);
 
         setUpCheckers();
@@ -98,7 +103,7 @@ public class Main extends SimpleApplication {
 
         // You must add a directional light to make the model visible!
         DirectionalLight sun = new DirectionalLight();
-        sun.setDirection(new Vector3f(-0.9f, -0.7f, -1.0f).normalizeLocal());
+        sun.setDirection(new Vector3f(-0.9f, -1.2f, -1.0f).normalizeLocal());
 
         rootNode.addLight(sun);
 
@@ -117,8 +122,9 @@ public class Main extends SimpleApplication {
          * *
          */
         cam.setFrame(cam1Loc, cam1Left, cam1Up, cam1Dir);
+        
+        flyCam.setEnabled(true);
         flyCam.setMoveSpeed(10);
-        //cam.lookAt(camLocVctrDir1,  Vector3f.UNIT_Y);
 
 
 
@@ -131,6 +137,9 @@ public class Main extends SimpleApplication {
 //            assetManager, "Textures/sky/BrightSky.dds", false));
         rootNode.attachChild(SkyFactory.createSky(
                 assetManager, "Textures/sky/space.dds", false));
+        
+        
+        
         initKeys(); // load my custom keybinding
 
     }
@@ -239,15 +248,16 @@ public class Main extends SimpleApplication {
         Node white_node = new Node("white_checkers");
         Node black_node = new Node("black_checkers");
 
-        rootNode.attachChild(white_node); // put this node in the scene
-        rootNode.attachChild(black_node); // put this node in the scene
+
 
         float cell_pos_x = 0.042778164f;
         float cell_pos_z = 0.0f;
 
         for (int i = 0; i < 12; i++) {
-            white_checkers[i] = assetManager.loadModel("Models/checkers/Checkers_model_white.j3o");
-            black_checkers[i] = assetManager.loadModel("Models/checkers/Checkers_model_black.j3o");
+//            white_checkers[i] = assetManager.loadModel("Models/checkers/Checkers_model_white.j3o");
+            white_checkers[i] = assetManager.loadModel("Models/Ch_white/Ch_white.j3o");
+
+            black_checkers[i] = assetManager.loadModel("Models/Ch_black/Ch_black.j3o");
 
             if (i < 4) {
                 cell_pos_x = 0.042778164f - i * X_CELL - X_CELL * (i + 1);
@@ -265,8 +275,10 @@ public class Main extends SimpleApplication {
                         white_checkers[i].setLocalTranslation(cell_pos_x, CELL_POS_Y, cell_pos_z);
 
             white_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
-
-
+//
+//                                        AmbientLight al = new AmbientLight();
+//        al.setColor(ColorRGBA.White.mult(0.02f));
+//       white_checkers[i].addLight(al);
 
             if (i < 4) {
                 cell_pos_x = 0.042778164f - X_CELL * i - X_CELL * (i);
@@ -299,8 +311,17 @@ public class Main extends SimpleApplication {
 
         }
 
+        /** PODSWIETLENIE */
+        AmbientLight blueLight = new AmbientLight();
+        blueLight.setColor(ColorRGBA.Blue.mult(3f));
+        AmbientLight redLight = new AmbientLight();
+        redLight.setColor(ColorRGBA.Red.mult(3f));
+        white_checkers[1].addLight(blueLight);
+        white_checkers[2].addLight(redLight);
+        /*****/
 
-
+        rootNode.attachChild(white_node); // put this node in the scene
+        rootNode.attachChild(black_node); // put this node in the scene
 
 
 
