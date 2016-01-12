@@ -10,6 +10,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.asset.plugins.ZipLocator;
 import com.jme3.bounding.BoundingBox;
+import com.jme3.collision.CollisionResults;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
@@ -17,9 +18,13 @@ import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.AmbientLight;
+import com.jme3.light.Light;
+import com.jme3.light.LightList;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Ray;
+import com.jme3.math.Vector2f;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Node;
@@ -65,11 +70,26 @@ public class Main extends SimpleApplication {
     //shadows
     final int SHADOWMAP_SIZE = 2048;
     /*TABLICE DO BIEREK */
-    Spatial[] black_checkers = new Spatial[12];
+    /* NODES - OD NAJWYSZYCH*/
+    //ROOTNODE
+    Node game = new Node("Game");//zawiera board i bierki
+    Node board_node = new Node("boardNode");
+    Node checkers_node = new Node("checkers_node");
+    Node white_node = new Node("whiteCheckersNode");//zawiera wszystkie biale
+    Node black_node = new Node("blackCheckersNode");
+    Node[] black_checkers_nodes;//tablica z nodami kazdy ma bierke
+    Node[] white_checkers_nodes;
+    Spatial[] black_checkers = new Spatial[12];//tablica spatiali
     Spatial[] white_checkers = new Spatial[12];
+    /**
+     * *****
+     */
+    
+    AmbientLight light = new AmbientLight();
 
     
     private final static float CELL_POS_Y = 1.4552078f;
+
     public static void main(String[] args) {
         Main app = new Main();
         app.start();
@@ -91,18 +111,17 @@ public class Main extends SimpleApplication {
         board.rotate(0.0f, 0f, 0.0f);
         board.setLocalTranslation(0f, 0f, 0f);
         board.setShadowMode(ShadowMode.CastAndReceive);
-        
 
-        
-        
-        
-        rootNode.attachChild(board);
+        board_node.attachChild(board);
+        game.attachChild(board_node);
+        rootNode.attachChild(game);
 
         setUpCheckers();
 
 
         // You must add a directional light to make the model visible!
         DirectionalLight sun = new DirectionalLight();
+        sun.setName("Sun");
         sun.setDirection(new Vector3f(-0.9f, -1.2f, -1.0f).normalizeLocal());
 
         rootNode.addLight(sun);
@@ -122,9 +141,9 @@ public class Main extends SimpleApplication {
          * *
          */
         cam.setFrame(cam1Loc, cam1Left, cam1Up, cam1Dir);
-        
-        flyCam.setEnabled(true);
-        flyCam.setMoveSpeed(10);
+
+        flyCam.setEnabled(false);
+//        flyCam.setMoveSpeed(10);
 
 
 
@@ -137,9 +156,9 @@ public class Main extends SimpleApplication {
 //            assetManager, "Textures/sky/BrightSky.dds", false));
         rootNode.attachChild(SkyFactory.createSky(
                 assetManager, "Textures/sky/space.dds", false));
-        
-        
-        
+
+
+
         initKeys(); // load my custom keybinding
 
     }
@@ -147,14 +166,10 @@ public class Main extends SimpleApplication {
     /* Use the main event loop to trigger repeating actions. */
     @Override
     public void simpleUpdate(float tpf) {//time per second
-
-        System.out.println("Cam location: " + cam.getLocation());
-        System.out.println("Cam up : " + cam.getUp());
-        System.out.println("Cam left : " + cam.getLeft());
-        System.out.println("Cam direction : " + cam.getDirection());
-
-
-
+//        System.out.println("Cam location: " + cam.getLocation());
+//        System.out.println("Cam up : " + cam.getUp());
+//        System.out.println("Cam left : " + cam.getLeft());
+//        System.out.println("Cam direction : " + cam.getDirection());
         // make the player rotate:
 //        System.out.println(checker_czarny.getLocalTranslation());
 //        
@@ -184,9 +199,13 @@ public class Main extends SimpleApplication {
         inputManager.addMapping("Down", new KeyTrigger(KeyInput.KEY_M));
         inputManager.addMapping("Far", new KeyTrigger(KeyInput.KEY_U));
         inputManager.addMapping("Close", new KeyTrigger(KeyInput.KEY_O));
+
+
+        inputManager.addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
+
         // Add the names to the action listener.
         inputManager.addListener(analogListener, "Left", "Right", "Up", "Down", "Far", "Close");
-        inputManager.addListener(actionListener, "Cam1", "Cam2", "Cam3", "Cam4", "Cam5");
+        inputManager.addListener(actionListener, "Cam1", "Cam2", "Cam3", "Cam4", "Cam5", "Click");
 
     }
     private ActionListener actionListener = new ActionListener() {
@@ -205,6 +224,76 @@ public class Main extends SimpleApplication {
             }
             if (name.equals("Cam5") && !keyPressed) {
                 cam.setFrame(cam5Loc, cam5Left, cam5Up, cam5Dir);
+            }
+            if (name.equals("Click") && !keyPressed) {
+                // Reset results list.
+                CollisionResults results = new CollisionResults();
+                // Convert screen click to 3d position
+                Vector2f click2d = inputManager.getCursorPosition();
+                Vector3f click3d = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 0f).clone();
+                Vector3f dir = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
+                // Aim the ray from the clicked spot forwards.
+                Ray ray = new Ray(click3d, dir);
+                // Collect intersections between ray and all nodes in results list.
+                checkers_node.collideWith(ray, results);
+                // (Print the results so we see what is going on:)
+//                for (int i = 0; i < results.size(); i++) {
+                if (results.size() > 0) {
+                    // (For each “hit”, we know distance, impact point, geometry.)
+                    float dist = results.getCollision(0).getDistance();
+                    Vector3f pt = results.getCollision(0).getContactPoint();
+//                    Node target = results.getCollision(i).getGeometry().getParent();
+                    try {
+//                        System.out.println(results.getCollision(i).getGeometry().getParent().toString());
+//System.out.println(results.getCollision(i).getGeometry().getParent().getParent().toString());
+//System.out.println(results.getCollision(i).getGeometry().getParent().getParent().getParent().toString());
+//System.out.println(results.getCollision(i).getGeometry().getParent().getParent().getParent().getParent().toString());
+
+                        //get checker node
+                        System.out.println(results.getCollision(0).getGeometry().getParent().getParent().getParent().getParent().getParent().getUserData("id"));
+                        System.out.println(results.size());
+
+                        //get color node
+//System.out.println(results.getCollision(i).getGeometry().getParent().getParent().getParent().getParent().getParent().getParent().toString());
+
+                    } catch (NullPointerException e) {
+                    }
+
+
+//  System.out.println("Selection #" + i + ": " + target.toString() + " at " + pt + ", " + dist + " WU away.");
+                }
+                if (results.size() > 0) {
+                    // The closest result is the target that the player picked:
+                    Node checkerNode = results.getClosestCollision().getGeometry().getParent().getParent().getParent().getParent().getParent();;
+                    System.out.println("Checker node " + checkerNode.getName());
+
+                    if (!checkerNode.getName().equals("Root Node")) {
+                        String checkerId = checkerNode.getUserData("id").toString();
+                        System.out.println("Checker Id " + checkerId);
+                        System.out.println("Checker name " + checkerNode.getName());
+                        System.out.println(checkerNode.getName());
+
+                        light.setColor(ColorRGBA.Blue.mult(1f));
+
+                        if (rootNode.getChild(checkerNode.getName()).getUserData("selected").equals("false")) {
+
+                            rootNode.getChild(checkerNode.getName()).setUserData("selected", "true");
+                            rootNode.getChild(checkerNode.getName()).addLight(light);
+
+
+                        } else if (rootNode.getChild(checkerNode.getName()).getUserData("selected").equals("true")) {
+
+
+                            rootNode.getChild(checkerNode.getName()).setUserData("selected", "false");
+                            rootNode.getChild(checkerNode.getName()).removeLight(light);
+
+                        }
+                        System.out.println(rootNode.getChild(checkerNode.getName()).getUserData("selected"));
+
+
+                    }
+
+                }
             }
 
         }
@@ -245,18 +334,20 @@ public class Main extends SimpleApplication {
     private void setUpCheckers() {
 
 
-        Node white_node = new Node("white_checkers");
-        Node black_node = new Node("black_checkers");
 
+
+        black_checkers_nodes = new Node[12];
+        white_checkers_nodes = new Node[12];
+        for (int i = 0; i < 12; i++) {
+            white_checkers_nodes[i] = new Node("WhiteNode" + i);
+            black_checkers_nodes[i] = new Node("BlackNode" + (i + 12));
+        }
 
 
         float cell_pos_x = 0.042778164f;
         float cell_pos_z = 0.0f;
-
         for (int i = 0; i < 12; i++) {
-//            white_checkers[i] = assetManager.loadModel("Models/checkers/Checkers_model_white.j3o");
             white_checkers[i] = assetManager.loadModel("Models/Ch_white/Ch_white.j3o");
-
             black_checkers[i] = assetManager.loadModel("Models/Ch_black/Ch_black.j3o");
 
             if (i < 4) {
@@ -271,13 +362,11 @@ public class Main extends SimpleApplication {
                 cell_pos_x = 0.042778164f - (i - 8) * X_CELL - X_CELL * (i - 8 + 1);
                 cell_pos_z = 0.0f - Z_CELL * 2;
             }
-//            white_checkers[i].setLocalTranslation(cell_pos_x, 1.4552078f, cell_pos_z);
-                        white_checkers[i].setLocalTranslation(cell_pos_x, CELL_POS_Y, cell_pos_z);
-
+            white_checkers[i].setLocalTranslation(cell_pos_x, CELL_POS_Y, cell_pos_z);
             white_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
 //
-//                                        AmbientLight al = new AmbientLight();
-//        al.setColor(ColorRGBA.White.mult(0.02f));
+//       AmbientLight al = new AmbientLight();
+//       al.setColor(ColorRGBA.White.mult(0.02f));
 //       white_checkers[i].addLight(al);
 
             if (i < 4) {
@@ -285,9 +374,7 @@ public class Main extends SimpleApplication {
                 cell_pos_z = 0.0f - Z_CELL * 7;
             }
             if (i > 3 && i < 8) {
-//               cell_pos_x = 0.042778164f - i*X_CELL - X_CELL*(i-7);
                 cell_pos_x = 0.042778164f - (i - 4) * X_CELL - X_CELL * (i - 4 + 1);
-
                 cell_pos_z = 0.0f - Z_CELL * 6;
             }
             if (i > 7) {
@@ -299,8 +386,17 @@ public class Main extends SimpleApplication {
             black_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
 
 
-            white_node.attachChild(white_checkers[i]);
-            black_node.attachChild(black_checkers[i]);
+            //dodaj id
+            white_checkers_nodes[i].attachChild(white_checkers[i]);
+            white_checkers_nodes[i].setUserData("id", i);
+            white_checkers_nodes[i].setUserData("selected", "false");
+
+            black_checkers_nodes[i].attachChild(black_checkers[i]);
+            black_checkers_nodes[i].setUserData("id", i + 12);
+            black_checkers_nodes[i].setUserData("selected", "false");
+
+            white_node.attachChild(white_checkers_nodes[i]);
+            black_node.attachChild(black_checkers_nodes[i]);
 
 
 //            AmbientLight light = new AmbientLight();
@@ -311,18 +407,22 @@ public class Main extends SimpleApplication {
 
         }
 
-        /** PODSWIETLENIE */
+        /**
+         * PODSWIETLENIE
+         */
         AmbientLight blueLight = new AmbientLight();
         blueLight.setColor(ColorRGBA.Blue.mult(3f));
         AmbientLight redLight = new AmbientLight();
         redLight.setColor(ColorRGBA.Red.mult(3f));
         white_checkers[1].addLight(blueLight);
         white_checkers[2].addLight(redLight);
-        /*****/
+        /**
+         * **
+         */
+        checkers_node.attachChild(white_node);
+        checkers_node.attachChild(black_node);
 
-        rootNode.attachChild(white_node); // put this node in the scene
-        rootNode.attachChild(black_node); // put this node in the scene
-
+        game.attachChild(checkers_node);
 
 
 
