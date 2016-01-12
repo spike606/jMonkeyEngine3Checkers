@@ -68,6 +68,8 @@ public class Main extends SimpleApplication {
     Spatial[] black_checkers = new Spatial[12];
     Spatial[] white_checkers = new Spatial[12];
 
+    
+    private final static float CELL_POS_Y = 1.4552078f;
     public static void main(String[] args) {
         Main app = new Main();
         app.start();
@@ -96,7 +98,7 @@ public class Main extends SimpleApplication {
 
         // You must add a directional light to make the model visible!
         DirectionalLight sun = new DirectionalLight();
-        sun.setDirection(new Vector3f(-0.1f, -0.7f, -1.0f).normalizeLocal());
+        sun.setDirection(new Vector3f(-0.9f, -0.7f, -1.0f).normalizeLocal());
 
         rootNode.addLight(sun);
 
@@ -259,7 +261,9 @@ public class Main extends SimpleApplication {
                 cell_pos_x = 0.042778164f - (i - 8) * X_CELL - X_CELL * (i - 8 + 1);
                 cell_pos_z = 0.0f - Z_CELL * 2;
             }
-            white_checkers[i].setLocalTranslation(cell_pos_x, 1.4552078f, cell_pos_z);
+//            white_checkers[i].setLocalTranslation(cell_pos_x, 1.4552078f, cell_pos_z);
+                        white_checkers[i].setLocalTranslation(cell_pos_x, CELL_POS_Y, cell_pos_z);
+
             white_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
 
 
@@ -279,7 +283,7 @@ public class Main extends SimpleApplication {
                 cell_pos_z = 0.0f - Z_CELL * 5;
             }
 
-            black_checkers[i].setLocalTranslation(cell_pos_x, 1.4552078f, cell_pos_z);
+            black_checkers[i].setLocalTranslation(cell_pos_x, CELL_POS_Y, cell_pos_z);
             black_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
 
 
