@@ -92,7 +92,16 @@ public class Main extends SimpleApplication {
 
     /* pomocnicze*/
     Vector3f selectedPointCoordinates;
+
+    /*kolumny planszy*/
+    private static final float FIRST_COL_X = 0.9304199f;
+    private static final float COL_X_DIFF = 1.809f;
+    private static final float FIRST_COL_Z = 0.9129584f;
+    private static final float COL_Z_DIFF = 1.809f;
     
+    private float[] colXCoordinates = new float[9];
+    private float[] colZCoordinates = new float[9];
+
     /**
      * ***
      */
@@ -124,7 +133,7 @@ public class Main extends SimpleApplication {
         blueLight.setColor(ColorRGBA.Blue.mult(1f));
         redLight.setColor(ColorRGBA.Red.mult(1f));
 
-        
+
         // You must add a directional light to make the model visible!
         DirectionalLight sun = new DirectionalLight();
         sun.setName("Sun");
@@ -163,6 +172,10 @@ public class Main extends SimpleApplication {
 
         // load my custom keybinding
         initKeys();
+        
+        //calculate coordinates for board
+        calculateColumns();
+        calculateRows();
 
     }
 
@@ -238,14 +251,14 @@ public class Main extends SimpleApplication {
                 Vector3f dir = cam.getWorldCoordinates(new Vector2f(click2d.x, click2d.y), 1f).subtractLocal(click3d).normalizeLocal();
                 // Aim the ray from the clicked spot forwards.
                 Ray ray = new Ray(click3d, dir);
-           
+
                 System.out.println("Ray: " + ray.toString());
 
                 // Collect intersections between ray and all nodes in results list.
                 game_node.collideWith(ray, results);//koliduje tylko z bierkami i plansza
 
-                if (results.size() > 0) {                   
-                  
+                if (results.size() > 0) {
+
                     // (For each “hit”, we know distance, impact point, geometry.)
 //                    float dist = results.getCollision(0).getDistance();
 //                    Vector3f pt = results.getCollision(0).getContactPoint();
@@ -263,15 +276,15 @@ public class Main extends SimpleApplication {
                         System.out.println("Checker name(node): " + checkerNode.getName());
 
                         if (rootNode.getChild(checkerNode.getName()).getUserData("selected").equals("false")) {
-                        selectChecker(checkerNode);
+                            selectChecker(checkerNode);
                         } else if (rootNode.getChild(checkerNode.getName()).getUserData("selected").equals("true")) {
-                        diselectChecker(checkerNode);
+                            diselectChecker(checkerNode);
                         }
-                    }
-                    else{
-                      System.out.println("Field selected. Coordinates: X, Y, Z: " + selectedPointCoordinates);
+                    } else {
+                        System.out.println("Field selected. Coordinates: X, Y, Z: " + selectedPointCoordinates);
 
                     }
+                    getBoardField(selectedPointCoordinates);
                 }
             }
         }
@@ -337,6 +350,7 @@ public class Main extends SimpleApplication {
                 cell_pos_x = 0.042778164f - (i - 8) * X_CELL - X_CELL * (i - 8 + 1);
                 cell_pos_z = 0.0f - Z_CELL * 2;
             }
+//            System.out.println("White checker. Id: " + i + " Position: X, Y, Z: " + cell_pos_x + " " + CELL_POS_Y + " " + cell_pos_z);
             white_checkers[i].setLocalTranslation(cell_pos_x, CELL_POS_Y, cell_pos_z);
             white_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
 
@@ -354,6 +368,7 @@ public class Main extends SimpleApplication {
                 cell_pos_x = 0.042778164f - X_CELL * (i - 8) - X_CELL * (i - 8);
                 cell_pos_z = 0.0f - Z_CELL * 5;
             }
+//            System.out.println("Black checker. Id: " + (i + 12) + " Position: X, Y, Z: " + cell_pos_x + " " + CELL_POS_Y + " " + cell_pos_z);
 
             black_checkers[i].setLocalTranslation(cell_pos_x, CELL_POS_Y, cell_pos_z);
             black_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
@@ -373,6 +388,8 @@ public class Main extends SimpleApplication {
 
         }
 
+
+
         /**
          * PODSWIETLENIE
          */
@@ -380,19 +397,74 @@ public class Main extends SimpleApplication {
         /**
          * **
          */
+        
         checkers_node.attachChild(white_node);
         checkers_node.attachChild(black_node);
 
         game_node.attachChild(checkers_node);
 
     }
-    
-    private void selectChecker(Node checkerNode){
+
+    private void selectChecker(Node checkerNode) {
         checkerNode.addLight(blueLight);
         checkerNode.setUserData("selected", "true");
     }
-    private void diselectChecker(Node checkerNode){
+
+    private void diselectChecker(Node checkerNode) {
         checkerNode.removeLight(blueLight);
         checkerNode.setUserData("selected", "false");
+    }
+    private void selectCheckerToBeat(Node checkerNode) {
+        checkerNode.addLight(redLight);
+//        checkerNode.setUserData("selected", "true");
+    }
+
+    private void diselectCheckerToBeat(Node checkerNode) {
+        checkerNode.removeLight(redLight);
+//        checkerNode.setUserData("selected", "false");
+    }
+    
+    private void getBoardField(Vector3f pointCoordinates){
+         int col = 8;
+         int row = 8;
+
+         float x_pos = pointCoordinates.getX();
+         float z_pos = pointCoordinates.getZ();
+
+         
+        for(int i = 0 ; i<8; i++){
+            
+            if(colXCoordinates[i]>x_pos){
+                col--;
+            }
+        }
+        for(int i = 0 ; i<8; i++){
+            
+            if(colZCoordinates[i]>z_pos){
+                row--;
+            }
+        }
+        System.out.println("Col number: " + col);
+        System.out.println("Row number: " + row);
+
+    }
+        
+    
+    
+    private void calculateColumns(){
+        
+        colXCoordinates[0] = FIRST_COL_X;
+
+        for(int i = 1 ; i<9; i++){
+            colXCoordinates[i] = colXCoordinates[i-1] - COL_X_DIFF;
+        }
+    }
+        private void calculateRows(){
+        
+        colZCoordinates[0] = FIRST_COL_Z;
+
+        for(int i = 1 ; i<9; i++){
+            colZCoordinates[i] = colZCoordinates[i-1] - COL_Z_DIFF;
+        }
     }
 }
