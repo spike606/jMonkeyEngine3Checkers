@@ -98,9 +98,14 @@ public class Main extends SimpleApplication {
     private static final float COL_X_DIFF = 1.809f;
     private static final float FIRST_COL_Z = 0.9129584f;
     private static final float COL_Z_DIFF = 1.809f;
-    
     private float[] colXCoordinates = new float[9];
     private float[] colZCoordinates = new float[9];
+    /*pozycje gdzie bierki moga sie znajdowac*/
+    private Field[][] boardFields = new Field[8][8];
+    private static final float[] columns = {-12.620531f, -10.811487f, -9.002442f, -7.1933985f, -5.384354f,
+        -3.5753102f, -1.766266f, 0.042778164f};
+    private static final float[] rows = {-12.619004f, -10.81629f, -9.013575f, -7.21086f, -5.408145f,
+        -3.60543f, -1.802715f, 0.0f};
 
     /**
      * ***
@@ -172,10 +177,13 @@ public class Main extends SimpleApplication {
 
         // load my custom keybinding
         initKeys();
-        
+
         //calculate coordinates for board
         calculateColumns();
         calculateRows();
+
+
+        setCoordinatesWhereCheckersCanBe();
 
     }
 
@@ -387,7 +395,21 @@ public class Main extends SimpleApplication {
             black_node.attachChild(black_checkers_nodes[i]);
 
         }
+        Spatial white_checkers2[] = new Spatial[12];
+        for (int i = 4; i < 12; i++) {
+            white_checkers2[i] = assetManager.loadModel("Models/Ch_white/Ch_white.j3o");
+            if (i > 3 && i < 8) {
+                cell_pos_x = 0.042778164f - X_CELL * (i - 4) - X_CELL * (i - 4);
+                cell_pos_z = 0.0f - Z_CELL * 3;
+            }
+            if (i > 7) {
+                cell_pos_x = 0.042778164f - (i - 8) * X_CELL - X_CELL * (i - 8 + 1);
+                cell_pos_z = 0.0f - Z_CELL * 4;
+            }
+            white_checkers2[i].setLocalTranslation(cell_pos_x, CELL_POS_Y, cell_pos_z);
+            white_node.attachChild(white_checkers2[i]);
 
+        }
 
 
         /**
@@ -397,7 +419,6 @@ public class Main extends SimpleApplication {
         /**
          * **
          */
-        
         checkers_node.attachChild(white_node);
         checkers_node.attachChild(black_node);
 
@@ -405,6 +426,7 @@ public class Main extends SimpleApplication {
 
     }
 
+    //dodaj/usun podswietlenie dla bierek
     private void selectChecker(Node checkerNode) {
         checkerNode.addLight(blueLight);
         checkerNode.setUserData("selected", "true");
@@ -414,6 +436,7 @@ public class Main extends SimpleApplication {
         checkerNode.removeLight(blueLight);
         checkerNode.setUserData("selected", "false");
     }
+
     private void selectCheckerToBeat(Node checkerNode) {
         checkerNode.addLight(redLight);
 //        checkerNode.setUserData("selected", "true");
@@ -423,24 +446,25 @@ public class Main extends SimpleApplication {
         checkerNode.removeLight(redLight);
 //        checkerNode.setUserData("selected", "false");
     }
-    
-    private void getBoardField(Vector3f pointCoordinates){
-         int col = 8;
-         int row = 8;
 
-         float x_pos = pointCoordinates.getX();
-         float z_pos = pointCoordinates.getZ();
+    //przeksztalc koordynaty z 3d na tablice dwuwymiarowa board
+    private void getBoardField(Vector3f pointCoordinates) {
+        int col = 8;
+        int row = 8;
 
-         
-        for(int i = 0 ; i<8; i++){
-            
-            if(colXCoordinates[i]>x_pos){
+        float x_pos = pointCoordinates.getX();
+        float z_pos = pointCoordinates.getZ();
+
+
+        for (int i = 0; i < 8; i++) {
+
+            if (colXCoordinates[i] > x_pos) {
                 col--;
             }
         }
-        for(int i = 0 ; i<8; i++){
-            
-            if(colZCoordinates[i]>z_pos){
+        for (int i = 0; i < 8; i++) {
+
+            if (colZCoordinates[i] > z_pos) {
                 row--;
             }
         }
@@ -448,23 +472,51 @@ public class Main extends SimpleApplication {
         System.out.println("Row number: " + row);
 
     }
-        
-    
-    
-    private void calculateColumns(){
-        
+
+    //na starcie oblicz granice miedzy polami board
+    private void calculateColumns() {
+
         colXCoordinates[0] = FIRST_COL_X;
 
-        for(int i = 1 ; i<9; i++){
-            colXCoordinates[i] = colXCoordinates[i-1] - COL_X_DIFF;
+        for (int i = 1; i < 9; i++) {
+            colXCoordinates[i] = colXCoordinates[i - 1] - COL_X_DIFF;
         }
     }
-        private void calculateRows(){
-        
+
+    private void calculateRows() {
+
         colZCoordinates[0] = FIRST_COL_Z;
 
-        for(int i = 1 ; i<9; i++){
-            colZCoordinates[i] = colZCoordinates[i-1] - COL_Z_DIFF;
+        for (int i = 1; i < 9; i++) {
+            colZCoordinates[i] = colZCoordinates[i - 1] - COL_Z_DIFF;
+        }
+    }
+
+    private void setCoordinatesWhereCheckersCanBe() {
+
+        for (int row = 0; row < boardFields.length; row++) {
+            for (int col = 0; col < boardFields[row].length; col++) {
+                boardFields[row][col] = new Field();
+
+                if (col % 2 == 0 && row % 2 == 0 || col == row || col % 2 == 1 && row % 2 == 1) {
+
+                    boardFields[row][col].setAccessible(false);
+
+                } else {
+
+                    boardFields[row][col].setAccessible(true);
+                }
+                //wartosci 2D
+                boardFields[row][col].setTabXPosition(col);
+                boardFields[row][col].setTabYPosition(row);
+
+                //wartosci 3D
+                //wysokosc taka sama dla wszystkich - poziom
+                boardFields[row][col].setFieldWorldCoordinates(new Vector3f(columns[col], CELL_POS_Y, columns[row]));
+
+                System.out.print(boardFields[row][col].isAccessible() + " " + "Loc: " + boardFields[row][col].getFieldWorldCoordinates() + " ");
+            }
+            System.out.println();
         }
     }
 }
