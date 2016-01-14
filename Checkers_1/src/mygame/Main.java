@@ -9,8 +9,10 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.asset.plugins.ZipLocator;
+import com.jme3.audio.AudioNode;
 import com.jme3.bounding.BoundingBox;
 import com.jme3.cinematic.MotionPath;
+import com.jme3.cinematic.MotionPathListener;
 import com.jme3.cinematic.events.MotionEvent;
 import com.jme3.collision.CollisionResults;
 import com.jme3.input.KeyInput;
@@ -119,6 +121,14 @@ public class Main extends SimpleApplication {
     private static final float PATH_SPEED = 1.0f;
     private static final float PATH_DURATION = 2.0f;//2 sekundy
 
+    
+    /***audio**/
+    private AudioNode audioTickNode;
+    private AudioNode audioWinnerNode;
+    private AudioNode audioLooserNode;
+
+    
+    
     /**
      * ***
      */
@@ -184,8 +194,18 @@ public class Main extends SimpleApplication {
         flyCam.setMoveSpeed(10);
 
 
+        //listener do ruchu
+        path.addListener(new MotionPathListener() {
 
-
+            public void onWayPointReach(MotionEvent control, int wayPointIndex) {
+                if (path.getNbWayPoints() == wayPointIndex + 1) {//gdy zakonczy sie 
+                            audioTickNode.playInstance(); // play each instance once!
+                } else {//gdy trwa
+                    
+                    
+                }
+            }
+        });
 
 
         //sky
@@ -197,6 +217,9 @@ public class Main extends SimpleApplication {
 
         // load my custom keybinding
         initKeys();
+        
+        initAudio();
+        
 
         //calculate coordinates for board
         calculateColumns();
@@ -654,4 +677,27 @@ public class Main extends SimpleApplication {
 
 
     }
+    
+      /** We create two audio nodes. */
+  private void initAudio() {
+    audioTickNode = new AudioNode(assetManager, "Sounds/tick.wav", false);
+    audioTickNode.setPositional(false);
+    audioTickNode.setLooping(false);
+    audioTickNode.setVolume(2);
+    rootNode.attachChild(audioTickNode);
+ 
+    audioWinnerNode = new AudioNode(assetManager, "Sounds/winner.wav", false);
+    audioWinnerNode.setPositional(false);
+    audioWinnerNode.setLooping(false);
+    audioWinnerNode.setVolume(3);
+    rootNode.attachChild(audioWinnerNode);
+    
+    audioLooserNode = new AudioNode(assetManager, "Sounds/looser.wav", false);
+    audioLooserNode.setPositional(false);
+    audioLooserNode.setLooping(false);
+    audioLooserNode.setVolume(3);
+    rootNode.attachChild(audioLooserNode);
+
+  }
+    
 }
