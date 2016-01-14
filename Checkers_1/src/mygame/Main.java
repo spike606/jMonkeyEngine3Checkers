@@ -10,6 +10,8 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.asset.plugins.ZipLocator;
 import com.jme3.bounding.BoundingBox;
+import com.jme3.cinematic.MotionPath;
+import com.jme3.cinematic.events.MotionEvent;
 import com.jme3.collision.CollisionResults;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -101,6 +103,7 @@ public class Main extends SimpleApplication {
     private static final float COL_Z_DIFF = 1.809f;
     private float[] colXCoordinates = new float[9];
     private float[] colZCoordinates = new float[9];
+    
     /*pozycje gdzie bierki moga sie znajdowac*/
     private Field[][] boardFields = new Field[8][8];
     private static final float[] columns = {-12.620531f, -10.811487f, -9.002442f, -7.1933985f, -5.384354f,
@@ -108,6 +111,15 @@ public class Main extends SimpleApplication {
     private static final float[] rows = {-12.619004f, -10.81629f, -9.013575f, -7.21086f, -5.408145f,
         -3.60543f, -1.802715f, 0.0f};
 
+    Field clickedFieldBefore;
+    Node clickedNodeBefore;
+    /***motion path*/
+    private MotionPath path = new MotionPath();
+    private MotionEvent motionControl;
+    private static final float PATH_SPEED = 1.0f;
+    private static final float PATH_DURATION = 2.0f;//2 sekundy
+
+    
     /**
      * ***
      */
@@ -170,8 +182,8 @@ public class Main extends SimpleApplication {
         /* cam 1 */
         cam.setFrame(cam1Loc, cam1Left, cam1Up, cam1Dir);
 
-        flyCam.setEnabled(true);
-      flyCam.setMoveSpeed(10);
+        flyCam.setEnabled(false);
+        flyCam.setMoveSpeed(10);
 
 
 
@@ -253,7 +265,16 @@ public class Main extends SimpleApplication {
 //    Node[] white_checkers_nodes;
 //    Spatial[] white_checkers = new Spatial[12];
                            
-    white_checkers_nodes[11].setLocalTranslation(boardFields[4][1].getFieldWorldCoordinates().subtract(new Vector3f(0.3f, 0.0f,0.3f)));
+                           
+                           
+
+//    white_checkers_nodes[11].setLocalTranslation(boardFields[4][1].getFieldWorldCoordinates().subtract(new Vector3f(0.3f, 0.0f,0.3f)));
+    
+    
+    
+    
+    
+    
 //                white_checkers_nodes[11].move(boardFields[4][1].getFieldWorldCoordinates().getX(),
 //                        boardFields[4][1].getFieldWorldCoordinates().getY(), boardFields[4][1].getFieldWorldCoordinates().getZ());
 //                                 white_checkers[11].setLocalTranslation(boardFields[4][1].getFieldWorldCoordinates());
@@ -299,6 +320,7 @@ public class Main extends SimpleApplication {
 //                    Vector3f pt = results.getCollision(0).getContactPoint();
 
                     selectedPointCoordinates = results.getClosestCollision().getContactPoint();
+                    Field clickedField =  getBoardField(selectedPointCoordinates);
 
                     // The closest result is the target that the player picked:
                     Node checkerNode = results.getClosestCollision().getGeometry().getParent().getParent().getParent().getParent().getParent();
@@ -311,15 +333,21 @@ public class Main extends SimpleApplication {
                         System.out.println("Checker name(node): " + checkerNode.getName());
 
                         if (rootNode.getChild(checkerNode.getName()).getUserData("selected").equals("false")) {
+//                            rootNode.getChild(checkerNode.getName()).setUserData("position", clickedField);
+                            clickedFieldBefore = clickedField;
+                            clickedNodeBefore = checkerNode;
                             selectChecker(checkerNode);
                         } else if (rootNode.getChild(checkerNode.getName()).getUserData("selected").equals("true")) {
                             diselectChecker(checkerNode);
                         }
                     } else {
                         System.out.println("Field selected. Coordinates: X, Y, Z: " + selectedPointCoordinates);
-
+                        if (clickedNodeBefore.getUserData("selected").equals("true")){
+                            
+                        moveCheckerNode(clickedNodeBefore,clickedFieldBefore,clickedField);
+                            
+                        }
                     }
-                    getBoardField(selectedPointCoordinates);
                 }
             }
         }
@@ -478,7 +506,7 @@ public class Main extends SimpleApplication {
     }
 
     //przeksztalc koordynaty z 3d na tablice dwuwymiarowa board
-    private void getBoardField(Vector3f pointCoordinates) {
+    private Field getBoardField(Vector3f pointCoordinates) {
         int col = 8;
         int row = 8;
 
@@ -500,6 +528,7 @@ public class Main extends SimpleApplication {
         }
         System.out.println("Col number: " + col);
         System.out.println("Row number: " + row);
+        return boardFields[row][col];
 
     }
 
@@ -542,12 +571,80 @@ public class Main extends SimpleApplication {
 
                 //wartosci 3D
                 //wysokosc taka sama dla wszystkich - poziom
-                boardFields[row][col].setFieldWorldCoordinates(new Vector3f(columns[col], CELL_POS_Y, columns[row]));
+                boardFields[row][col].setFieldWorldCoordinates(new Vector3f(columns[col], CELL_POS_Y, rows[row]));
 
                 System.out.print("Row: " + boardFields[row][col].getTabXPosition() + " Col: " + boardFields[row][col].getTabYPosition() +
                         boardFields[row][col].isAccessible() + " " + "Loc: " + boardFields[row][col].getFieldWorldCoordinates() + " ");
             }
             System.out.println();
         }
+    }
+    
+    private void moveCheckerNode(Node nodeToMove, Field from, Field to){
+        
+        path.clearWayPoints();        
+
+
+        //motion path
+        
+        
+        if(from.getTabXPosition() - to.getTabXPosition() == 1 || from.getTabXPosition() - to.getTabXPosition() == -1){
+/*******ruch bierki - przesuniecie*********/
+        Vector3f startPos = new Vector3f(from.getFieldWorldCoordinates());
+        Vector3f endPos = new Vector3f(to.getFieldWorldCoordinates());
+        path.addWayPoint(startPos);     
+        path.addWayPoint(endPos);
+        path.setCurveTension(0.0f);//ruch prosty
+        /*************************/
+        }
+        else{
+        /*******przykladowe dane - bicie (skok)*********/
+        Vector3f startPos = new Vector3f(from.getFieldWorldCoordinates());
+        Vector3f endPos = new Vector3f(to.getFieldWorldCoordinates());
+
+        Vector3f vectorBetween1 = FastMath.interpolateLinear(0.1f, startPos, endPos).add(new Vector3f(0.0f, 2.0f, 0.0f));
+        Vector3f vectorBetween2 = FastMath.interpolateLinear(0.2f, startPos, endPos).add(new Vector3f(0.0f, 2.4f, 0.0f));
+        Vector3f vectorBetween3 = FastMath.interpolateLinear(0.3f, startPos, endPos).add(new Vector3f(0.0f, 2.8f, 0.0f));
+        Vector3f vectorBetween4 = FastMath.interpolateLinear(0.4f, startPos, endPos).add(new Vector3f(0.0f, 3.0f, 0.0f));
+        Vector3f vectorBetween5 = FastMath.interpolateLinear(0.5f, startPos, endPos).add(new Vector3f(0.0f, 3.2f, 0.0f));
+        Vector3f vectorBetween6 = FastMath.interpolateLinear(0.6f, startPos, endPos).add(new Vector3f(0.0f, 3.0f, 0.0f));
+        Vector3f vectorBetween7 = FastMath.interpolateLinear(0.7f, startPos, endPos).add(new Vector3f(0.0f, 2.8f, 0.0f));
+        Vector3f vectorBetween8 = FastMath.interpolateLinear(0.8f, startPos, endPos).add(new Vector3f(0.0f, 2.4f, 0.0f));
+        Vector3f vectorBetween9 = FastMath.interpolateLinear(0.9f, startPos, endPos).add(new Vector3f(0.0f, 2.0f, 0.0f));
+               
+        
+        path.addWayPoint(startPos);     
+        path.addWayPoint(vectorBetween1);
+        path.addWayPoint(vectorBetween2);
+        path.addWayPoint(vectorBetween3);
+        path.addWayPoint(vectorBetween4);
+        path.addWayPoint(vectorBetween5);
+        path.addWayPoint(vectorBetween6);
+        path.addWayPoint(vectorBetween7);
+        path.addWayPoint(vectorBetween8);
+        path.addWayPoint(vectorBetween9);        
+        path.addWayPoint(endPos);
+        path.setCurveTension(0.23f);//ruch zaokraglony
+        /************************/
+            
+            
+        }
+//        
+
+        path.enableDebugShape(assetManager, rootNode);//pokaz linie     
+        
+        motionControl = new MotionEvent(nodeToMove, path);//ktora bierka
+        //ustawienie zachowania podczas przemieszczania sie
+        motionControl.setDirectionType(MotionEvent.Direction.None);//bez obrotow     
+//        motionControl.setDirectionType(MotionEvent.Direction.PathAndRotation);
+//        motionControl.setRotation(new Quaternion().fromAngleNormalAxis(-FastMath.HALF_PI, Vector3f.UNIT_Y));
+
+        //szybkosci i czas animacji
+        motionControl.setInitialDuration(PATH_DURATION);//zatem 2 sek
+        motionControl.setSpeed(PATH_SPEED);// 1 - 1 sekunda
+        motionControl.play();
+
+        
+        
     }
 }
