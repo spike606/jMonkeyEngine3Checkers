@@ -103,37 +103,36 @@ public class Main extends SimpleApplication {
     private static final float COL_Z_DIFF = 1.809f;
     private float[] colXCoordinates = new float[9];
     private float[] colZCoordinates = new float[9];
-    
     /*pozycje gdzie bierki moga sie znajdowac*/
     private Field[][] boardFields = new Field[8][8];
     private static final float[] columns = {-12.620531f, -10.811487f, -9.002442f, -7.1933985f, -5.384354f,
         -3.5753102f, -1.766266f, 0.042778164f};
     private static final float[] rows = {-12.619004f, -10.81629f, -9.013575f, -7.21086f, -5.408145f,
         -3.60543f, -1.802715f, 0.0f};
-
     Field clickedFieldBefore;
     Node clickedNodeBefore;
-    /***motion path*/
+    /**
+     * *motion path
+     */
     private MotionPath path = new MotionPath();
     private MotionEvent motionControl;
     private static final float PATH_SPEED = 1.0f;
     private static final float PATH_DURATION = 2.0f;//2 sekundy
 
-    
     /**
      * ***
      */
     public static void main(String[] args) {
         Main app = new Main();
-        
-        
-        
+
+
+
         AppSettings settings = new AppSettings(true);
 
         settings.setFrameRate(60);
 
         app.setSettings(settings);
-        
+
         app.start();
     }
 
@@ -155,7 +154,6 @@ public class Main extends SimpleApplication {
         game_node.attachChild(board_node);
         rootNode.attachChild(game_node);
 
-        setUpCheckers();
 
         blueLight.setColor(ColorRGBA.Blue.mult(1f));
         redLight.setColor(ColorRGBA.Red.mult(1f));
@@ -204,8 +202,10 @@ public class Main extends SimpleApplication {
         calculateColumns();
         calculateRows();
 
-
         setCoordinatesWhereCheckersCanBe();
+
+        setUpCheckers();
+
 
     }
 
@@ -260,21 +260,15 @@ public class Main extends SimpleApplication {
     private ActionListener actionListener = new ActionListener() {
         public void onAction(String name, boolean keyPressed, float tpf) {
             if (name.equals("Move") && !keyPressed) {
-                           System.out.println("Move to: " +  boardFields[4][1].getFieldWorldCoordinates().toString());
-    
+                System.out.println("Move to: " + boardFields[4][1].getFieldWorldCoordinates().toString());
+
 //    Node[] white_checkers_nodes;
 //    Spatial[] white_checkers = new Spatial[12];
-                           
-                           
-                           
+
 
 //    white_checkers_nodes[11].setLocalTranslation(boardFields[4][1].getFieldWorldCoordinates().subtract(new Vector3f(0.3f, 0.0f,0.3f)));
-    
-    
-    
-    
-    
-    
+
+
 //                white_checkers_nodes[11].move(boardFields[4][1].getFieldWorldCoordinates().getX(),
 //                        boardFields[4][1].getFieldWorldCoordinates().getY(), boardFields[4][1].getFieldWorldCoordinates().getZ());
 //                                 white_checkers[11].setLocalTranslation(boardFields[4][1].getFieldWorldCoordinates());
@@ -320,7 +314,7 @@ public class Main extends SimpleApplication {
 //                    Vector3f pt = results.getCollision(0).getContactPoint();
 
                     selectedPointCoordinates = results.getClosestCollision().getContactPoint();
-                    Field clickedField =  getBoardField(selectedPointCoordinates);
+                    Field clickedField = getBoardField(selectedPointCoordinates);
 
                     // The closest result is the target that the player picked:
                     Node checkerNode = results.getClosestCollision().getGeometry().getParent().getParent().getParent().getParent().getParent();
@@ -342,10 +336,10 @@ public class Main extends SimpleApplication {
                         }
                     } else {
                         System.out.println("Field selected. Coordinates: X, Y, Z: " + selectedPointCoordinates);
-                        if (clickedNodeBefore.getUserData("selected").equals("true")){
-                            
-                        moveCheckerNode(clickedNodeBefore,clickedFieldBefore,clickedField);
-                            
+                        if (clickedNodeBefore.getUserData("selected").equals("true")) {
+
+                            moveCheckerNode(clickedNodeBefore, clickedFieldBefore, clickedField);
+
                         }
                     }
                 }
@@ -392,7 +386,7 @@ public class Main extends SimpleApplication {
         //do obrocenia czarnych bierek o 180 stopni
         Quaternion roll180 = new Quaternion();
         roll180.fromAngleAxis(-FastMath.PI, Vector3f.UNIT_Y);
-        
+
         black_checkers_nodes = new Node[12];
         white_checkers_nodes = new Node[12];
         for (int i = 0; i < 12; i++) {
@@ -409,41 +403,8 @@ public class Main extends SimpleApplication {
             white_checkers[i] = assetManager.loadModel("Models/Ch_white/Ch_white.j3o");
             black_checkers[i] = assetManager.loadModel("Models/Ch_black/Ch_black.j3o");
 
-            if (i < 4) {
-                cell_pos_x = 0.042778164f - i * X_CELL - X_CELL * (i + 1);
-                cell_pos_z = 0.0f;
-            }
-            if (i > 3 && i < 8) {
-                cell_pos_x = 0.042778164f - X_CELL * (i - 4) - X_CELL * (i - 4);
-                cell_pos_z = 0.0f - Z_CELL;
-            }
-            if (i > 7) {
-                cell_pos_x = 0.042778164f - (i - 8) * X_CELL - X_CELL * (i - 8 + 1);
-                cell_pos_z = 0.0f - Z_CELL * 2;
-            }
-//            System.out.println("White checker. Id: " + i + " Position: X, Y, Z: " + cell_pos_x + " " + CELL_POS_Y + " " + cell_pos_z);
-            white_checkers_nodes[i].setLocalTranslation(cell_pos_x, CELL_POS_Y, cell_pos_z);
             white_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
-
-
-
-            if (i < 4) {
-                cell_pos_x = 0.042778164f - X_CELL * i - X_CELL * (i);
-                cell_pos_z = 0.0f - Z_CELL * 7;
-            }
-            if (i > 3 && i < 8) {
-                cell_pos_x = 0.042778164f - (i - 4) * X_CELL - X_CELL * (i - 4 + 1);
-                cell_pos_z = 0.0f - Z_CELL * 6;
-            }
-            if (i > 7) {
-                cell_pos_x = 0.042778164f - X_CELL * (i - 8) - X_CELL * (i - 8);
-                cell_pos_z = 0.0f - Z_CELL * 5;
-            }
-//            System.out.println("Black checker. Id: " + (i + 12) + " Position: X, Y, Z: " + cell_pos_x + " " + CELL_POS_Y + " " + cell_pos_z);
-
-            black_checkers_nodes[i].setLocalTranslation(cell_pos_x, CELL_POS_Y, cell_pos_z);
             black_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
-
 
             //dodaj id
             white_checkers_nodes[i].attachChild(white_checkers[i]);
@@ -456,8 +417,43 @@ public class Main extends SimpleApplication {
 
             white_node.attachChild(white_checkers_nodes[i]);
             black_node.attachChild(black_checkers_nodes[i]);
+            
+
 
         }
+
+        //pozycja startowa bierek
+         white_checkers_nodes[0].setLocalTranslation(boardFields[7][6].getFieldWorldCoordinates());
+         white_checkers_nodes[1].setLocalTranslation(boardFields[7][4].getFieldWorldCoordinates());
+         white_checkers_nodes[2].setLocalTranslation(boardFields[7][2].getFieldWorldCoordinates());
+         white_checkers_nodes[3].setLocalTranslation(boardFields[7][0].getFieldWorldCoordinates());
+         white_checkers_nodes[4].setLocalTranslation(boardFields[6][7].getFieldWorldCoordinates());
+         white_checkers_nodes[5].setLocalTranslation(boardFields[6][5].getFieldWorldCoordinates());
+         white_checkers_nodes[6].setLocalTranslation(boardFields[6][3].getFieldWorldCoordinates());
+         white_checkers_nodes[7].setLocalTranslation(boardFields[6][1].getFieldWorldCoordinates());
+         white_checkers_nodes[8].setLocalTranslation(boardFields[5][6].getFieldWorldCoordinates());
+         white_checkers_nodes[9].setLocalTranslation(boardFields[5][4].getFieldWorldCoordinates());
+         white_checkers_nodes[10].setLocalTranslation(boardFields[5][2].getFieldWorldCoordinates());
+         white_checkers_nodes[11].setLocalTranslation(boardFields[5][0].getFieldWorldCoordinates());
+        
+         black_checkers_nodes[0].setLocalTranslation(boardFields[0][7].getFieldWorldCoordinates());
+         black_checkers_nodes[1].setLocalTranslation(boardFields[0][5].getFieldWorldCoordinates());
+         black_checkers_nodes[2].setLocalTranslation(boardFields[0][3].getFieldWorldCoordinates());
+         black_checkers_nodes[3].setLocalTranslation(boardFields[0][1].getFieldWorldCoordinates());
+         black_checkers_nodes[4].setLocalTranslation(boardFields[1][6].getFieldWorldCoordinates());
+         black_checkers_nodes[5].setLocalTranslation(boardFields[1][4].getFieldWorldCoordinates());
+         black_checkers_nodes[6].setLocalTranslation(boardFields[1][2].getFieldWorldCoordinates());
+         black_checkers_nodes[7].setLocalTranslation(boardFields[1][0].getFieldWorldCoordinates());
+         black_checkers_nodes[8].setLocalTranslation(boardFields[2][7].getFieldWorldCoordinates());
+         black_checkers_nodes[9].setLocalTranslation(boardFields[2][5].getFieldWorldCoordinates());
+         black_checkers_nodes[10].setLocalTranslation(boardFields[2][3].getFieldWorldCoordinates());
+         black_checkers_nodes[11].setLocalTranslation(boardFields[2][1].getFieldWorldCoordinates());
+
+
+
+
+
+
         //tymczasowo - wypelnij reszte pol bierkami
 //        Spatial white_checkers2[] = new Spatial[12];
 //        for (int i = 4; i < 12; i++) {
@@ -579,66 +575,71 @@ public class Main extends SimpleApplication {
                 //wysokosc taka sama dla wszystkich - poziom
                 boardFields[row][col].setFieldWorldCoordinates(new Vector3f(columns[col], CELL_POS_Y, rows[row]));
 
-                System.out.print("Row: " + boardFields[row][col].getTabXPosition() + " Col: " + boardFields[row][col].getTabYPosition() +
-                        boardFields[row][col].isAccessible() + " " + "Loc: " + boardFields[row][col].getFieldWorldCoordinates() + " ");
+                System.out.print("Row: " + boardFields[row][col].getTabXPosition() + " Col: " + boardFields[row][col].getTabYPosition()
+                        + boardFields[row][col].isAccessible() + " " + "Loc: " + boardFields[row][col].getFieldWorldCoordinates() + " ");
             }
             System.out.println();
         }
     }
-    
-    private void moveCheckerNode(Node nodeToMove, Field from, Field to){
-        
-        path.clearWayPoints();        
+
+    private void moveCheckerNode(Node nodeToMove, Field from, Field to) {
+
+        path.clearWayPoints();
 
 
         //motion path
-        
-        
-        if(from.getTabXPosition() - to.getTabXPosition() == 1 || from.getTabXPosition() - to.getTabXPosition() == -1){
-/*******ruch bierki - przesuniecie*********/
-        Vector3f startPos = new Vector3f(from.getFieldWorldCoordinates());
-        Vector3f endPos = new Vector3f(to.getFieldWorldCoordinates());
-        path.addWayPoint(startPos);     
-        path.addWayPoint(endPos);
-        path.setCurveTension(0.0f);//ruch prosty
-        /*************************/
-        }
-        else{
-        /*******przykladowe dane - bicie (skok)*********/
-        Vector3f startPos = new Vector3f(from.getFieldWorldCoordinates());
-        Vector3f endPos = new Vector3f(to.getFieldWorldCoordinates());
 
-        Vector3f vectorBetween1 = FastMath.interpolateLinear(0.1f, startPos, endPos).add(new Vector3f(0.0f, 2.0f, 0.0f));
-        Vector3f vectorBetween2 = FastMath.interpolateLinear(0.2f, startPos, endPos).add(new Vector3f(0.0f, 2.4f, 0.0f));
-        Vector3f vectorBetween3 = FastMath.interpolateLinear(0.3f, startPos, endPos).add(new Vector3f(0.0f, 2.8f, 0.0f));
-        Vector3f vectorBetween4 = FastMath.interpolateLinear(0.4f, startPos, endPos).add(new Vector3f(0.0f, 3.0f, 0.0f));
-        Vector3f vectorBetween5 = FastMath.interpolateLinear(0.5f, startPos, endPos).add(new Vector3f(0.0f, 3.2f, 0.0f));
-        Vector3f vectorBetween6 = FastMath.interpolateLinear(0.6f, startPos, endPos).add(new Vector3f(0.0f, 3.0f, 0.0f));
-        Vector3f vectorBetween7 = FastMath.interpolateLinear(0.7f, startPos, endPos).add(new Vector3f(0.0f, 2.8f, 0.0f));
-        Vector3f vectorBetween8 = FastMath.interpolateLinear(0.8f, startPos, endPos).add(new Vector3f(0.0f, 2.4f, 0.0f));
-        Vector3f vectorBetween9 = FastMath.interpolateLinear(0.9f, startPos, endPos).add(new Vector3f(0.0f, 2.0f, 0.0f));
-               
-        
-        path.addWayPoint(startPos);     
-        path.addWayPoint(vectorBetween1);
-        path.addWayPoint(vectorBetween2);
-        path.addWayPoint(vectorBetween3);
-        path.addWayPoint(vectorBetween4);
-        path.addWayPoint(vectorBetween5);
-        path.addWayPoint(vectorBetween6);
-        path.addWayPoint(vectorBetween7);
-        path.addWayPoint(vectorBetween8);
-        path.addWayPoint(vectorBetween9);        
-        path.addWayPoint(endPos);
-        path.setCurveTension(0.23f);//ruch zaokraglony
-        /************************/
-            
-            
+
+        if (from.getTabXPosition() - to.getTabXPosition() == 1 || from.getTabXPosition() - to.getTabXPosition() == -1) {
+            /**
+             * *****ruch bierki - przesuniecie********
+             */
+            Vector3f startPos = new Vector3f(from.getFieldWorldCoordinates());
+            Vector3f endPos = new Vector3f(to.getFieldWorldCoordinates());
+            path.addWayPoint(startPos);
+            path.addWayPoint(endPos);
+            path.setCurveTension(0.0f);//ruch prosty
+            /**
+             * **********************
+             */
+        } else {
+            /**
+             * *****przykladowe dane - bicie (skok)********
+             */
+            Vector3f startPos = new Vector3f(from.getFieldWorldCoordinates());
+            Vector3f endPos = new Vector3f(to.getFieldWorldCoordinates());
+
+            Vector3f vectorBetween1 = FastMath.interpolateLinear(0.1f, startPos, endPos).add(new Vector3f(0.0f, 2.0f, 0.0f));
+            Vector3f vectorBetween2 = FastMath.interpolateLinear(0.2f, startPos, endPos).add(new Vector3f(0.0f, 2.4f, 0.0f));
+            Vector3f vectorBetween3 = FastMath.interpolateLinear(0.3f, startPos, endPos).add(new Vector3f(0.0f, 2.8f, 0.0f));
+            Vector3f vectorBetween4 = FastMath.interpolateLinear(0.4f, startPos, endPos).add(new Vector3f(0.0f, 3.0f, 0.0f));
+            Vector3f vectorBetween5 = FastMath.interpolateLinear(0.5f, startPos, endPos).add(new Vector3f(0.0f, 3.2f, 0.0f));
+            Vector3f vectorBetween6 = FastMath.interpolateLinear(0.6f, startPos, endPos).add(new Vector3f(0.0f, 3.0f, 0.0f));
+            Vector3f vectorBetween7 = FastMath.interpolateLinear(0.7f, startPos, endPos).add(new Vector3f(0.0f, 2.8f, 0.0f));
+            Vector3f vectorBetween8 = FastMath.interpolateLinear(0.8f, startPos, endPos).add(new Vector3f(0.0f, 2.4f, 0.0f));
+            Vector3f vectorBetween9 = FastMath.interpolateLinear(0.9f, startPos, endPos).add(new Vector3f(0.0f, 2.0f, 0.0f));
+
+
+            path.addWayPoint(startPos);
+            path.addWayPoint(vectorBetween1);
+            path.addWayPoint(vectorBetween2);
+            path.addWayPoint(vectorBetween3);
+            path.addWayPoint(vectorBetween4);
+            path.addWayPoint(vectorBetween5);
+            path.addWayPoint(vectorBetween6);
+            path.addWayPoint(vectorBetween7);
+            path.addWayPoint(vectorBetween8);
+            path.addWayPoint(vectorBetween9);
+            path.addWayPoint(endPos);
+            path.setCurveTension(0.23f);//ruch zaokraglony
+            /**
+             * *********************
+             */
         }
 //        
 
         path.enableDebugShape(assetManager, rootNode);//pokaz linie     
-        
+
         motionControl = new MotionEvent(nodeToMove, path);//ktora bierka
         //ustawienie zachowania podczas przemieszczania sie
         motionControl.setDirectionType(MotionEvent.Direction.None);//bez obrotow     
@@ -650,7 +651,7 @@ public class Main extends SimpleApplication {
         motionControl.setSpeed(PATH_SPEED);// 1 - 1 sekunda
         motionControl.play();
 
-        
-        
+
+
     }
 }
