@@ -389,11 +389,17 @@ public class Main extends SimpleApplication {
 
     private void setUpCheckers() {
 
+        //do obrocenia czarnych bierek o 180 stopni
+        Quaternion roll180 = new Quaternion();
+        roll180.fromAngleAxis(-FastMath.PI, Vector3f.UNIT_Y);
+        
         black_checkers_nodes = new Node[12];
         white_checkers_nodes = new Node[12];
         for (int i = 0; i < 12; i++) {
             white_checkers_nodes[i] = new Node("WhiteNode" + i);
             black_checkers_nodes[i] = new Node("BlackNode" + (i + 12));
+            //obroc czarne bierki
+            black_checkers_nodes[i].rotate(roll180);
         }
 
 
