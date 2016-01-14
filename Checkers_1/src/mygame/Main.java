@@ -31,6 +31,7 @@ import com.jme3.scene.Node;
 import com.jme3.shadow.BasicShadowRenderer;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
+import com.jme3.system.AppSettings;
 import com.jme3.util.SkyFactory;
 
 /**
@@ -112,6 +113,15 @@ public class Main extends SimpleApplication {
      */
     public static void main(String[] args) {
         Main app = new Main();
+        
+        
+        
+        AppSettings settings = new AppSettings(true);
+
+        settings.setFrameRate(60);
+
+        app.setSettings(settings);
+        
         app.start();
     }
 
@@ -160,8 +170,8 @@ public class Main extends SimpleApplication {
         /* cam 1 */
         cam.setFrame(cam1Loc, cam1Left, cam1Up, cam1Dir);
 
-        flyCam.setEnabled(false);
-//      flyCam.setMoveSpeed(10);
+        flyCam.setEnabled(true);
+      flyCam.setMoveSpeed(10);
 
 
 
@@ -216,6 +226,9 @@ public class Main extends SimpleApplication {
         inputManager.addMapping("Cam4", new KeyTrigger(KeyInput.KEY_4));
         inputManager.addMapping("Cam5", new KeyTrigger(KeyInput.KEY_5));
 
+        inputManager.addMapping("Move", new KeyTrigger(KeyInput.KEY_6));
+
+
 
         inputManager.addMapping("Left", new KeyTrigger(KeyInput.KEY_J));
         inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_K));
@@ -229,11 +242,25 @@ public class Main extends SimpleApplication {
 
         // Add the names to the action listener.
         inputManager.addListener(analogListener, "Left", "Right", "Up", "Down", "Far", "Close");
-        inputManager.addListener(actionListener, "Cam1", "Cam2", "Cam3", "Cam4", "Cam5", "Click");
+        inputManager.addListener(actionListener, "Cam1", "Cam2", "Cam3", "Cam4", "Cam5", "Click", "Move");
 
     }
     private ActionListener actionListener = new ActionListener() {
         public void onAction(String name, boolean keyPressed, float tpf) {
+            if (name.equals("Move") && !keyPressed) {
+                           System.out.println("Move to: " +  boardFields[4][1].getFieldWorldCoordinates().toString());
+    
+//    Node[] white_checkers_nodes;
+//    Spatial[] white_checkers = new Spatial[12];
+                           
+    white_checkers_nodes[11].setLocalTranslation(boardFields[4][1].getFieldWorldCoordinates().subtract(new Vector3f(0.3f, 0.0f,0.3f)));
+//                white_checkers_nodes[11].move(boardFields[4][1].getFieldWorldCoordinates().getX(),
+//                        boardFields[4][1].getFieldWorldCoordinates().getY(), boardFields[4][1].getFieldWorldCoordinates().getZ());
+//                                 white_checkers[11].setLocalTranslation(boardFields[4][1].getFieldWorldCoordinates());
+//        white_checkers_nodes[11].setLocalTranslation(boardFields[4][1].getFieldWorldCoordinates());
+//                white_checkers[11].move(boardFields[4][1].getFieldWorldCoordinates().getX(),
+//                        boardFields[4][1].getFieldWorldCoordinates().getY(), boardFields[4][1].getFieldWorldCoordinates().getZ());
+            }
             if (name.equals("Cam1") && !keyPressed) {
                 cam.setFrame(cam1Loc, cam1Left, cam1Up, cam1Dir);
             }
@@ -299,10 +326,12 @@ public class Main extends SimpleApplication {
     };
     private AnalogListener analogListener = new AnalogListener() {
         public void onAnalog(String name, float value, float tpf) {
-//        if (name.equals("Right")) {
-//          Vector3f v = white_checkers[1].getLocalTranslation();
-//          white_checkers[1].setLocalTranslation(v.x + value*speed, v.y , v.z);
-//        }
+//            if (name.equals("Right")) {
+//          Vector3f v = white_checkers[12].getLocalTranslation();
+//          white_checkers_nodes[11].move(boardFields[1][4].getFieldWorldCoordinates().getX(),
+//                  boardFields[1][4].getFieldWorldCoordinates().getY(), boardFields[1][4].getFieldWorldCoordinates().getZ());
+//          
+//            }
 //        if (name.equals("Right")) {
 //          Vector3f v = checker_czarny.getLocalTranslation();
 //          checker_czarny.setLocalTranslation(v.x + value*speed, v.y , v.z);
@@ -359,7 +388,7 @@ public class Main extends SimpleApplication {
                 cell_pos_z = 0.0f - Z_CELL * 2;
             }
 //            System.out.println("White checker. Id: " + i + " Position: X, Y, Z: " + cell_pos_x + " " + CELL_POS_Y + " " + cell_pos_z);
-            white_checkers[i].setLocalTranslation(cell_pos_x, CELL_POS_Y, cell_pos_z);
+            white_checkers_nodes[i].setLocalTranslation(cell_pos_x, CELL_POS_Y, cell_pos_z);
             white_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
 
 
@@ -378,7 +407,7 @@ public class Main extends SimpleApplication {
             }
 //            System.out.println("Black checker. Id: " + (i + 12) + " Position: X, Y, Z: " + cell_pos_x + " " + CELL_POS_Y + " " + cell_pos_z);
 
-            black_checkers[i].setLocalTranslation(cell_pos_x, CELL_POS_Y, cell_pos_z);
+            black_checkers_nodes[i].setLocalTranslation(cell_pos_x, CELL_POS_Y, cell_pos_z);
             black_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
 
 
@@ -395,21 +424,22 @@ public class Main extends SimpleApplication {
             black_node.attachChild(black_checkers_nodes[i]);
 
         }
-        Spatial white_checkers2[] = new Spatial[12];
-        for (int i = 4; i < 12; i++) {
-            white_checkers2[i] = assetManager.loadModel("Models/Ch_white/Ch_white.j3o");
-            if (i > 3 && i < 8) {
-                cell_pos_x = 0.042778164f - X_CELL * (i - 4) - X_CELL * (i - 4);
-                cell_pos_z = 0.0f - Z_CELL * 3;
-            }
-            if (i > 7) {
-                cell_pos_x = 0.042778164f - (i - 8) * X_CELL - X_CELL * (i - 8 + 1);
-                cell_pos_z = 0.0f - Z_CELL * 4;
-            }
-            white_checkers2[i].setLocalTranslation(cell_pos_x, CELL_POS_Y, cell_pos_z);
-            white_node.attachChild(white_checkers2[i]);
-
-        }
+        //tymczasowo - wypelnij reszte pol bierkami
+//        Spatial white_checkers2[] = new Spatial[12];
+//        for (int i = 4; i < 12; i++) {
+//            white_checkers2[i] = assetManager.loadModel("Models/Ch_white/Ch_white.j3o");
+//            if (i > 3 && i < 8) {
+//                cell_pos_x = 0.042778164f - X_CELL * (i - 4) - X_CELL * (i - 4);
+//                cell_pos_z = 0.0f - Z_CELL * 3;
+//            }
+//            if (i > 7) {
+//                cell_pos_x = 0.042778164f - (i - 8) * X_CELL - X_CELL * (i - 8 + 1);
+//                cell_pos_z = 0.0f - Z_CELL * 4;
+//            }
+//            white_checkers2[i].setLocalTranslation(cell_pos_x, CELL_POS_Y, cell_pos_z);
+//            white_node.attachChild(white_checkers2[i]);
+//
+//        }
 
 
         /**
@@ -514,7 +544,8 @@ public class Main extends SimpleApplication {
                 //wysokosc taka sama dla wszystkich - poziom
                 boardFields[row][col].setFieldWorldCoordinates(new Vector3f(columns[col], CELL_POS_Y, columns[row]));
 
-                System.out.print(boardFields[row][col].isAccessible() + " " + "Loc: " + boardFields[row][col].getFieldWorldCoordinates() + " ");
+                System.out.print("Row: " + boardFields[row][col].getTabXPosition() + " Col: " + boardFields[row][col].getTabYPosition() +
+                        boardFields[row][col].isAccessible() + " " + "Loc: " + boardFields[row][col].getFieldWorldCoordinates() + " ");
             }
             System.out.println();
         }
