@@ -74,7 +74,7 @@ public class Main extends SimpleApplication {
     private static final float Z_CELL = 1.802715f;
     private final static float CELL_POS_Y = 1.4552078f;//poziom
     //shadows
-    final int SHADOWMAP_SIZE = 2048;
+    private final static int SHADOWMAP_SIZE = 2048;
     /*TABLICE DO BIEREK */
     /* NODES - OD NAJWYSZYCH*/
     //ROOTNODE
@@ -198,9 +198,9 @@ public class Main extends SimpleApplication {
         path.addListener(new MotionPathListener() {
 
             public void onWayPointReach(MotionEvent control, int wayPointIndex) {
-                if (path.getNbWayPoints() == wayPointIndex + 1) {//gdy zakonczy sie 
+                if (path.getNbWayPoints() == wayPointIndex + 1) {//gdy zakonczy sie przemieszczenie
                             audioTickNode.playInstance(); // play each instance once!
-                } else {//gdy trwa
+                } else {//gdy trwa przemieszczenie
                     
                     
                 }
@@ -576,6 +576,7 @@ public class Main extends SimpleApplication {
         }
     }
 
+   //oblicza koordynaty na starcie 
     private void setCoordinatesWhereCheckersCanBe() {
 
         for (int row = 0; row < boardFields.length; row++) {
@@ -605,7 +606,8 @@ public class Main extends SimpleApplication {
         }
     }
 
-    private void moveCheckerNode(Node nodeToMove, Field from, Field to) {
+    //przenosi bierke
+  private void moveCheckerNode(Node nodeToMove, Field from, Field to) {
 
         path.clearWayPoints();
 
