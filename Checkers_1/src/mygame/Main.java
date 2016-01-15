@@ -1,5 +1,6 @@
 package mygame;
 
+import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapText;
 import com.jme3.light.DirectionalLight;
@@ -36,7 +37,13 @@ import com.jme3.shadow.BasicShadowRenderer;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.system.AppSettings;
+import com.jme3.system.JmeCanvasContext;
 import com.jme3.util.SkyFactory;
+import gameUI.CheckersUI;
+import java.awt.Canvas;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.FlowLayout;
 
 /**
  * Sample 3 - how to load an OBJ model, and OgreXML model, a material/texture,
@@ -120,34 +127,70 @@ public class Main extends SimpleApplication {
     private MotionEvent motionControl;
     private static final float PATH_SPEED = 1.0f;
     private static final float PATH_DURATION = 2.0f;//2 sekundy
-
-    
-    /***audio**/
+    /**
+     * *audio*
+     */
     private AudioNode audioTickNode;
     private AudioNode audioWinnerNode;
     private AudioNode audioLooserNode;
+    /**
+     * ustawienia
+     */
+    private final static int RESOLUTION_WIDTH = 640;//rozdzielczosc obrazu gry
+    private final static int RESOLUTION_HEIGHT = 480;
+    private static JmeCanvasContext context;
+    private static Canvas canvas;
 
-    
-    
     /**
      * ***
      */
     public static void main(String[] args) {
+
+        AppSettings gameSettings = new AppSettings(true);
+        gameSettings.setResolution(RESOLUTION_WIDTH, RESOLUTION_HEIGHT);
+        gameSettings.setFrameRate(60);
+
+
         Main app = new Main();
+        app.setSettings(gameSettings);
+
+
+//        app.setPauseOnLostFocus(false);
+//        app.setSettings(settings);
+        app.createCanvas();
+//        app.startCanvas();
+
+
+        context = (JmeCanvasContext) app.getContext();
+        context.setSystemListener(app);
+        Dimension dim = new Dimension(640, 480);
+        context.getCanvas().setPreferredSize(dim);
+
+        EventQueue.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                CheckersUI window = new CheckersUI();
+                window.setDefaultCloseOperation(CheckersUI.EXIT_ON_CLOSE);
+//                window.jPanel1.setLayout(new FlowLayout());
+                window.jPanel1.add(context.getCanvas());//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                window.pack();
+                window.setVisible(true);
+            }
+        });
 
 
 
-        AppSettings settings = new AppSettings(true);
 
-        settings.setFrameRate(60);
+        app.startCanvas();
 
-        app.setSettings(settings);
-
-        app.start();
     }
 
     @Override
     public void simpleInitApp() {
+
+
+
+
 
         /* INFO OFF*/
         setDisplayFps(false);
@@ -189,20 +232,16 @@ public class Main extends SimpleApplication {
 
         /* cam 1 */
         cam.setFrame(cam1Loc, cam1Left, cam1Up, cam1Dir);
-
         flyCam.setEnabled(false);
         flyCam.setMoveSpeed(10);
 
 
         //listener do ruchu
         path.addListener(new MotionPathListener() {
-
             public void onWayPointReach(MotionEvent control, int wayPointIndex) {
                 if (path.getNbWayPoints() == wayPointIndex + 1) {//gdy zakonczy sie przemieszczenie
-                            audioTickNode.playInstance(); // play each instance once!
+                    audioTickNode.playInstance(); // play each instance once!
                 } else {//gdy trwa przemieszczenie
-                    
-                    
                 }
             }
         });
@@ -217,9 +256,9 @@ public class Main extends SimpleApplication {
 
         // load my custom keybinding
         initKeys();
-        
+
         initAudio();
-        
+
 
         //calculate coordinates for board
         calculateColumns();
@@ -440,37 +479,37 @@ public class Main extends SimpleApplication {
 
             white_node.attachChild(white_checkers_nodes[i]);
             black_node.attachChild(black_checkers_nodes[i]);
-            
+
 
 
         }
 
         //pozycja startowa bierek
-         white_checkers_nodes[0].setLocalTranslation(boardFields[7][6].getFieldWorldCoordinates());
-         white_checkers_nodes[1].setLocalTranslation(boardFields[7][4].getFieldWorldCoordinates());
-         white_checkers_nodes[2].setLocalTranslation(boardFields[7][2].getFieldWorldCoordinates());
-         white_checkers_nodes[3].setLocalTranslation(boardFields[7][0].getFieldWorldCoordinates());
-         white_checkers_nodes[4].setLocalTranslation(boardFields[6][7].getFieldWorldCoordinates());
-         white_checkers_nodes[5].setLocalTranslation(boardFields[6][5].getFieldWorldCoordinates());
-         white_checkers_nodes[6].setLocalTranslation(boardFields[6][3].getFieldWorldCoordinates());
-         white_checkers_nodes[7].setLocalTranslation(boardFields[6][1].getFieldWorldCoordinates());
-         white_checkers_nodes[8].setLocalTranslation(boardFields[5][6].getFieldWorldCoordinates());
-         white_checkers_nodes[9].setLocalTranslation(boardFields[5][4].getFieldWorldCoordinates());
-         white_checkers_nodes[10].setLocalTranslation(boardFields[5][2].getFieldWorldCoordinates());
-         white_checkers_nodes[11].setLocalTranslation(boardFields[5][0].getFieldWorldCoordinates());
-        
-         black_checkers_nodes[0].setLocalTranslation(boardFields[0][7].getFieldWorldCoordinates());
-         black_checkers_nodes[1].setLocalTranslation(boardFields[0][5].getFieldWorldCoordinates());
-         black_checkers_nodes[2].setLocalTranslation(boardFields[0][3].getFieldWorldCoordinates());
-         black_checkers_nodes[3].setLocalTranslation(boardFields[0][1].getFieldWorldCoordinates());
-         black_checkers_nodes[4].setLocalTranslation(boardFields[1][6].getFieldWorldCoordinates());
-         black_checkers_nodes[5].setLocalTranslation(boardFields[1][4].getFieldWorldCoordinates());
-         black_checkers_nodes[6].setLocalTranslation(boardFields[1][2].getFieldWorldCoordinates());
-         black_checkers_nodes[7].setLocalTranslation(boardFields[1][0].getFieldWorldCoordinates());
-         black_checkers_nodes[8].setLocalTranslation(boardFields[2][7].getFieldWorldCoordinates());
-         black_checkers_nodes[9].setLocalTranslation(boardFields[2][5].getFieldWorldCoordinates());
-         black_checkers_nodes[10].setLocalTranslation(boardFields[2][3].getFieldWorldCoordinates());
-         black_checkers_nodes[11].setLocalTranslation(boardFields[2][1].getFieldWorldCoordinates());
+        white_checkers_nodes[0].setLocalTranslation(boardFields[7][6].getFieldWorldCoordinates());
+        white_checkers_nodes[1].setLocalTranslation(boardFields[7][4].getFieldWorldCoordinates());
+        white_checkers_nodes[2].setLocalTranslation(boardFields[7][2].getFieldWorldCoordinates());
+        white_checkers_nodes[3].setLocalTranslation(boardFields[7][0].getFieldWorldCoordinates());
+        white_checkers_nodes[4].setLocalTranslation(boardFields[6][7].getFieldWorldCoordinates());
+        white_checkers_nodes[5].setLocalTranslation(boardFields[6][5].getFieldWorldCoordinates());
+        white_checkers_nodes[6].setLocalTranslation(boardFields[6][3].getFieldWorldCoordinates());
+        white_checkers_nodes[7].setLocalTranslation(boardFields[6][1].getFieldWorldCoordinates());
+        white_checkers_nodes[8].setLocalTranslation(boardFields[5][6].getFieldWorldCoordinates());
+        white_checkers_nodes[9].setLocalTranslation(boardFields[5][4].getFieldWorldCoordinates());
+        white_checkers_nodes[10].setLocalTranslation(boardFields[5][2].getFieldWorldCoordinates());
+        white_checkers_nodes[11].setLocalTranslation(boardFields[5][0].getFieldWorldCoordinates());
+
+        black_checkers_nodes[0].setLocalTranslation(boardFields[0][7].getFieldWorldCoordinates());
+        black_checkers_nodes[1].setLocalTranslation(boardFields[0][5].getFieldWorldCoordinates());
+        black_checkers_nodes[2].setLocalTranslation(boardFields[0][3].getFieldWorldCoordinates());
+        black_checkers_nodes[3].setLocalTranslation(boardFields[0][1].getFieldWorldCoordinates());
+        black_checkers_nodes[4].setLocalTranslation(boardFields[1][6].getFieldWorldCoordinates());
+        black_checkers_nodes[5].setLocalTranslation(boardFields[1][4].getFieldWorldCoordinates());
+        black_checkers_nodes[6].setLocalTranslation(boardFields[1][2].getFieldWorldCoordinates());
+        black_checkers_nodes[7].setLocalTranslation(boardFields[1][0].getFieldWorldCoordinates());
+        black_checkers_nodes[8].setLocalTranslation(boardFields[2][7].getFieldWorldCoordinates());
+        black_checkers_nodes[9].setLocalTranslation(boardFields[2][5].getFieldWorldCoordinates());
+        black_checkers_nodes[10].setLocalTranslation(boardFields[2][3].getFieldWorldCoordinates());
+        black_checkers_nodes[11].setLocalTranslation(boardFields[2][1].getFieldWorldCoordinates());
 
 
 
@@ -576,7 +615,7 @@ public class Main extends SimpleApplication {
         }
     }
 
-   //oblicza koordynaty na starcie 
+    //oblicza koordynaty na starcie 
     private void setCoordinatesWhereCheckersCanBe() {
 
         for (int row = 0; row < boardFields.length; row++) {
@@ -607,7 +646,7 @@ public class Main extends SimpleApplication {
     }
 
     //przenosi bierke
-  private void moveCheckerNode(Node nodeToMove, Field from, Field to) {
+    private void moveCheckerNode(Node nodeToMove, Field from, Field to) {
 
         path.clearWayPoints();
 
@@ -679,27 +718,28 @@ public class Main extends SimpleApplication {
 
 
     }
-    
-      /** We create two audio nodes. */
-  private void initAudio() {
-    audioTickNode = new AudioNode(assetManager, "Sounds/tick.wav", false);
-    audioTickNode.setPositional(false);
-    audioTickNode.setLooping(false);
-    audioTickNode.setVolume(2);
-    rootNode.attachChild(audioTickNode);
- 
-    audioWinnerNode = new AudioNode(assetManager, "Sounds/winner.wav", false);
-    audioWinnerNode.setPositional(false);
-    audioWinnerNode.setLooping(false);
-    audioWinnerNode.setVolume(3);
-    rootNode.attachChild(audioWinnerNode);
-    
-    audioLooserNode = new AudioNode(assetManager, "Sounds/looser.wav", false);
-    audioLooserNode.setPositional(false);
-    audioLooserNode.setLooping(false);
-    audioLooserNode.setVolume(3);
-    rootNode.attachChild(audioLooserNode);
 
-  }
-    
+    /**
+     * We create two audio nodes.
+     */
+    private void initAudio() {
+        audioTickNode = new AudioNode(assetManager, "Sounds/tick.wav", false);
+        audioTickNode.setPositional(false);
+        audioTickNode.setLooping(false);
+        audioTickNode.setVolume(2);
+        rootNode.attachChild(audioTickNode);
+
+        audioWinnerNode = new AudioNode(assetManager, "Sounds/winner.wav", false);
+        audioWinnerNode.setPositional(false);
+        audioWinnerNode.setLooping(false);
+        audioWinnerNode.setVolume(3);
+        rootNode.attachChild(audioWinnerNode);
+
+        audioLooserNode = new AudioNode(assetManager, "Sounds/looser.wav", false);
+        audioLooserNode.setPositional(false);
+        audioLooserNode.setLooping(false);
+        audioLooserNode.setVolume(3);
+        rootNode.attachChild(audioLooserNode);
+
+    }
 }
