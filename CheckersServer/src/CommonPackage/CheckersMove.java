@@ -1,13 +1,16 @@
 package CommonPackage;
 
-import java.io.Serializable;
+import com.jme3.network.AbstractMessage;
+import com.jme3.network.serializing.Serializable;
 
 /*
  * Class which represent move in the game (checker and queen)
  */
-public class CheckersMove implements Serializable {
 
-	private static final long serialVersionUID = 7989998894212425464L;
+@Serializable
+public class CheckersMove extends AbstractMessage{
+
+//	private static final long serialVersionUID = 7989998894212425464L;
 	private int moveFromRow, moveFromCol; // coordinates of the checker to be
 											// moved
 	private int moveToRow, moveToCol; // coordinates where the checker will be
@@ -21,6 +24,11 @@ public class CheckersMove implements Serializable {
 	private boolean beatingPerformedByQueen = false;// flag to know when queen
 													// beats opponent checker
 
+        
+        public CheckersMove(){
+            
+        }
+        
 	public boolean isBeatingPerformedByQueen() {
 		return beatingPerformedByQueen;
 	}

@@ -17,6 +17,9 @@ public class MessageFromServer extends AbstractMessage {
 	private int winner; // contain winner(BLACK or WHITE - 0, 1)
 	private int myColor;
 
+        public MessageFromServer() {}    // empty constructor
+
+        
 	public int getMyColor() {
 		return myColor;
 	}

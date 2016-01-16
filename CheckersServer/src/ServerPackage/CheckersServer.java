@@ -1,5 +1,6 @@
 package ServerPackage;
 
+import CommonPackage.CheckersMove;
 import CommonPackage.MessageFromClient;
 import CommonPackage.MessageFromServer;
 import com.jme3.app.SimpleApplication;
@@ -34,6 +35,7 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
 
         Serializer.registerClass(MessageFromClient.class);//konieczna serializacja wiadomosci
         Serializer.registerClass(MessageFromServer.class);
+        Serializer.registerClass(CheckersMove.class);
 
 
 
@@ -51,16 +53,26 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
 
                 while(gotFirstPlayer == false){               
                 }
-                Match.Player playerWhite = match.new Player(myServer.getConnection(newestConnection), GameData.WHITE);
+                match.setWhitePlayer(new Player(myServer.getConnection(newestConnection), GameData.WHITE, match));
+//                Match.Player playerWhite = match.new Player(myServer.getConnection(newestConnection), GameData.WHITE);
                 System.out.println("Match #" + matchNumber + ": player #1 connected.");
 
                 while(gotSecondPlayer == false){               
                 }
-                Match.Player playerBlack = match.new Player(myServer.getConnection(newestConnection), GameData.BLACK);
+                match.setBlackPlayer(new Player(myServer.getConnection(newestConnection), GameData.BLACK, match));
+
+//                Match.Player playerBlack = match.new Player(myServer.getConnection(newestConnection), GameData.BLACK);
                 System.out.println("Match #" + matchNumber + ": player #2 connected.");
 
-                playerWhite.start();
-                playerBlack.start();
+                //register server listener
+                myServer.addMessageListener(match.getWhitePlayer(), MessageFromClient.class,MessageFromServer.class);
+                myServer.addMessageListener(match.getBlackPlayer(), MessageFromClient.class,MessageFromServer.class);
+
+                match.getWhitePlayer().start();
+                match.getBlackPlayer().start();
+
+//                playerWhite.start();
+//                playerBlack.start();
                 
                 
                 
@@ -130,4 +142,5 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
       myServer.close();
       super.destroy();
   }
+     
 }

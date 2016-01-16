@@ -16,6 +16,8 @@ public class MessageFromClient extends AbstractMessage {
 	private int col;
 	private boolean resign;
 
+        public MessageFromClient() {}    // empty constructor
+        
 	public boolean isResign() {
 		return resign;
 	}
