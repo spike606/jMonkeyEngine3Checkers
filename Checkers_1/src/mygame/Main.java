@@ -101,10 +101,8 @@ public class Main extends SimpleApplication {
     private static final AmbientLight blueLight = new AmbientLight();//zaznaczona bierka
     private static final AmbientLight redLight = new AmbientLight();//bierka do bicia
     private static final Vector3f sunLightDirection = new Vector3f(-0.9f, -1.2f, -1.0f);
-
     /* pomocnicze*/
     Vector3f selectedPointCoordinates;
-
     /*kolumny planszy*/
     private static final float FIRST_COL_X = 0.9304199f;
     private static final float COL_X_DIFF = 1.809f;
@@ -130,6 +128,7 @@ public class Main extends SimpleApplication {
     /**
      * *audio*
      */
+    private AudioNode gameAudioNode;
     private AudioNode audioTickNode;
     private AudioNode audioWinnerNode;
     private AudioNode audioLooserNode;
@@ -138,6 +137,11 @@ public class Main extends SimpleApplication {
      */
     private final static int RESOLUTION_WIDTH = 640;//rozdzielczosc obrazu gry
     private final static int RESOLUTION_HEIGHT = 480;
+    private final static int FRAMERATE = 60;
+    private final static int SAMPLES = 16;
+    private final static boolean VSYNC = false;
+
+    /* swing*/
     private static JmeCanvasContext context;
     private static Canvas canvas;
 
@@ -147,18 +151,21 @@ public class Main extends SimpleApplication {
     public static void main(String[] args) {
 
         AppSettings gameSettings = new AppSettings(true);
-        gameSettings.setResolution(RESOLUTION_WIDTH, RESOLUTION_HEIGHT);
-        gameSettings.setFrameRate(60);
-
-
         Main app = new Main();
-        app.setSettings(gameSettings);
+
+        performSettings(app, gameSettings, RESOLUTION_WIDTH, RESOLUTION_HEIGHT, FRAMERATE, SAMPLES, VSYNC);
+
+
+
 
 
 //        app.setPauseOnLostFocus(false);
 //        app.setSettings(settings);
         app.createCanvas();
 //        app.startCanvas();
+
+        
+        
 
 
         context = (JmeCanvasContext) app.getContext();
@@ -171,9 +178,16 @@ public class Main extends SimpleApplication {
             public void run() {
                 CheckersUI window = new CheckersUI();
                 window.setDefaultCloseOperation(CheckersUI.EXIT_ON_CLOSE);
-//                window.jPanel1.setLayout(new FlowLayout());
-                window.jPanel1.add(context.getCanvas());//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                window.gamePanel.add(context.getCanvas());//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 window.pack();
+                
+                
+               
+                try {
+                    Thread.sleep(5000);//w celu jednoczesnego pojawienia sie okna i uruchomionego okna silnika
+                } catch (InterruptedException exc) {
+                }
+                
                 window.setVisible(true);
             }
         });
@@ -187,10 +201,6 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-
-
-
-
 
         /* INFO OFF*/
         setDisplayFps(false);
@@ -217,7 +227,6 @@ public class Main extends SimpleApplication {
         sun.setName("Sun");
         sun.setDirection(sunLightDirection.normalizeLocal());
         rootNode.addLight(sun);
-
 
         /* Drop shadows */
         DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(assetManager, SHADOWMAP_SIZE, 1);
@@ -300,7 +309,6 @@ public class Main extends SimpleApplication {
         inputManager.addMapping("Cam4", new KeyTrigger(KeyInput.KEY_4));
         inputManager.addMapping("Cam5", new KeyTrigger(KeyInput.KEY_5));
 
-        inputManager.addMapping("Move", new KeyTrigger(KeyInput.KEY_6));
 
 
 
@@ -316,28 +324,11 @@ public class Main extends SimpleApplication {
 
         // Add the names to the action listener.
         inputManager.addListener(analogListener, "Left", "Right", "Up", "Down", "Far", "Close");
-        inputManager.addListener(actionListener, "Cam1", "Cam2", "Cam3", "Cam4", "Cam5", "Click", "Move");
+        inputManager.addListener(actionListener, "Cam1", "Cam2", "Cam3", "Cam4", "Cam5", "Click");
 
     }
     private ActionListener actionListener = new ActionListener() {
         public void onAction(String name, boolean keyPressed, float tpf) {
-            if (name.equals("Move") && !keyPressed) {
-                System.out.println("Move to: " + boardFields[4][1].getFieldWorldCoordinates().toString());
-
-//    Node[] white_checkers_nodes;
-//    Spatial[] white_checkers = new Spatial[12];
-
-
-//    white_checkers_nodes[11].setLocalTranslation(boardFields[4][1].getFieldWorldCoordinates().subtract(new Vector3f(0.3f, 0.0f,0.3f)));
-
-
-//                white_checkers_nodes[11].move(boardFields[4][1].getFieldWorldCoordinates().getX(),
-//                        boardFields[4][1].getFieldWorldCoordinates().getY(), boardFields[4][1].getFieldWorldCoordinates().getZ());
-//                                 white_checkers[11].setLocalTranslation(boardFields[4][1].getFieldWorldCoordinates());
-//        white_checkers_nodes[11].setLocalTranslation(boardFields[4][1].getFieldWorldCoordinates());
-//                white_checkers[11].move(boardFields[4][1].getFieldWorldCoordinates().getX(),
-//                        boardFields[4][1].getFieldWorldCoordinates().getY(), boardFields[4][1].getFieldWorldCoordinates().getZ());
-            }
             if (name.equals("Cam1") && !keyPressed) {
                 cam.setFrame(cam1Loc, cam1Left, cam1Up, cam1Dir);
             }
@@ -453,7 +444,7 @@ public class Main extends SimpleApplication {
         white_checkers_nodes = new Node[12];
         for (int i = 0; i < 12; i++) {
             white_checkers_nodes[i] = new Node("WhiteNode" + i);
-            black_checkers_nodes[i] = new Node("BlackNode" + (i + 12));
+            black_checkers_nodes[i] = new Node("BlackNode" + i);
             //obroc czarne bierki
             black_checkers_nodes[i].rotate(roll180);
         }
@@ -638,10 +629,10 @@ public class Main extends SimpleApplication {
                 //wysokosc taka sama dla wszystkich - poziom
                 boardFields[row][col].setFieldWorldCoordinates(new Vector3f(columns[col], CELL_POS_Y, rows[row]));
 
-                System.out.print("Row: " + boardFields[row][col].getTabXPosition() + " Col: " + boardFields[row][col].getTabYPosition()
-                        + boardFields[row][col].isAccessible() + " " + "Loc: " + boardFields[row][col].getFieldWorldCoordinates() + " ");
+//                System.out.print("Row: " + boardFields[row][col].getTabXPosition() + " Col: " + boardFields[row][col].getTabYPosition()
+//                        + boardFields[row][col].isAccessible() + " " + "Loc: " + boardFields[row][col].getFieldWorldCoordinates() + " ");
             }
-            System.out.println();
+//            System.out.println();
         }
     }
 
@@ -702,7 +693,7 @@ public class Main extends SimpleApplication {
         }
 //        
 
-        path.enableDebugShape(assetManager, rootNode);//pokaz linie     
+//        path.enableDebugShape(assetManager, rootNode);//pokaz linie     
 
         motionControl = new MotionEvent(nodeToMove, path);//ktora bierka
         //ustawienie zachowania podczas przemieszczania sie
@@ -723,23 +714,40 @@ public class Main extends SimpleApplication {
      * We create two audio nodes.
      */
     private void initAudio() {
+
+        gameAudioNode = new AudioNode();
+
         audioTickNode = new AudioNode(assetManager, "Sounds/tick.wav", false);
         audioTickNode.setPositional(false);
         audioTickNode.setLooping(false);
         audioTickNode.setVolume(2);
-        rootNode.attachChild(audioTickNode);
+        gameAudioNode.attachChild(audioTickNode);
+        rootNode.attachChild(gameAudioNode);
 
         audioWinnerNode = new AudioNode(assetManager, "Sounds/winner.wav", false);
         audioWinnerNode.setPositional(false);
         audioWinnerNode.setLooping(false);
         audioWinnerNode.setVolume(3);
-        rootNode.attachChild(audioWinnerNode);
+        gameAudioNode.attachChild(audioWinnerNode);
+        rootNode.attachChild(gameAudioNode);
 
         audioLooserNode = new AudioNode(assetManager, "Sounds/looser.wav", false);
         audioLooserNode.setPositional(false);
         audioLooserNode.setLooping(false);
         audioLooserNode.setVolume(3);
-        rootNode.attachChild(audioLooserNode);
+        gameAudioNode.attachChild(audioLooserNode);
+        rootNode.attachChild(gameAudioNode);
+
+    }
+
+    private static void performSettings(SimpleApplication app, AppSettings gameSettings, int res_width, int res_height, int frameRate, int samples,
+            boolean vsync) {
+        gameSettings.setResolution(res_width, res_height);
+        gameSettings.setFrameRate(frameRate);
+        gameSettings.setSamples(samples);
+        gameSettings.setVSync(vsync);
+
+        app.setSettings(gameSettings);
 
     }
 }
