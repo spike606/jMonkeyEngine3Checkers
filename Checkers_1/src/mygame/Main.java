@@ -1,17 +1,10 @@
 package mygame;
 
-import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
-import com.jme3.font.BitmapText;
 import com.jme3.light.DirectionalLight;
-import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.shape.Box;
-import com.jme3.asset.plugins.ZipLocator;
 import com.jme3.audio.AudioNode;
-import com.jme3.bounding.BoundingBox;
 import com.jme3.cinematic.MotionPath;
 import com.jme3.cinematic.MotionPathListener;
 import com.jme3.cinematic.events.MotionEvent;
@@ -23,8 +16,6 @@ import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.AmbientLight;
-import com.jme3.light.Light;
-import com.jme3.light.LightList;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
@@ -33,7 +24,6 @@ import com.jme3.math.Vector2f;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Node;
-import com.jme3.shadow.BasicShadowRenderer;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.system.AppSettings;
@@ -43,7 +33,6 @@ import gameUI.CheckersUI;
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.FlowLayout;
 
 /**
  * Sample 3 - how to load an OBJ model, and OgreXML model, a material/texture,
@@ -161,12 +150,8 @@ public class Main extends SimpleApplication {
 
 //        app.setPauseOnLostFocus(false);
 //        app.setSettings(settings);
-        app.createCanvas();
+          app.createCanvas();
 //        app.startCanvas();
-
-        
-        
-
 
         context = (JmeCanvasContext) app.getContext();
         context.setSystemListener(app);
@@ -310,21 +295,9 @@ public class Main extends SimpleApplication {
         inputManager.addMapping("Cam4", new KeyTrigger(KeyInput.KEY_4));
         inputManager.addMapping("Cam5", new KeyTrigger(KeyInput.KEY_5));
 
-
-
-
-        inputManager.addMapping("Left", new KeyTrigger(KeyInput.KEY_J));
-        inputManager.addMapping("Right", new KeyTrigger(KeyInput.KEY_K));
-        inputManager.addMapping("Up", new KeyTrigger(KeyInput.KEY_I));
-        inputManager.addMapping("Down", new KeyTrigger(KeyInput.KEY_M));
-        inputManager.addMapping("Far", new KeyTrigger(KeyInput.KEY_U));
-        inputManager.addMapping("Close", new KeyTrigger(KeyInput.KEY_O));
-
-
         inputManager.addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
 
         // Add the names to the action listener.
-        inputManager.addListener(analogListener, "Left", "Right", "Up", "Down", "Far", "Close");
         inputManager.addListener(actionListener, "Cam1", "Cam2", "Cam3", "Cam4", "Cam5", "Click");
 
     }
@@ -403,40 +376,7 @@ public class Main extends SimpleApplication {
             }
         }
     };
-    private AnalogListener analogListener = new AnalogListener() {
-        public void onAnalog(String name, float value, float tpf) {
-//            if (name.equals("Right")) {
-//          Vector3f v = white_checkers[12].getLocalTranslation();
-//          white_checkers_nodes[11].move(boardFields[1][4].getFieldWorldCoordinates().getX(),
-//                  boardFields[1][4].getFieldWorldCoordinates().getY(), boardFields[1][4].getFieldWorldCoordinates().getZ());
-//          
-//            }
-//        if (name.equals("Right")) {
-//          Vector3f v = checker_czarny.getLocalTranslation();
-//          checker_czarny.setLocalTranslation(v.x + value*speed, v.y , v.z);
-//        }
-//        if (name.equals("Left")) {
-//          Vector3f v = checker_czarny.getLocalTranslation();
-//          checker_czarny.setLocalTranslation(v.x - value*speed, v.y, v.z);
-//        }
-//        if (name.equals("Up")) {
-//          Vector3f v = checker_czarny.getLocalTranslation();
-//          checker_czarny.setLocalTranslation(v.x,  v.y + value*speed, v.z);
-//        }
-//        if (name.equals("Down")) {
-//          Vector3f v = checker_czarny.getLocalTranslation();
-//          checker_czarny.setLocalTranslation(v.x , v.y - value*speed, v.z);
-//        }
-//        if (name.equals("Far")) {
-//          Vector3f v = checker_czarny.getLocalTranslation();
-//          checker_czarny.setLocalTranslation(v.x,  v.y , v.z + value*speed);
-//        }
-//        if (name.equals("Close")) {
-//          Vector3f v = checker_czarny.getLocalTranslation();
-//          checker_czarny.setLocalTranslation(v.x , v.y, v.z  - value*speed);
-//        }
-        }
-    };
+
 
     private void setUpCheckers() {
 
@@ -604,7 +544,7 @@ public class Main extends SimpleApplication {
         /**
          * PODSWIETLENIE
          */
-        black_checkers_nodes[2].addLight(redLight);
+//        black_checkers_nodes[2].addLight(redLight);
         /**
          * **
          */

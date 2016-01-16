@@ -1,4 +1,4 @@
-package CommonPackage;
+package CommonPackageGame;
 
 import com.jme3.network.AbstractMessage;
 //import java.io.Serializable;
