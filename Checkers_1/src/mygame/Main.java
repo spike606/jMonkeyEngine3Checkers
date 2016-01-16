@@ -250,6 +250,7 @@ public class Main extends SimpleApplication {
             public void onWayPointReach(MotionEvent control, int wayPointIndex) {
                 if (path.getNbWayPoints() == wayPointIndex + 1) {//gdy zakonczy sie przemieszczenie
                     audioTickNode.playInstance(); // play each instance once!
+
                 } else {//gdy trwa przemieszczenie
                 }
             }
@@ -390,8 +391,11 @@ public class Main extends SimpleApplication {
                     } else {
                         System.out.println("Field selected. Coordinates: X, Y, Z: " + selectedPointCoordinates);
                         if (clickedNodeBefore.getUserData("selected").equals("true")) {
+                            
+                            diselectChecker(clickedNodeBefore);
 
                             moveCheckerNode(clickedNodeBefore, clickedFieldBefore, clickedField);
+
 
                         }
                     }
@@ -465,7 +469,7 @@ public class Main extends SimpleApplication {
             white_checkers_nodes[i].setUserData("selected", "false");
 
             black_checkers_nodes[i].attachChild(black_checkers[i]);
-            black_checkers_nodes[i].setUserData("id", i + 12);
+            black_checkers_nodes[i].setUserData("id", i);
             black_checkers_nodes[i].setUserData("selected", "false");
 
             white_node.attachChild(white_checkers_nodes[i]);
@@ -475,32 +479,104 @@ public class Main extends SimpleApplication {
 
         }
 
-        //pozycja startowa bierek
+        //pozycja startowa bierek oraz jej odzwierciedlenie na tablicy dwuwymiarowej by latwiej je znalezc
         white_checkers_nodes[0].setLocalTranslation(boardFields[7][6].getFieldWorldCoordinates());
+        white_checkers_nodes[0].setUserData("row", 7);
+        white_checkers_nodes[0].setUserData("col", 6);
+
         white_checkers_nodes[1].setLocalTranslation(boardFields[7][4].getFieldWorldCoordinates());
+        white_checkers_nodes[1].setUserData("row", 7);
+        white_checkers_nodes[1].setUserData("col", 4);
+        
         white_checkers_nodes[2].setLocalTranslation(boardFields[7][2].getFieldWorldCoordinates());
+        white_checkers_nodes[2].setUserData("row", 7);
+        white_checkers_nodes[2].setUserData("col", 2);
+        
         white_checkers_nodes[3].setLocalTranslation(boardFields[7][0].getFieldWorldCoordinates());
+        white_checkers_nodes[3].setUserData("row", 7);
+        white_checkers_nodes[3].setUserData("col", 0);
+        
         white_checkers_nodes[4].setLocalTranslation(boardFields[6][7].getFieldWorldCoordinates());
+        white_checkers_nodes[4].setUserData("row", 6);
+        white_checkers_nodes[4].setUserData("col", 7);
+        
         white_checkers_nodes[5].setLocalTranslation(boardFields[6][5].getFieldWorldCoordinates());
+        white_checkers_nodes[5].setUserData("row", 6);
+        white_checkers_nodes[5].setUserData("col", 5);
+        
         white_checkers_nodes[6].setLocalTranslation(boardFields[6][3].getFieldWorldCoordinates());
+        white_checkers_nodes[6].setUserData("row", 6);
+        white_checkers_nodes[6].setUserData("col", 3);
+                
         white_checkers_nodes[7].setLocalTranslation(boardFields[6][1].getFieldWorldCoordinates());
+        white_checkers_nodes[7].setUserData("row", 6);
+        white_checkers_nodes[7].setUserData("col", 1);
+        
         white_checkers_nodes[8].setLocalTranslation(boardFields[5][6].getFieldWorldCoordinates());
+        white_checkers_nodes[8].setUserData("row", 5);
+        white_checkers_nodes[8].setUserData("col", 6);
+        
         white_checkers_nodes[9].setLocalTranslation(boardFields[5][4].getFieldWorldCoordinates());
+        white_checkers_nodes[9].setUserData("row", 5);
+        white_checkers_nodes[9].setUserData("col", 4);
+        
         white_checkers_nodes[10].setLocalTranslation(boardFields[5][2].getFieldWorldCoordinates());
+        white_checkers_nodes[10].setUserData("row", 5);
+        white_checkers_nodes[10].setUserData("col", 2);
+        
         white_checkers_nodes[11].setLocalTranslation(boardFields[5][0].getFieldWorldCoordinates());
+        white_checkers_nodes[11].setUserData("row", 5);
+        white_checkers_nodes[11].setUserData("col", 0);
+        
 
         black_checkers_nodes[0].setLocalTranslation(boardFields[0][7].getFieldWorldCoordinates());
+        black_checkers_nodes[0].setUserData("row", 0);
+        black_checkers_nodes[0].setUserData("col", 7);
+        
         black_checkers_nodes[1].setLocalTranslation(boardFields[0][5].getFieldWorldCoordinates());
+        black_checkers_nodes[1].setUserData("row", 0);
+        black_checkers_nodes[1].setUserData("col", 5);
+        
         black_checkers_nodes[2].setLocalTranslation(boardFields[0][3].getFieldWorldCoordinates());
+        black_checkers_nodes[2].setUserData("row", 0);
+        black_checkers_nodes[2].setUserData("col", 3);
+        
         black_checkers_nodes[3].setLocalTranslation(boardFields[0][1].getFieldWorldCoordinates());
+        black_checkers_nodes[3].setUserData("row", 0);
+        black_checkers_nodes[3].setUserData("col", 1);
+        
         black_checkers_nodes[4].setLocalTranslation(boardFields[1][6].getFieldWorldCoordinates());
+        black_checkers_nodes[4].setUserData("row", 1);
+        black_checkers_nodes[4].setUserData("col", 6);
+        
         black_checkers_nodes[5].setLocalTranslation(boardFields[1][4].getFieldWorldCoordinates());
+        black_checkers_nodes[5].setUserData("row", 1);
+        black_checkers_nodes[5].setUserData("col", 4);
+        
         black_checkers_nodes[6].setLocalTranslation(boardFields[1][2].getFieldWorldCoordinates());
+        black_checkers_nodes[6].setUserData("row", 1);
+        black_checkers_nodes[6].setUserData("col", 2);
+        
         black_checkers_nodes[7].setLocalTranslation(boardFields[1][0].getFieldWorldCoordinates());
+        black_checkers_nodes[7].setUserData("row", 1);
+        black_checkers_nodes[7].setUserData("col", 0);
+        
         black_checkers_nodes[8].setLocalTranslation(boardFields[2][7].getFieldWorldCoordinates());
+        black_checkers_nodes[8].setUserData("row", 2);
+        black_checkers_nodes[8].setUserData("col", 7);
+        
         black_checkers_nodes[9].setLocalTranslation(boardFields[2][5].getFieldWorldCoordinates());
+        black_checkers_nodes[9].setUserData("row", 2);
+        black_checkers_nodes[9].setUserData("col", 5);
+        
         black_checkers_nodes[10].setLocalTranslation(boardFields[2][3].getFieldWorldCoordinates());
+        black_checkers_nodes[10].setUserData("row", 2);
+        black_checkers_nodes[10].setUserData("col", 3);
+        
         black_checkers_nodes[11].setLocalTranslation(boardFields[2][1].getFieldWorldCoordinates());
+        black_checkers_nodes[11].setUserData("row", 2);
+        black_checkers_nodes[11].setUserData("col", 1);
+        
 
 
 
@@ -552,13 +628,12 @@ public class Main extends SimpleApplication {
 
     private void selectCheckerToBeat(Node checkerNode) {
         checkerNode.addLight(redLight);
-//        checkerNode.setUserData("selected", "true");
     }
 
     private void diselectCheckerToBeat(Node checkerNode) {
         checkerNode.removeLight(redLight);
-//        checkerNode.setUserData("selected", "false");
     }
+
 
     //przeksztalc koordynaty z 3d na tablice dwuwymiarowa board
     private Field getBoardField(Vector3f pointCoordinates) {
@@ -691,6 +766,16 @@ public class Main extends SimpleApplication {
              * *********************
              */
         }
+        
+        //uaktualnij w tablicy swiata 3d
+        from.setAccessible(true);
+        to.setAccessible(false);
+
+        
+        //uaktualnij dane nodes
+        nodeToMove.setUserData("row", to.getTabYPosition());
+        nodeToMove.setUserData("col", to.getTabXPosition());
+
 //        
 
 //        path.enableDebugShape(assetManager, rootNode);//pokaz linie     
