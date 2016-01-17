@@ -6,6 +6,8 @@ package gameUI;
 
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
+import mygame.Connecting;
+import mygame.GameFlowClient;
 
 /**
  *
@@ -147,10 +149,13 @@ public class CheckersUI extends javax.swing.JFrame {
 
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
         infoLabel.setText("Make your move.");
+        GameFlowClient.setTryingToConnect(true);
+        GameFlowClient.startNewGame();
     }//GEN-LAST:event_startButtonActionPerformed
 
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
-        // TODO add your handling code here:
+			GameFlowClient.resignGame();
+                        GameFlowClient.resignGameSend();
     }//GEN-LAST:event_stopButtonActionPerformed
 
     /**
@@ -190,9 +195,9 @@ public class CheckersUI extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel buttonsPanel;
     public javax.swing.JPanel gamePanel;
-    private javax.swing.JLabel infoLabel;
+    public javax.swing.JLabel infoLabel;
     private javax.swing.JPanel labelPanel;
-    private javax.swing.JButton startButton;
-    private javax.swing.JButton stopButton;
+    public javax.swing.JButton startButton;
+    public javax.swing.JButton stopButton;
     // End of variables declaration//GEN-END:variables
 }
