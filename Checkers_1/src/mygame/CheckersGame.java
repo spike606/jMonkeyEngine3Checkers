@@ -12,7 +12,6 @@ import com.jme3.collision.CollisionResults;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
-import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.light.AmbientLight;
@@ -21,6 +20,8 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
+import com.jme3.network.Client;
+import com.jme3.network.Network;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Node;
@@ -34,11 +35,12 @@ import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 
+
 /**
  * Sample 3 - how to load an OBJ model, and OgreXML model, a material/texture,
  * or text.
  */
-public class Main extends SimpleApplication {
+public class CheckersGame extends SimpleApplication {
 
     //przod
     private static final Vector3f cam1Loc = new Vector3f(-6.2657156f, 14.529437f, 8.240483f);
@@ -127,12 +129,16 @@ public class Main extends SimpleApplication {
     private final static int RESOLUTION_WIDTH = 640;//rozdzielczosc obrazu gry
     private final static int RESOLUTION_HEIGHT = 480;
     private final static int FRAMERATE = 60;
-    private final static int SAMPLES = 16;
+    private final static int SAMPLES = 0;
     private final static boolean VSYNC = false;
 
     /* swing*/
     private static JmeCanvasContext context;
     private static Canvas canvas;
+    public static CheckersUI window;
+    
+    
+
 
     /**
      * ***
@@ -140,7 +146,7 @@ public class Main extends SimpleApplication {
     public static void main(String[] args) {
 
         AppSettings gameSettings = new AppSettings(true);
-        Main app = new Main();
+        CheckersGame app = new CheckersGame();
 
         performSettings(app, gameSettings, RESOLUTION_WIDTH, RESOLUTION_HEIGHT, FRAMERATE, SAMPLES, VSYNC);
 
@@ -161,7 +167,7 @@ public class Main extends SimpleApplication {
         EventQueue.invokeLater(new Runnable() {
             @Override
             public void run() {
-                CheckersUI window = new CheckersUI();
+                window = new CheckersUI();
                 window.setDefaultCloseOperation(CheckersUI.EXIT_ON_CLOSE);
                 window.gamePanel.add(context.getCanvas());//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 window.pack();
@@ -263,12 +269,21 @@ public class Main extends SimpleApplication {
 
         setUpCheckers();
 
+        
+        
+
 
     }
 
     /* Use the main event loop to trigger repeating actions. */
     @Override
     public void simpleUpdate(float tpf) {//time per second
+        
+        GameFlowClient game = new GameFlowClient();
+
+        
+        
+        
 //        System.out.println("Cam location: " + cam.getLocation());
 //        System.out.println("Cam up : " + cam.getUp());
 //        System.out.println("Cam left : " + cam.getLeft());
@@ -363,14 +378,14 @@ public class Main extends SimpleApplication {
                         }
                     } else {
                         System.out.println("Field selected. Coordinates: X, Y, Z: " + selectedPointCoordinates);
-                        if (clickedNodeBefore.getUserData("selected").equals("true")) {
-                            
-                            diselectChecker(clickedNodeBefore);
-
-                            moveCheckerNode(clickedNodeBefore, clickedFieldBefore, clickedField);
-
-
-                        }
+//                        if (clickedNodeBefore.getUserData("selected").equals("true")) {
+//                            
+//                            diselectChecker(clickedNodeBefore);
+//
+//                            moveCheckerNode(clickedNodeBefore, clickedFieldBefore, clickedField);
+//
+//
+//                        }
                     }
                 }
             }

@@ -1,8 +1,8 @@
 package ServerPackage;
 
-import CommonPackage.CheckersMove;
-import CommonPackage.MessageFromClient;
-import CommonPackage.MessageFromServer;
+import CommonPackageServer.CheckersMove;
+import CommonPackageServer.MessageFromClient;
+import CommonPackageServer.MessageFromServer;
 import com.jme3.app.SimpleApplication;
 import com.jme3.network.Client;
 import com.jme3.network.ConnectionListener;

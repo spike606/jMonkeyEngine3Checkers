@@ -4,9 +4,9 @@
  */
 package ServerPackage;
 
-import CommonPackage.CheckersMove;
-import CommonPackage.MessageFromClient;
-import CommonPackage.MessageFromServer;
+import CommonPackageServer.CheckersMove;
+import CommonPackageServer.MessageFromClient;
+import CommonPackageServer.MessageFromServer;
 import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.Message;
@@ -63,6 +63,7 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
 
                 while (true && threadRunning) {// TODO:??
                     if (match.gameFlow.getCurrentPlayer() == color && match.gameFlow.isGameRunning() && firstMessageSend == false) {
+                System.out.println("W petli 1 ");
 
                         prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
                                 match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
@@ -80,6 +81,7 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
                                 match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
                                 match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), color);
                         hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);
+                System.out.println("W petli 2 ");
 
 //                            myOutput.reset();
 //                            myOutput.writeObject(messageToClient);
@@ -108,9 +110,11 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
 //                    } catch (IOException e) {
 //								System.out.println("Error during closing streams!");
 //                    }
+//                            System.out.println("W petli 3 ");
 
                 }
             }
+
         }
 
 

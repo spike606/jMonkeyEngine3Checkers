@@ -1,7 +1,5 @@
 package ServerPackage;
 
-import CommonPackage.*;
-
 public class Match {
 
     int matchNumber;

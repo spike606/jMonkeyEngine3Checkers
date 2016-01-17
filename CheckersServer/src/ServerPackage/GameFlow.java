@@ -1,6 +1,6 @@
 package ServerPackage;
 
-import CommonPackage.*;
+import CommonPackageServer.CheckersMove;
 
 /*
  * Class used to manage the game flow
