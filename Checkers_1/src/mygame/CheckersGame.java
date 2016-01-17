@@ -20,8 +20,6 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
-import com.jme3.network.Client;
-import com.jme3.network.Network;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Node;
@@ -34,7 +32,8 @@ import gameUI.CheckersUI;
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Sample 3 - how to load an OBJ model, and OgreXML model, a material/texture,
@@ -42,6 +41,8 @@ import java.awt.EventQueue;
  */
 public class CheckersGame extends SimpleApplication {
 
+    //logger
+    private static final Logger logger = Logger.getLogger(CheckersGame.class.getName());
     //przod
     private static final Vector3f cam1Loc = new Vector3f(-6.2657156f, 14.529437f, 8.240483f);
     private static final Vector3f cam1Dir = new Vector3f(-0.0028091485f, -0.7335623f, -0.67961645f);
@@ -85,9 +86,7 @@ public class CheckersGame extends SimpleApplication {
     Node[] white_checkers_nodes;
     Spatial[] black_checkers = new Spatial[12];//tablica spatiali
     Spatial[] white_checkers = new Spatial[12];
-    /**
-     * *****
-     */
+
     /* SWIATLA */
     private static final AmbientLight blueLight = new AmbientLight();//zaznaczona bierka
     private static final AmbientLight redLight = new AmbientLight();//bierka do bicia
@@ -136,9 +135,6 @@ public class CheckersGame extends SimpleApplication {
     private static JmeCanvasContext context;
     private static Canvas canvas;
     public static CheckersUI window;
-    
-    
-
 
     /**
      * ***
@@ -150,13 +146,9 @@ public class CheckersGame extends SimpleApplication {
 
         performSettings(app, gameSettings, RESOLUTION_WIDTH, RESOLUTION_HEIGHT, FRAMERATE, SAMPLES, VSYNC);
 
-
-
-
-
 //        app.setPauseOnLostFocus(false);
 //        app.setSettings(settings);
-          app.createCanvas();
+        app.createCanvas();
 //        app.startCanvas();
 
         context = (JmeCanvasContext) app.getContext();
@@ -168,23 +160,16 @@ public class CheckersGame extends SimpleApplication {
             @Override
             public void run() {
                 window = new CheckersUI();
-                window.setDefaultCloseOperation(CheckersUI.EXIT_ON_CLOSE);
+
                 window.gamePanel.add(context.getCanvas());//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 window.pack();
-                
-                
-               
                 try {
                     Thread.sleep(5000);//w celu jednoczesnego pojawienia sie okna i uruchomionego okna silnika
                 } catch (InterruptedException exc) {
                 }
-                
                 window.setVisible(true);
             }
         });
-
-
-
 
         app.startCanvas();
 
@@ -249,41 +234,31 @@ public class CheckersGame extends SimpleApplication {
 
 
         //sky
-//      viewPort.setBackgroundColor(ColorRGBA.Blue);       
-//       rootNode.attachChild(SkyFactory.createSky(
-//            assetManager, "Textures/sky/BrightSky.dds", false));
         rootNode.attachChild(SkyFactory.createSky(
                 assetManager, "Textures/sky/space.dds", false));
 
-        // load my custom keybinding
+        // load my custom keybinding, audio
         initKeys();
-
         initAudio();
 
 
         //calculate coordinates for board
         calculateColumns();
         calculateRows();
-
         setCoordinatesWhereCheckersCanBe();
-
         setUpCheckers();
-
-        
-        
-
 
     }
 
     /* Use the main event loop to trigger repeating actions. */
     @Override
     public void simpleUpdate(float tpf) {//time per second
-        
+
         GameFlowClient game = new GameFlowClient();
 
-        
-        
-        
+
+
+
 //        System.out.println("Cam location: " + cam.getLocation());
 //        System.out.println("Cam up : " + cam.getUp());
 //        System.out.println("Cam left : " + cam.getLeft());
@@ -392,7 +367,6 @@ public class CheckersGame extends SimpleApplication {
         }
     };
 
-
     private void setUpCheckers() {
 
         //do obrocenia czarnych bierek o 180 stopni
@@ -407,7 +381,6 @@ public class CheckersGame extends SimpleApplication {
             //obroc czarne bierki
             black_checkers_nodes[i].rotate(roll180);
         }
-
 
         float cell_pos_x = 0.042778164f;
         float cell_pos_z = 0.0f;
@@ -429,9 +402,6 @@ public class CheckersGame extends SimpleApplication {
 
             white_node.attachChild(white_checkers_nodes[i]);
             black_node.attachChild(black_checkers_nodes[i]);
-
-
-
         }
 
         //pozycja startowa bierek oraz jej odzwierciedlenie na tablicy dwuwymiarowej by latwiej je znalezc
@@ -442,127 +412,96 @@ public class CheckersGame extends SimpleApplication {
         white_checkers_nodes[1].setLocalTranslation(boardFields[7][4].getFieldWorldCoordinates());
         white_checkers_nodes[1].setUserData("row", 7);
         white_checkers_nodes[1].setUserData("col", 4);
-        
+
         white_checkers_nodes[2].setLocalTranslation(boardFields[7][2].getFieldWorldCoordinates());
         white_checkers_nodes[2].setUserData("row", 7);
         white_checkers_nodes[2].setUserData("col", 2);
-        
+
         white_checkers_nodes[3].setLocalTranslation(boardFields[7][0].getFieldWorldCoordinates());
         white_checkers_nodes[3].setUserData("row", 7);
         white_checkers_nodes[3].setUserData("col", 0);
-        
+
         white_checkers_nodes[4].setLocalTranslation(boardFields[6][7].getFieldWorldCoordinates());
         white_checkers_nodes[4].setUserData("row", 6);
         white_checkers_nodes[4].setUserData("col", 7);
-        
+
         white_checkers_nodes[5].setLocalTranslation(boardFields[6][5].getFieldWorldCoordinates());
         white_checkers_nodes[5].setUserData("row", 6);
         white_checkers_nodes[5].setUserData("col", 5);
-        
+
         white_checkers_nodes[6].setLocalTranslation(boardFields[6][3].getFieldWorldCoordinates());
         white_checkers_nodes[6].setUserData("row", 6);
         white_checkers_nodes[6].setUserData("col", 3);
-                
+
         white_checkers_nodes[7].setLocalTranslation(boardFields[6][1].getFieldWorldCoordinates());
         white_checkers_nodes[7].setUserData("row", 6);
         white_checkers_nodes[7].setUserData("col", 1);
-        
+
         white_checkers_nodes[8].setLocalTranslation(boardFields[5][6].getFieldWorldCoordinates());
         white_checkers_nodes[8].setUserData("row", 5);
         white_checkers_nodes[8].setUserData("col", 6);
-        
+
         white_checkers_nodes[9].setLocalTranslation(boardFields[5][4].getFieldWorldCoordinates());
         white_checkers_nodes[9].setUserData("row", 5);
         white_checkers_nodes[9].setUserData("col", 4);
-        
+
         white_checkers_nodes[10].setLocalTranslation(boardFields[5][2].getFieldWorldCoordinates());
         white_checkers_nodes[10].setUserData("row", 5);
         white_checkers_nodes[10].setUserData("col", 2);
-        
+
         white_checkers_nodes[11].setLocalTranslation(boardFields[5][0].getFieldWorldCoordinates());
         white_checkers_nodes[11].setUserData("row", 5);
         white_checkers_nodes[11].setUserData("col", 0);
-        
+
 
         black_checkers_nodes[0].setLocalTranslation(boardFields[0][7].getFieldWorldCoordinates());
         black_checkers_nodes[0].setUserData("row", 0);
         black_checkers_nodes[0].setUserData("col", 7);
-        
+
         black_checkers_nodes[1].setLocalTranslation(boardFields[0][5].getFieldWorldCoordinates());
         black_checkers_nodes[1].setUserData("row", 0);
         black_checkers_nodes[1].setUserData("col", 5);
-        
+
         black_checkers_nodes[2].setLocalTranslation(boardFields[0][3].getFieldWorldCoordinates());
         black_checkers_nodes[2].setUserData("row", 0);
         black_checkers_nodes[2].setUserData("col", 3);
-        
+
         black_checkers_nodes[3].setLocalTranslation(boardFields[0][1].getFieldWorldCoordinates());
         black_checkers_nodes[3].setUserData("row", 0);
         black_checkers_nodes[3].setUserData("col", 1);
-        
+
         black_checkers_nodes[4].setLocalTranslation(boardFields[1][6].getFieldWorldCoordinates());
         black_checkers_nodes[4].setUserData("row", 1);
         black_checkers_nodes[4].setUserData("col", 6);
-        
+
         black_checkers_nodes[5].setLocalTranslation(boardFields[1][4].getFieldWorldCoordinates());
         black_checkers_nodes[5].setUserData("row", 1);
         black_checkers_nodes[5].setUserData("col", 4);
-        
+
         black_checkers_nodes[6].setLocalTranslation(boardFields[1][2].getFieldWorldCoordinates());
         black_checkers_nodes[6].setUserData("row", 1);
         black_checkers_nodes[6].setUserData("col", 2);
-        
+
         black_checkers_nodes[7].setLocalTranslation(boardFields[1][0].getFieldWorldCoordinates());
         black_checkers_nodes[7].setUserData("row", 1);
         black_checkers_nodes[7].setUserData("col", 0);
-        
+
         black_checkers_nodes[8].setLocalTranslation(boardFields[2][7].getFieldWorldCoordinates());
         black_checkers_nodes[8].setUserData("row", 2);
         black_checkers_nodes[8].setUserData("col", 7);
-        
+
         black_checkers_nodes[9].setLocalTranslation(boardFields[2][5].getFieldWorldCoordinates());
         black_checkers_nodes[9].setUserData("row", 2);
         black_checkers_nodes[9].setUserData("col", 5);
-        
+
         black_checkers_nodes[10].setLocalTranslation(boardFields[2][3].getFieldWorldCoordinates());
         black_checkers_nodes[10].setUserData("row", 2);
         black_checkers_nodes[10].setUserData("col", 3);
-        
+
         black_checkers_nodes[11].setLocalTranslation(boardFields[2][1].getFieldWorldCoordinates());
         black_checkers_nodes[11].setUserData("row", 2);
         black_checkers_nodes[11].setUserData("col", 1);
-        
 
-
-
-
-
-
-        //tymczasowo - wypelnij reszte pol bierkami
-//        Spatial white_checkers2[] = new Spatial[12];
-//        for (int i = 4; i < 12; i++) {
-//            white_checkers2[i] = assetManager.loadModel("Models/Ch_white/Ch_white.j3o");
-//            if (i > 3 && i < 8) {
-//                cell_pos_x = 0.042778164f - X_CELL * (i - 4) - X_CELL * (i - 4);
-//                cell_pos_z = 0.0f - Z_CELL * 3;
-//            }
-//            if (i > 7) {
-//                cell_pos_x = 0.042778164f - (i - 8) * X_CELL - X_CELL * (i - 8 + 1);
-//                cell_pos_z = 0.0f - Z_CELL * 4;
-//            }
-//            white_checkers2[i].setLocalTranslation(cell_pos_x, CELL_POS_Y, cell_pos_z);
-//            white_node.attachChild(white_checkers2[i]);
-//
-//        }
-
-
-        /**
-         * PODSWIETLENIE
-         */
-//        black_checkers_nodes[2].addLight(redLight);
-        /**
-         * **
-         */
         checkers_node.attachChild(white_node);
         checkers_node.attachChild(black_node);
 
@@ -589,7 +528,6 @@ public class CheckersGame extends SimpleApplication {
         checkerNode.removeLight(redLight);
     }
 
-
     //przeksztalc koordynaty z 3d na tablice dwuwymiarowa board
     private Field getBoardField(Vector3f pointCoordinates) {
         int col = 8;
@@ -611,8 +549,8 @@ public class CheckersGame extends SimpleApplication {
                 row--;
             }
         }
-        System.out.println("Col number: " + col);
-        System.out.println("Row number: " + row);
+        logger.log(Level.INFO, "Col number: {0}, Row number: {1}", new Object[]{col, row});
+
         return boardFields[row][col];
 
     }
@@ -659,10 +597,7 @@ public class CheckersGame extends SimpleApplication {
                 //wysokosc taka sama dla wszystkich - poziom
                 boardFields[row][col].setFieldWorldCoordinates(new Vector3f(columns[col], CELL_POS_Y, rows[row]));
 
-//                System.out.print("Row: " + boardFields[row][col].getTabXPosition() + " Col: " + boardFields[row][col].getTabYPosition()
-//                        + boardFields[row][col].isAccessible() + " " + "Loc: " + boardFields[row][col].getFieldWorldCoordinates() + " ");
             }
-//            System.out.println();
         }
     }
 
@@ -673,8 +608,6 @@ public class CheckersGame extends SimpleApplication {
 
 
         //motion path
-
-
         if (from.getTabXPosition() - to.getTabXPosition() == 1 || from.getTabXPosition() - to.getTabXPosition() == -1) {
             /**
              * *****ruch bierki - przesuniecie********
@@ -721,18 +654,14 @@ public class CheckersGame extends SimpleApplication {
              * *********************
              */
         }
-        
+
         //uaktualnij w tablicy swiata 3d
         from.setAccessible(true);
         to.setAccessible(false);
 
-        
         //uaktualnij dane nodes
         nodeToMove.setUserData("row", to.getTabYPosition());
         nodeToMove.setUserData("col", to.getTabXPosition());
-
-//        
-
 //        path.enableDebugShape(assetManager, rootNode);//pokaz linie     
 
         motionControl = new MotionEvent(nodeToMove, path);//ktora bierka
@@ -745,9 +674,6 @@ public class CheckersGame extends SimpleApplication {
         motionControl.setInitialDuration(PATH_DURATION);//zatem 2 sek
         motionControl.setSpeed(PATH_SPEED);// 1 - 1 sekunda
         motionControl.play();
-
-
-
     }
 
     /**

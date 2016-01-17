@@ -4,6 +4,8 @@
  */
 package gameUI;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import mygame.Connecting;
@@ -15,6 +17,9 @@ import mygame.GameFlowClient;
  */
 public class CheckersUI extends javax.swing.JFrame {
 
+        //logger
+    private static final Logger logger = Logger.getLogger(CheckersUI.class.getName());
+    
     /**
      * Creates new form CheckersUI
      */
@@ -55,23 +60,25 @@ public class CheckersUI extends javax.swing.JFrame {
         infoLabel = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Checkers 3D - jMonkeyEngine 3.0");
         setAlwaysOnTop(true);
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setMinimumSize(new java.awt.Dimension(800, 600));
         setResizable(false);
 
         gamePanel.setPreferredSize(new java.awt.Dimension(640, 480));
 
         startButton.setText("START");
-        startButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                startButtonActionPerformed(evt);
+        startButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                startButtonMouseReleased(evt);
             }
         });
 
         stopButton.setText("STOP");
-        stopButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                stopButtonActionPerformed(evt);
+        stopButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                stopButtonMouseReleased(evt);
             }
         });
 
@@ -145,18 +152,17 @@ public class CheckersUI extends javax.swing.JFrame {
         );
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
-        infoLabel.setText("Make your move.");
-        GameFlowClient.setTryingToConnect(true);
-        GameFlowClient.startNewGame();
-    }//GEN-LAST:event_startButtonActionPerformed
+    private void startButtonMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_startButtonMouseReleased
+			GameFlowClient.setTryingToConnect(true);
+			GameFlowClient.startNewGame();    }//GEN-LAST:event_startButtonMouseReleased
 
-    private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
+    private void stopButtonMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_stopButtonMouseReleased
 			GameFlowClient.resignGame();
-                        GameFlowClient.resignGameSend();
-    }//GEN-LAST:event_stopButtonActionPerformed
+			Connecting.sendMessageToServer(-1, -1, GameFlowClient.isResign());
+                        logger.log(Level.INFO, "RESIGN");    }//GEN-LAST:event_stopButtonMouseReleased
 
     /**
      * @param args the command line arguments

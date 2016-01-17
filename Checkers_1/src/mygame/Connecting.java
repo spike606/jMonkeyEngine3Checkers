@@ -15,66 +15,68 @@ import java.util.logging.Logger;
 
 public class Connecting extends Thread {
 
+    //logger
+    private static final Logger logger = Logger.getLogger(CheckersGame.class.getName());
+    
     private static MessageFromClient messageToServer;
     private MessageFromServer messageFromServer;
     static boolean connectedToServer = true;
     private volatile boolean threadRunning = true;
     private static final int SERVER_PORT = 8901;
     private static final String HOST_NAME = "localhost";
-    Client myClient;
+    private static Client myClient;
+    private static boolean firstMessageIn = false;//pomocnicza ustawiana gdy odbierzemy wiadomosc z serwera
+
+    
 
     public Connecting() {
         messageToServer = new MessageFromClient();
+                messageFromServer = new MessageFromServer();
+
         Serializer.registerClass(MessageFromClient.class);//konieczna serializacja wiadomosci
         Serializer.registerClass(MessageFromServer.class);
         Serializer.registerClass(CheckersMove.class);
-
-
 
     }
 
     @Override
     public void run() {
         while (threadRunning) {
-//			try {
-            // Setup networking
-
-
-
-
             try {
                 myClient = Network.connectToServer(HOST_NAME, SERVER_PORT);
                 myClient.addMessageListener(new ClientListener(), MessageFromClient.class, MessageFromServer.class);
 
             } catch (IOException ex) {
-                Logger.getLogger(CheckersGame.class.getName()).log(Level.SEVERE, null, ex);
-                GameFlowClient.setTryingToConnect(false);
+                logger.log(Level.SEVERE, null, ex);
                 connectedToServer = false;
                 CheckersGame.window.startButton.setEnabled(true);
                 CheckersGame.window.stopButton.setEnabled(false);
             }
+
+
+            
             myClient.start();
             connectedToServer = true;
-//				mySocket = new Socket(HOST_NAME, SERVER_PORT);
-//				myOutput = new ObjectOutputStream(mySocket.getOutputStream());
-//				myOutput.flush();
-//				myInput = new ObjectInputStream(mySocket.getInputStream());
-
-//			} catch (IOException e1) {
-            // System.out.println("IOException1.");
-
-//			}
 
             while (connectedToServer) {
-//                try {
-                            //TODO!!!!!!!!!!!!!!!!!!!!1
-                if (GameFlowClient.isResign() == true) {
+                
+                GameFlowClient.setTryingToConnect(false);
+                GameFlowClient.setResign(false);
+                
+//                if(firstMessageIn == true){
+//                    
+//                    
+//                    
+//                    firstMessageIn = false;
+//                }
+                
+                if (GameFlowClient.isResign() == true ) {
                     sendMessageToServer(-1, -1, GameFlowClient.isResign());
                     CheckersGame.window.startButton.setEnabled(true);
                     CheckersGame.window.stopButton.setEnabled(false);
                     break;
 
-                } else if (messageFromServer.getWinner() != GameFlowClient.EMPTY) {
+                } else if ( messageFromServer.getWinner() != GameFlowClient.EMPTY) {
                     if (messageFromServer.getWinner() == GameFlowClient.getMyColor()) {
                         CheckersGame.window.startButton.setEnabled(true);
                         CheckersGame.window.stopButton.setEnabled(false);
@@ -87,33 +89,13 @@ public class Connecting extends Thread {
                         break;
                     }
                 }
-
-//                } catch (ClassNotFoundException e) {
-//                    // System.out.println("Class not found.");
-//                } catch (IOException e) {
-//                    // System.out.println("IOException2.");
-//                }
-
             }
             threadRunning = false;
-//            try {
-//                myOutput.close();
-//                myInput.close();
-//                mySocket.close();
-//            } catch (IOException e) {
-//                // System.out.println("Error during closing streams!");
-//            }
         }
 
     }
 
-    public Client getMyClient() {
-        return myClient;
-    }
 
-    public void setMyClient(Client myClient) {
-        this.myClient = myClient;
-    }
 
     private void getDataFromServer(int[][] board, int chosenRow, int chosenCol, boolean gameRunning, int currentPlayer,
             CheckersMove[] possibleMoves, int myColor, int winner) {
@@ -135,15 +117,10 @@ public class Connecting extends Thread {
 
     }
 
-    public void sendMessageToServer(int row, int col, boolean resign) {
+    public static void sendMessageToServer(int row, int col, boolean resign) {
         prepareMessageToServer(row, col, resign);
-//        try {
-//            myOutput.reset();
-//            myOutput.writeObject(messageToServer);
+
         myClient.send(messageToServer);
-//        } catch (IOException e) {
-        // e.printStackTrace();
-//        }
 
     }
 
@@ -155,25 +132,20 @@ public class Connecting extends Thread {
 
     class ClientListener implements MessageListener<Client> {
 
-        public void messageReceived(Client source, Message m) {
+    public void messageReceived(Client source, Message m) {
             if (m instanceof MessageFromServer) {
-
-//                            object = myInput.readObject();
+               
+//                firstMessageIn = true;
+                
                 messageFromServer = (MessageFromServer) m;
-
-                GameFlowClient.setTryingToConnect(false);
-                GameFlowClient.setResign(false);
 
                 getDataFromServer(messageFromServer.getBoard(), messageFromServer.getChosenRow(),
                         messageFromServer.getChosenCol(), messageFromServer.isGameRunning(),
                         messageFromServer.getCurrentPlayer(), messageFromServer.getPossibleMoves(),
                         messageFromServer.getMyColor(), messageFromServer.getWinner());
-                System.out.println("Ch col:" + messageFromServer.getChosenCol());
-                System.out.println("Ch row:" + messageFromServer.getChosenRow());
 
-
-
-
+                logger.log(Level.INFO, "Ch col: {0}", messageFromServer.getChosenCol());
+                logger.log(Level.INFO, "Ch row: {0}", messageFromServer.getChosenRow());
 
             }
         }
