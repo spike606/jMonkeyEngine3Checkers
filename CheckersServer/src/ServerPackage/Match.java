@@ -5,8 +5,6 @@ public class Match {
     int matchNumber;
     // objects to manage game for this match
     GameFlow gameFlow;
-//    MessageFromServer messageToClient;
-//    MessageFromClient messageFromClient;
     private Player whitePlayer;
     private Player blackPlayer;
 
@@ -16,11 +14,7 @@ public class Match {
 
         this.gameFlow = new GameFlow();
         this.gameFlow.setGameRunning(true);
-//        this.messageFromClient = new MessageFromClient();
-//        this.messageToClient = new MessageFromServer();
-
     }
-
     public Player getWhitePlayer() {
         return whitePlayer;
     }
@@ -36,21 +30,4 @@ public class Match {
     public void setBlackPlayer(Player blackPlayer) {
         this.blackPlayer = blackPlayer;
     }
-
-//    public MessageFromServer getMessageToClient() {
-//        return messageToClient;
-//    }
-//
-//    public void setMessageToClient(MessageFromServer messageToClient) {
-//        this.messageToClient = messageToClient;
-//    }
-//
-//    public MessageFromClient getMessageFromClient() {
-//        return messageFromClient;
-//    }
-//
-//    public void setMessageFromClient(MessageFromClient messageFromClient) {
-//        this.messageFromClient = messageFromClient;
-//    }
-    
 }

@@ -4,13 +4,11 @@ import CommonPackageServer.CheckersMove;
 import CommonPackageServer.MessageFromClient;
 import CommonPackageServer.MessageFromServer;
 import com.jme3.app.SimpleApplication;
-import com.jme3.network.Client;
 import com.jme3.network.ConnectionListener;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.Network;
 import com.jme3.network.Server;
 import com.jme3.network.serializing.Serializer;
-import com.jme3.renderer.RenderManager;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeContext;
 import java.io.IOException;
@@ -23,6 +21,9 @@ import java.util.logging.Logger;
  * @author normenhansen
  */
 public class CheckersServer extends SimpleApplication implements ConnectionListener {
+    
+    //logger
+    private static final Logger logger = Logger.getLogger(CheckersServer.class.getName());
 
     private static final int SERVER_PORT = 8901;
     private static int matchNumber = 1;
@@ -31,143 +32,107 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
     private static boolean gotSecondPlayer = false;
     private static int newestConnection = 0; // pomocnicza do zdobycia najnowszego polaczenia
 
-
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) {
 
         Serializer.registerClass(MessageFromClient.class);//konieczna serializacja wiadomosci
         Serializer.registerClass(MessageFromServer.class);
         Serializer.registerClass(CheckersMove.class);
 
-AppSettings newSetting = new AppSettings(true);
-
-newSetting.setFrameRate(60);
-
-
-
         CheckersServer app = new CheckersServer();
-        
-                app.setSettings(newSetting);
-
         app.start(JmeContext.Type.Headless);//aplikacja startuje bez okna
-
-
-//        try {
-//            while (true) {
-//
-//
-//
-//            }
-//        } finally {
-////            serversocket.close();
-//        }
-
-
-
-
     }
 
     @Override
     public void simpleInitApp() {
         try {
             myServer = Network.createServer(SERVER_PORT);
-            System.out.println("Checkers server is running");
+            logger.log(Level.INFO, "CheckersGame server is running...");
 
 
             myServer.start();
             myServer.addConnectionListener(new CheckersServer());
 
         } catch (IOException ex) {
-            Logger.getLogger(CheckersServer.class.getName()).log(Level.SEVERE, null, ex);
+            logger.log(Level.SEVERE, null, ex);
         }
     }
 
     @Override
     public void simpleUpdate(float tpf) {
         //TODO: add update code
-        
-                        Match match = new Match(matchNumber);
-                System.out.println("Waiting for players...");
-               System.out.println("Threads: " + Thread.activeCount());
 
-//                myServer.getConnection(SERVER_PORT) //                try {
+        Match match = new Match(matchNumber);
+        logger.log(Level.INFO, "Waiting for players...");
+//        logger.log(Level.INFO, "Number of threads {0}", Thread.activeCount());
 
-                while(gotFirstPlayer == false){
-                            try {
-                                Thread.sleep(500);
-                            } catch (InterruptedException ex) {
-                                Logger.getLogger(CheckersServer.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                                           System.out.println("Threads: " + Thread.activeCount());
 
-                }
-                match.setWhitePlayer(new Player(myServer.getConnection(newestConnection), GameData.WHITE, match));
-//                Match.Player playerWhite = match.new Player(myServer.getConnection(newestConnection), GameData.WHITE);
-                System.out.println("Match #" + matchNumber + ": player #1 connected.");
-               System.out.println("Threads: " + Thread.activeCount());
 
-                while(gotSecondPlayer == false){       
-                            try {
-                                Thread.sleep(500);
-                            } catch (InterruptedException ex) {
-                                Logger.getLogger(CheckersServer.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-               System.out.println("Threads: " + Thread.activeCount());
+        while (gotFirstPlayer == false) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ex) {
+            logger.log(Level.SEVERE, null, ex);
+            }
+//        logger.log(Level.INFO, "Number of threads1 {0}", Thread.activeCount());
 
-                }
-                match.setBlackPlayer(new Player(myServer.getConnection(newestConnection), GameData.BLACK, match));
-               System.out.println("Threads: " + Thread.activeCount());
+        }
+        match.setWhitePlayer(new Player(myServer.getConnection(newestConnection), GameData.WHITE, match));
+        logger.log(Level.INFO, "Match #{0}: player #1 connected.", matchNumber);
+//        logger.log(Level.INFO, "Number of threads2 {0}", Thread.activeCount());
 
-//                Match.Player playerBlack = match.new Player(myServer.getConnection(newestConnection), GameData.BLACK);
-                System.out.println("Match #" + matchNumber + ": player #2 connected.");
+        while (gotSecondPlayer == false) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ex) {
+                logger.log(Level.SEVERE, null, ex);
+            }
+//        logger.log(Level.INFO, "Number of threads3 {0}", Thread.activeCount());
 
-                //register server listener
-                myServer.addMessageListener(match.getWhitePlayer(), MessageFromClient.class,MessageFromServer.class);
-                myServer.addMessageListener(match.getBlackPlayer(), MessageFromClient.class,MessageFromServer.class);
+        }
+        match.setBlackPlayer(new Player(myServer.getConnection(newestConnection), GameData.BLACK, match));
+//        logger.log(Level.INFO, "Number of threads4 {0}", Thread.activeCount());
 
-                match.getWhitePlayer().start();
-                match.getBlackPlayer().start();
+        logger.log(Level.INFO, "Match #{0}: player #2 connected.", matchNumber);
 
-//                playerWhite.start();
-//                playerBlack.start();
-                
-                
-                
-                gotFirstPlayer = false;
-                gotSecondPlayer = false;
-//					System.out.println(java.lang.Thread.activeCount());
-                matchNumber++;
-                newestConnection++;
+        //register server listener
+        myServer.addMessageListener(match.getWhitePlayer(), MessageFromClient.class, MessageFromServer.class);
+        myServer.addMessageListener(match.getBlackPlayer(), MessageFromClient.class, MessageFromServer.class);
 
-//                } catch (IOException e) {
-//                    System.out.println("IOError");
-//                }
+        match.getWhitePlayer().start();
+        match.getBlackPlayer().start();
+
+        gotFirstPlayer = false;
+        gotSecondPlayer = false;
+        matchNumber++;
+        newestConnection++;
+
     }
 
     public void connectionAdded(Server server, HostedConnection conn) {
-        System.out.println("Client Connected: " + conn.getId());
-        int numberOfConnections = conn.getId() + 1;
-                System.out.println("number of connectons: " + numberOfConnections);
+        logger.log(Level.INFO, "Client Connected: {0}", conn.getId());
+//        int numberOfConnections = conn.getId() + 1;    
+                int numberOfConnections = server.getConnections().size();        
 
-        if(numberOfConnections > 0 && numberOfConnections % 2 != 0 ){
+        logger.log(Level.INFO, "number of connectons: : {0}", numberOfConnections);
+
+
+        if (numberOfConnections > 0 && numberOfConnections % 2 != 0) {
             gotFirstPlayer = true;
         }
-        if(numberOfConnections > 0 && numberOfConnections % 2 == 0 ){
-            gotSecondPlayer= true;
+        if (numberOfConnections > 0 && numberOfConnections % 2 == 0) {
+            gotSecondPlayer = true;
             newestConnection++;
         }
 
     }
 
     public void connectionRemoved(Server server, HostedConnection conn) {
-                System.out.println("Client out: " + conn.getId());
 
-        conn.close("");
     }
-    
-     @Override
-     public void destroy() {
-      myServer.close();
-      super.destroy();
-  }
-     
+
+    @Override
+    public void destroy() {
+        myServer.close();
+        super.destroy();
+    }
 }
