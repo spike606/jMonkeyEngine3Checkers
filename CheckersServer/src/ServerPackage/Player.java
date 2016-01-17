@@ -11,6 +11,8 @@ import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -63,7 +65,7 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
 
                 while (true && threadRunning) {// TODO:??
                     if (match.gameFlow.getCurrentPlayer() == color && match.gameFlow.isGameRunning() && firstMessageSend == false) {
-                System.out.println("W petli 1 ");
+                        System.out.println("W petli 1 ");
 
                         prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
                                 match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
@@ -81,7 +83,7 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
                                 match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
                                 match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), color);
                         hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);
-                System.out.println("W petli 2 ");
+                        System.out.println("W petli 2 ");
 
 //                            myOutput.reset();
 //                            myOutput.writeObject(messageToClient);
@@ -112,8 +114,14 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
 //                    }
 //                            System.out.println("W petli 3 ");
 
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Player.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }
+
 
         }
 
@@ -153,7 +161,7 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
 //        myOutput.reset();
 //        myOutput.writeObject(messageToClient);
         hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);
-                        firstMessageSend = false;
+        firstMessageSend = false;
 
 
     }
