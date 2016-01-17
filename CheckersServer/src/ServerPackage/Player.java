@@ -39,6 +39,7 @@ public class Player extends Thread implements MessageListener<HostedConnection>,
         this.hostedConnection = hostedConnection;
         this.myColor = color;
         this.match = match;
+         hostedConnection.getServer().addConnectionListener(this);
 
 
     }
@@ -127,6 +128,7 @@ public class Player extends Thread implements MessageListener<HostedConnection>,
     public void connectionAdded(Server server, HostedConnection conn) {
     }
 
+    @Override
     public void connectionRemoved(Server server, HostedConnection conn) {
 
         resign = true;
