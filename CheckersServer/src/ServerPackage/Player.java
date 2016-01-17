@@ -20,26 +20,31 @@ import java.util.logging.Logger;
  *
  * @author Krystus
  */
-public class Player extends Thread implements MessageListener<HostedConnection>, ConnectionListener {
+public class Player extends Thread implements MessageListener<HostedConnection> {
 
     //logger
     private static final Logger logger = Logger.getLogger(Player.class.getName());
     private Match match;
     private int myColor;
+    private int myConnectionId;
     private HostedConnection hostedConnection;
+    private Server myServer;
     private MessageFromServer messageToClient;
     private MessageFromClient messageFromClient;
     private volatile boolean threadRunning = true;// flag to kill thread
     private boolean resign = false;// used when out or pressed stop
     private boolean firstMessageOut = false;//pomocnicza ustawiana gdy wyslana zostala wiado do klienta i czekamy na odp
 
-    public Player(HostedConnection hostedConnection, int color, Match match) {
+    public Player(Server myServer, HostedConnection hostedConnection, int color, Match match) {
         this.messageFromClient = new MessageFromClient();
         this.messageToClient = new MessageFromServer();
         this.hostedConnection = hostedConnection;
         this.myColor = color;
         this.match = match;
-         hostedConnection.getServer().addConnectionListener(this);
+        this.myServer = myServer;
+
+        this.myConnectionId = hostedConnection.getId();
+//         hostedConnection.getServer().addConnectionListener(this);
 
 
     }
@@ -56,6 +61,9 @@ public class Player extends Thread implements MessageListener<HostedConnection>,
                 hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);//send message to client
 
                 while (true && threadRunning) {// TODO:??
+                    
+                checkResign(hostedConnection);
+                
                     if (match.gameFlow.getCurrentPlayer() == myColor && match.gameFlow.isGameRunning() && firstMessageOut == false) {
 
                         prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
@@ -72,11 +80,11 @@ public class Player extends Thread implements MessageListener<HostedConnection>,
                         threadRunning = false;// to kill current thread
 
                     }
-                    try {
-                        Thread.sleep(300);
-                    } catch (InterruptedException ex) {
-                        logger.log(Level.SEVERE, null, ex);
-                    }
+//                    try {
+//                        Thread.sleep(1);
+//                    } catch (InterruptedException ex) {
+//                        logger.log(Level.SEVERE, null, ex);
+//                    }
                 }
             }
 
@@ -125,17 +133,16 @@ public class Player extends Thread implements MessageListener<HostedConnection>,
 
     }
 
-    public void connectionAdded(Server server, HostedConnection conn) {
-    }
+    public void checkResign(HostedConnection conn) {
 
-    @Override
-    public void connectionRemoved(Server server, HostedConnection conn) {
+        if (!myServer.getConnections().contains(conn)) {
+            resign = true;
+            match.gameFlow.makeClick(-1, -1, resign);
+            threadRunning = false;
+        }
 
-        resign = true;
-        match.gameFlow.makeClick(-1, -1, resign);
-        threadRunning = false;
 
-        logger.log(Level.INFO, "Client out: {0}", conn.getId());
-        conn.close("");
+
+
     }
 }

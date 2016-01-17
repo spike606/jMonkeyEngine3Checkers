@@ -21,10 +21,9 @@ import java.util.logging.Logger;
  * @author normenhansen
  */
 public class CheckersServer extends SimpleApplication implements ConnectionListener {
-    
+
     //logger
     private static final Logger logger = Logger.getLogger(CheckersServer.class.getName());
-
     private static final int SERVER_PORT = 8901;
     private static int matchNumber = 1;
     private static Server myServer;
@@ -63,33 +62,32 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
 
         Match match = new Match(matchNumber);
         logger.log(Level.INFO, "Waiting for players...");
-//        logger.log(Level.INFO, "Number of threads {0}", Thread.activeCount());
-
+        logger.log(Level.INFO, "Number of threads {0}", Thread.activeCount());
 
 
         while (gotFirstPlayer == false) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(100);
             } catch (InterruptedException ex) {
-            logger.log(Level.SEVERE, null, ex);
+                logger.log(Level.SEVERE, null, ex);
             }
 //        logger.log(Level.INFO, "Number of threads1 {0}", Thread.activeCount());
 
         }
-        match.setWhitePlayer(new Player(myServer.getConnection(newestConnection), GameData.WHITE, match));
+        match.setWhitePlayer(new Player(myServer,myServer.getConnection(newestConnection), GameData.WHITE, match));
         logger.log(Level.INFO, "Match #{0}: player #1 connected.", matchNumber);
 //        logger.log(Level.INFO, "Number of threads2 {0}", Thread.activeCount());
 
         while (gotSecondPlayer == false) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(100);
             } catch (InterruptedException ex) {
                 logger.log(Level.SEVERE, null, ex);
             }
 //        logger.log(Level.INFO, "Number of threads3 {0}", Thread.activeCount());
 
         }
-        match.setBlackPlayer(new Player(myServer.getConnection(newestConnection), GameData.BLACK, match));
+        match.setBlackPlayer(new Player(myServer,myServer.getConnection(newestConnection), GameData.BLACK, match));
 //        logger.log(Level.INFO, "Number of threads4 {0}", Thread.activeCount());
 
         logger.log(Level.INFO, "Match #{0}: player #2 connected.", matchNumber);
@@ -111,7 +109,7 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
     public void connectionAdded(Server server, HostedConnection conn) {
         logger.log(Level.INFO, "Client Connected: {0}", conn.getId());
 //        int numberOfConnections = conn.getId() + 1;    
-                int numberOfConnections = server.getConnections().size();        
+        int numberOfConnections = server.getConnections().size();
 
         logger.log(Level.INFO, "number of connectons: : {0}", numberOfConnections);
 
@@ -127,6 +125,11 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
     }
 
     public void connectionRemoved(Server server, HostedConnection conn) {
+        logger.log(Level.INFO, "Client out: {0}", conn.getId());
+
+        conn.close("");
+
+
 
     }
 
