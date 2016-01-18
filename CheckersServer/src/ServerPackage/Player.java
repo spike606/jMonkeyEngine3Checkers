@@ -13,6 +13,7 @@ import com.jme3.network.HostedConnection;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Server;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,13 +43,13 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
         this.myColor = color;
         this.match = match;
         this.myServer = myServer;
-
+        
         this.myConnectionId = hostedConnection.getId();
 //         hostedConnection.getServer().addConnectionListener(this);
 
-
+        
     }
-
+    
     @Override
     public void run() {
         while (threadRunning) {
@@ -58,46 +59,55 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
                 prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
                         match.gameFlow.getChosenRow(), true, match.gameFlow.getCurrentPlayer(), match.gameFlow.getPossibleMoves(),
                         GameData.EMPTY, myColor);
-                hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);//send message to client
+//                hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);//send message to client
+            hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);//send message to client
+                
+//                        hostedConnection.send(messageToClient);
 
                 while (true && threadRunning) {// TODO:??
-                    
-                checkResign(hostedConnection);
-                
-                    if (match.gameFlow.getCurrentPlayer() == myColor && match.gameFlow.isGameRunning() && firstMessageOut == false) {
 
+                    checkResign(hostedConnection);
+                    
+                    if (match.gameFlow.getCurrentPlayer() == myColor && match.gameFlow.isGameRunning() && firstMessageOut == false) {
+                        
                         prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
                                 match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
                                 match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), myColor);
-                        hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);
+//                        hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);
+                                    hostedConnection.getServer().broadcast(Filters.equalTo(hostedConnection), messageToClient);
+
+//                                                hostedConnection.send(messageToClient);
+
                         firstMessageOut = true;
                     } else if (!match.gameFlow.isGameRunning() && match.gameFlow.getWinner() != GameData.EMPTY) {// game end
                         prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
                                 match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
                                 match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), myColor);
-                        hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);
+//                        hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);
+                                    hostedConnection.getServer().broadcast(Filters.equalTo(hostedConnection), messageToClient);
 
+//                        hostedConnection.send(messageToClient);
                         threadRunning = false;// to kill current thread
 
                     }
-//                    try {
-//                        Thread.sleep(1);
-//                    } catch (InterruptedException ex) {
-//                        logger.log(Level.SEVERE, null, ex);
-//                    }
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException ex) {
+                        logger.log(Level.SEVERE, null, ex);
+                    }
                 }
             }
-
-
+            
+            
         }
-
-
-
+        
+        
+        
     }
-
+    
     private void prepareMessageToClient(int[][] board, int chosenCol, int chosenRow, boolean gameRunning,
             int currentPlayer, CheckersMove[] possibleMoves, int winner, int myColor) {
-
+        
         messageToClient.setBoard(board);
         messageToClient.setChosenCol(chosenCol);
         messageToClient.setChosenRow(chosenRow);
@@ -107,12 +117,12 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
         messageToClient.setWinner(winner);
         messageToClient.setGameRunning(gameRunning);
         messageToClient.setMyColor(myColor);
-
+        
     }
 
     //listener - when message is received
     public void messageReceived(HostedConnection source, Message m) {
-
+        
         if (match.gameFlow.getCurrentPlayer() == myColor && match.gameFlow.isGameRunning() && firstMessageOut == true) {
 
             // receive message from client
@@ -126,23 +136,37 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
             prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
                     match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
                     match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), myColor);
+            
+            hostedConnection.getServer().broadcast(Filters.equalTo(hostedConnection), messageToClient);
+//                                    hostedConnection.send(messageToClient);
 
-            hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);
             firstMessageOut = false;
         }
-
+        
     }
-
+    
     public void checkResign(HostedConnection conn) {
-
+        
         if (!myServer.getConnections().contains(conn)) {
             resign = true;
             match.gameFlow.makeClick(-1, -1, resign);
             threadRunning = false;
         }
+//System.out.println(Arrays.deepToString(match.gameFlow.boardData.getBoard()));
 
 
-
+//        int[][] array = match.gameFlow.boardData.getBoard();
+//        System.out.println();
+//        System.out.println();
+//
+//        for (int i = 0; i < array.length; i++) {
+//            for (int j = 0; j < array[i].length; j++) {
+//                System.out.print(array[i][j]);
+//            }
+//            System.out.println();
+//        }
+//        System.out.println();
+//        System.out.println();
 
     }
 }

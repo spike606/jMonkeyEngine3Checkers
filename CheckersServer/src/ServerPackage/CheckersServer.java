@@ -74,9 +74,10 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
 //        logger.log(Level.INFO, "Number of threads1 {0}", Thread.activeCount());
 
         }
-        match.setWhitePlayer(new Player(myServer,myServer.getConnection(newestConnection), GameData.WHITE, match));
+        match.setWhitePlayer(new Player(myServer, myServer.getConnection(newestConnection), GameData.WHITE, match));
         logger.log(Level.INFO, "Match #{0}: player #1 connected.", matchNumber);
 //        logger.log(Level.INFO, "Number of threads2 {0}", Thread.activeCount());
+					System.out.println("Connection!!!!:" + myServer.getConnection(newestConnection));
 
         while (gotSecondPlayer == false) {
             try {
@@ -87,7 +88,7 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
 //        logger.log(Level.INFO, "Number of threads3 {0}", Thread.activeCount());
 
         }
-        match.setBlackPlayer(new Player(myServer,myServer.getConnection(newestConnection), GameData.BLACK, match));
+        match.setBlackPlayer(new Player(myServer, myServer.getConnection(newestConnection), GameData.BLACK, match));
 //        logger.log(Level.INFO, "Number of threads4 {0}", Thread.activeCount());
 
         logger.log(Level.INFO, "Match #{0}: player #2 connected.", matchNumber);
