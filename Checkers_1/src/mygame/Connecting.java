@@ -20,7 +20,7 @@ public class Connecting extends Thread {
     
     private static MessageFromClient messageToServer;
     private MessageFromServer messageFromServer;
-    static boolean connectedToServer = true;
+    static boolean connectedToServer = false;
     private volatile boolean threadRunning = true;
     private static final int SERVER_PORT = 8901;
     private static final String HOST_NAME = "localhost";

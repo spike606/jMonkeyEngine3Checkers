@@ -135,6 +135,9 @@ public class CheckersGame extends SimpleApplication {
     private static JmeCanvasContext context;
     private static Canvas canvas;
     public static CheckersUI window;
+    //pomocnicze 
+    private static boolean gameCreated = false;
+    GameFlowClient game;
 
     /**
      * ***
@@ -226,6 +229,7 @@ public class CheckersGame extends SimpleApplication {
             public void onWayPointReach(MotionEvent control, int wayPointIndex) {
                 if (path.getNbWayPoints() == wayPointIndex + 1) {//gdy zakonczy sie przemieszczenie
                     audioTickNode.playInstance(); // play each instance once!
+                    diselectAllCheckers();//diselect all
 
                 } else {//gdy trwa przemieszczenie
                 }
@@ -254,9 +258,15 @@ public class CheckersGame extends SimpleApplication {
     @Override
     public void simpleUpdate(float tpf) {//time per second
 
-        GameFlowClient game = new GameFlowClient();
+        if (gameCreated == false) {
+            game = new GameFlowClient();
+            gameCreated = true;
 
+        }
 
+        if (Connecting.connectedToServer) {
+            refreshView();
+        }
 
 
 //        System.out.println("Cam location: " + cam.getLocation());
@@ -335,24 +345,30 @@ public class CheckersGame extends SimpleApplication {
 
                     // The closest result is the target that the player picked:
                     Node checkerNode = results.getClosestCollision().getGeometry().getParent().getParent().getParent().getParent().getParent();
+//                    if (!checkerNode.getName().equals("Root Node")) {
+                    Connecting.sendMessageToServer(clickedField.getTabYPosition(), clickedField.getTabXPosition(), GameFlowClient.isResign());
+//                    GameFlowClient.chosenRow = clickedField.getTabYPosition();
+//                    GameFlowClient.chosenCol = clickedField.getTabXPosition();
 
-                    if (!checkerNode.getName().equals("Root Node")) {
-                        //wypisz wspolrzedne klikniecia na planszy
-                        System.out.println("Click position: X, Y, Z: " + selectedPointCoordinates);
-                        String checkerId = checkerNode.getUserData("id").toString();
-                        System.out.println("Checker Id: " + checkerId);
-                        System.out.println("Checker name(node): " + checkerNode.getName());
+//                    }
 
-                        if (rootNode.getChild(checkerNode.getName()).getUserData("selected").equals("false")) {
-//                            rootNode.getChild(checkerNode.getName()).setUserData("position", clickedField);
-                            clickedFieldBefore = clickedField;
-                            clickedNodeBefore = checkerNode;
-                            selectChecker(checkerNode);
-                        } else if (rootNode.getChild(checkerNode.getName()).getUserData("selected").equals("true")) {
-                            diselectChecker(checkerNode);
-                        }
-                    } else {
-                        System.out.println("Field selected. Coordinates: X, Y, Z: " + selectedPointCoordinates);
+//                    if (!checkerNode.getName().equals("Root Node")) {
+                    //wypisz wspolrzedne klikniecia na planszy
+//                        System.out.println("Click position: X, Y, Z: " + selectedPointCoordinates);
+//                        String checkerId = checkerNode.getUserData("id").toString();
+//                        System.out.println("Checker Id: " + checkerId);
+//                        System.out.println("Checker name(node): " + checkerNode.getName());
+
+//                        if (rootNode.getChild(checkerNode.getName()).getUserData("selected").equals("false")) {
+////                            rootNode.getChild(checkerNode.getName()).setUserData("position", clickedField);
+//                            clickedFieldBefore = clickedField;
+//                            clickedNodeBefore = checkerNode;
+//                            selectChecker(checkerNode);
+//                        } else if (rootNode.getChild(checkerNode.getName()).getUserData("selected").equals("true")) {
+//                            diselectChecker(checkerNode);
+//                        }
+//                    } else {
+//                        System.out.println("Field selected. Coordinates: X, Y, Z: " + selectedPointCoordinates);
 //                        if (clickedNodeBefore.getUserData("selected").equals("true")) {
 //                            
 //                            diselectChecker(clickedNodeBefore);
@@ -361,7 +377,7 @@ public class CheckersGame extends SimpleApplication {
 //
 //
 //                        }
-                    }
+//                    }
                 }
             }
         }
@@ -394,11 +410,11 @@ public class CheckersGame extends SimpleApplication {
             //dodaj id
             white_checkers_nodes[i].attachChild(white_checkers[i]);
             white_checkers_nodes[i].setUserData("id", i);
-            white_checkers_nodes[i].setUserData("selected", "false");
+            white_checkers_nodes[i].setUserData("selected", false);
 
             black_checkers_nodes[i].attachChild(black_checkers[i]);
             black_checkers_nodes[i].setUserData("id", i);
-            black_checkers_nodes[i].setUserData("selected", "false");
+            black_checkers_nodes[i].setUserData("selected", false);
 
             white_node.attachChild(white_checkers_nodes[i]);
             black_node.attachChild(black_checkers_nodes[i]);
@@ -512,12 +528,25 @@ public class CheckersGame extends SimpleApplication {
     //dodaj/usun podswietlenie dla bierek
     private void selectChecker(Node checkerNode) {
         checkerNode.addLight(blueLight);
-        checkerNode.setUserData("selected", "true");
+        checkerNode.setUserData("selected", true);
     }
 
     private void diselectChecker(Node checkerNode) {
         checkerNode.removeLight(blueLight);
-        checkerNode.setUserData("selected", "false");
+        checkerNode.setUserData("selected", false);
+    }
+
+    private void diselectAllCheckers() {
+
+        for (int i = 0; i < 12; i++) {
+            if (white_checkers_nodes[i].getUserData("selected")) {
+                diselectChecker(white_checkers_nodes[i]);
+            }
+            if (black_checkers_nodes[i].getUserData("selected")) {
+                diselectChecker(black_checkers_nodes[i]);
+            }
+
+        }
     }
 
     private void selectCheckerToBeat(Node checkerNode) {
@@ -714,6 +743,91 @@ public class CheckersGame extends SimpleApplication {
         gameSettings.setVSync(vsync);
 
         app.setSettings(gameSettings);
+
+    }
+
+    private void refreshView() {
+
+        int[][] currentBoard = GameFlowClient.getBoard();
+        int chosenRow = GameFlowClient.getChosenRow();
+        int chosenCol = GameFlowClient.getChosenCol();
+
+        //zaznaczenie bierki jesli moj kolor i tylko tej ktora moze wykonac ruch - (dane z serwera)
+        if (GameFlowClient.gameRunning && GameFlowClient.getMyColor() == GameFlowClient.getCurrentPlayer()) {
+
+            if (chosenRow >= 0 && chosenCol >= 0) {
+                if (currentBoard[chosenRow][chosenCol] == 1) {
+                    for (int i = 0; i < 12; i++) {
+                        if (white_checkers_nodes[i].getUserData("row").equals(chosenRow)
+                                && white_checkers_nodes[i].getUserData("col").equals(chosenCol)) {
+                            diselectAllCheckers();
+                            selectChecker(white_checkers_nodes[i]);
+                        }
+                    }
+                }
+                if (currentBoard[chosenRow][chosenCol] == 3) {
+                    for (int i = 0; i < 12; i++) {
+                        if (black_checkers_nodes[i].getUserData("row").equals(chosenRow)
+                                && black_checkers_nodes[i].getUserData("col").equals(chosenCol)) {
+                            diselectAllCheckers();
+                            selectChecker(black_checkers_nodes[i]);
+                        }
+                    }
+                }
+            }
+        }
+
+
+//        if (chosenRow != -1 && chosenCol != -1) {
+
+//            if (currentBoard[chosenRow][chosenCol] == 1) {
+//                for (int i = 0; i < 12; i++) {
+//                    if (white_checkers_nodes[i].getUserData("row").equals(chosenRow)
+//                            && white_checkers_nodes[i].getUserData("col").equals(chosenCol)) {
+//
+//
+//
+//                        diselectAllCheckers();
+//                        selectChecker(white_checkers_nodes[i]);
+//System.out.println(white_checkers_nodes[i].getUserData("selected"));
+//                      
+//                    }
+//                }
+//            }
+//            if (currentBoard[chosenRow][chosenCol] == 3) {
+//                for (int i = 0; i < 12; i++) {
+//                    if (black_checkers_nodes[i].getUserData("row").equals(chosenRow)
+//                            && black_checkers_nodes[i].getUserData("col").equals(chosenCol)) {
+//                       diselectAllCheckers();
+//                        selectChecker(black_checkers_nodes[i]);
+//
+//                    }
+//                }
+//            }
+//
+//            if (currentBoard[chosenRow][chosenCol] == 0) {
+//                for (int i = 0; i < 12; i++) {
+//                    if (black_checkers_nodes[i].getUserData("selected").equals(true)) {
+//                        int rowFrom = black_checkers_nodes[i].getUserData("row");
+//                        int colFrom = black_checkers_nodes[i].getUserData("col");
+//                        moveCheckerNode(black_checkers_nodes[i], boardFields[rowFrom][colFrom], boardFields[chosenRow][chosenCol]);
+//
+//                    }
+//                }
+//                for (int i = 0; i < 12; i++) {
+//                    if (white_checkers_nodes[i].getUserData("selected").equals(true)) {
+//                        int rowFrom = white_checkers_nodes[i].getUserData("row");
+//                        int colFrom = white_checkers_nodes[i].getUserData("col");
+//                        moveCheckerNode(white_checkers_nodes[i], boardFields[rowFrom][colFrom], boardFields[chosenRow][chosenCol]);
+//
+//                    }
+//                }
+//            }
+
+//        }
+
+
+
 
     }
 }
