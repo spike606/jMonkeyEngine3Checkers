@@ -89,6 +89,11 @@ public class Connecting extends Thread {
                         break;
                     }
                 }
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Connecting.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
             threadRunning = false;
         }
@@ -120,7 +125,9 @@ public class Connecting extends Thread {
     public static void sendMessageToServer(int row, int col, boolean resign) {
         prepareMessageToServer(row, col, resign);
 
+        if((GameFlowClient.gameRunning && GameFlowClient.getMyColor() == GameFlowClient.getCurrentPlayer())){
         myClient.send(messageToServer);
+        }
 
     }
 
@@ -143,10 +150,10 @@ public class Connecting extends Thread {
                         messageFromServer.getChosenCol(), messageFromServer.isGameRunning(),
                         messageFromServer.getCurrentPlayer(), messageFromServer.getPossibleMoves(),
                         messageFromServer.getMyColor(), messageFromServer.getWinner());
+                logger.log(Level.INFO, "Client ID: {0}", myClient.getId());
 
                 logger.log(Level.INFO, "Ch col: {0}", messageFromServer.getChosenCol());
                 logger.log(Level.INFO, "Ch row: {0}", messageFromServer.getChosenRow());
-
             }
         }
     }

@@ -20,6 +20,24 @@ public class Field {
     //lokalizacja w tabllicy 2D
     private int tabXPosition;
     private int tabYPosition;
+    private int checkerId;//-1 - brak bierki na tym polu bo id bierek od 0
+    private int checkerColor;//0 - brak bierki na tym polu
+
+    public int getCheckerColor() {
+        return checkerColor;
+    }
+
+    public void setCheckerColor(int checkerColor) {
+        this.checkerColor = checkerColor;
+    }
+
+    public int getCheckerId() {
+        return checkerId;
+    }
+
+    public void setCheckerId(int checkerId) {
+        this.checkerId = checkerId;
+    }
 
     public Vector3f getFieldWorldCoordinates() {
         return fieldWorldCoordinates;
