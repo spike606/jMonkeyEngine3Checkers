@@ -129,8 +129,8 @@ public class CheckersGame extends SimpleApplication {
     private final static int RESOLUTION_WIDTH = 640;//rozdzielczosc obrazu gry
     private final static int RESOLUTION_HEIGHT = 480;
     private final static int FRAMERATE = 60;
-    private final static int SAMPLES = 0;
-    private final static boolean VSYNC = false;
+    private final static int SAMPLES = 16;
+    private final static boolean VSYNC = true;
 
     /* swing*/
     private static JmeCanvasContext context;
@@ -147,9 +147,7 @@ public class CheckersGame extends SimpleApplication {
 
         AppSettings gameSettings = new AppSettings(true);
         final CheckersGame app = new CheckersGame();
-
         performSettings(app, gameSettings, RESOLUTION_WIDTH, RESOLUTION_HEIGHT, FRAMERATE, SAMPLES, VSYNC);
-
         app.setPauseOnLostFocus(false);//by update method byla kontynuowana nawet gdy brak focus
 //        app.setSettings(settings);
         app.createCanvas();
@@ -157,7 +155,7 @@ public class CheckersGame extends SimpleApplication {
 
         context = (JmeCanvasContext) app.getContext();
         context.setSystemListener(app);
-        Dimension dim = new Dimension(640, 480);
+        Dimension dim = new Dimension(RESOLUTION_WIDTH, RESOLUTION_HEIGHT);
         context.getCanvas().setPreferredSize(dim);
 
         EventQueue.invokeLater(new Runnable() {
@@ -212,12 +210,14 @@ public class CheckersGame extends SimpleApplication {
         DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(assetManager, SHADOWMAP_SIZE, 1);
         dlsr.setLight(sun);
         viewPort.addProcessor(dlsr);
-        DirectionalLightShadowFilter dlsf = new DirectionalLightShadowFilter(assetManager, SHADOWMAP_SIZE, 3);
+        DirectionalLightShadowFilter dlsf = new DirectionalLightShadowFilter(assetManager, SHADOWMAP_SIZE, 1);
         dlsf.setLight(sun);
         dlsf.setEnabled(true);
-        FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
-        fpp.addFilter(dlsf);
-        viewPort.addProcessor(fpp);
+        /* dodanie filtra wywala antyaliasing ?!!!!! */
+//        FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
+//        fpp.addFilter(dlsf);
+//        fpp.setNumSamples(8); 
+//        viewPort.addProcessor(fpp);
 
         /* cam 1 */
         cam.setFrame(cam1Loc, cam1Left, cam1Up, cam1Dir);
@@ -401,8 +401,10 @@ public class CheckersGame extends SimpleApplication {
         float cell_pos_z = 0.0f;
         for (int i = 0; i < 12; i++) {
             white_checkers[i] = assetManager.loadModel("Models/Ch_white/Ch_white.j3o");
-            black_checkers[i] = assetManager.loadModel("Models/Ch_black/Ch_black.j3o");
+//            white_checkers[i] = assetManager.
+//                    loadModel("Models/scalak_render_bialy_008/scalak_render_bialy_008.j3o");
 
+            black_checkers[i] = assetManager.loadModel("Models/Ch_black/Ch_black.j3o");
             white_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
             black_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
 
