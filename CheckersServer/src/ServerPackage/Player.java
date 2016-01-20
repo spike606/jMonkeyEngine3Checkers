@@ -66,6 +66,7 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
 
                 while (true && threadRunning) {// TODO:??
 
+
                     checkResign(hostedConnection);
                     
                     if (match.gameFlow.getCurrentPlayer() == myColor && match.gameFlow.isGameRunning() && firstMessageOut == false) {
@@ -123,7 +124,7 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
     //listener - when message is received
     public void messageReceived(HostedConnection source, Message m) {
         
-        if (match.gameFlow.getCurrentPlayer() == myColor && match.gameFlow.isGameRunning() && firstMessageOut == true) {
+        if (source == hostedConnection  && match.gameFlow.getCurrentPlayer() == myColor && match.gameFlow.isGameRunning() && firstMessageOut == true && m instanceof MessageFromClient) {
 
             // receive message from client
             messageFromClient = (MessageFromClient) m;
