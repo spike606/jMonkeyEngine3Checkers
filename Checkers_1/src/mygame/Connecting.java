@@ -23,7 +23,9 @@ public class Connecting extends Thread {
     static boolean connectedToServer = false;
     private volatile boolean threadRunning = true;
     private static final int SERVER_PORT = 8901;
-    private static final String HOST_NAME = "localhost";
+    private static final String HOST_NAME = "192.168.0.101";
+//        private static final String HOST_NAME = "localhost";
+
     private static Client myClient;
     private static boolean firstMessageIn = false;//pomocnicza ustawiana gdy odbierzemy wiadomosc z serwera
 
