@@ -146,6 +146,16 @@ public class CheckersGame extends SimpleApplication {
     private static final String BLACK_CHECKER_MODEL = "Models/Ch_black/Ch_black.j3o";
     private static final String BLACK_QUEEN_CHECKER_MODEL = "Models/Ch_black_queen/Ch_black_queen.j3o";
     private static final String CHESSBOARD_MODEL = "Models/board/chessboard.j3o";
+    private static final String SKY = "Textures/sky/space.dds";
+    /**
+     * * FLAGA DO ANIMACJI
+     */
+    //pomocnicze przy usuwaniu modeli by nastepowalo ono dopiero po zakonczeniu animacji, zmiana na dame rowniez
+    private static Node checkerNodeToDelete;//id bierki ktora ma zostac usunieta
+    private static boolean animInProgress = false;
+    private static Field checkerFieldToDelete;
+    private static String modelToChange;//model na jaki bedzie zmiana np czaarna dama
+    private static int checkerIdToChange = -1;//id bierki do zmiany na dame
 
     /**
      * ***
@@ -232,13 +242,25 @@ public class CheckersGame extends SimpleApplication {
         flyCam.setMoveSpeed(10);
 
 
-        //listener do ruchu
+        //listener do ruchu !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
         path.addListener(new MotionPathListener() {
             public void onWayPointReach(MotionEvent control, int wayPointIndex) {
                 if (path.getNbWayPoints() == wayPointIndex + 1) {//gdy zakonczy sie przemieszczenie
                     audioTickNode.playInstance(); // play each instance once!
                     diselectAllCheckers();//diselect all
 
+                    if (checkerNodeToDelete != null) {
+                        removeCheckerNode(checkerNodeToDelete, checkerFieldToDelete);// remove opponent
+                        // checker
+
+
+
+                    }
+                    if (checkerIdToChange != -1) {//gdy jest nowa dama
+                        changeModel(findCheckerById(checkerIdToChange), modelToChange);
+                        checkerIdToChange = -1;
+                    }
+                    animInProgress = false;
                 } else {//gdy trwa przemieszczenie
                 }
             }
@@ -247,7 +269,7 @@ public class CheckersGame extends SimpleApplication {
 
         //sky
         rootNode.attachChild(SkyFactory.createSky(
-                assetManager, "Textures/sky/space.dds", false));
+                assetManager, SKY, false));
 
         // load my custom keybinding, audio
         initKeys();
@@ -272,7 +294,7 @@ public class CheckersGame extends SimpleApplication {
 
         }
 
-        if (Connecting.connectedToServer) {
+        if (Connecting.connectedToServer && animInProgress == false) {
             refreshView();
         }
 
@@ -355,7 +377,10 @@ public class CheckersGame extends SimpleApplication {
                     // The closest result is the target that the player picked:
                     Node checkerNode = results.getClosestCollision().getGeometry().getParent().getParent().getParent().getParent().getParent();
 //                    if (!checkerNode.getName().equals("Root Node")) {
-                    Connecting.sendMessageToServer(clickedField.getTabYPosition(), clickedField.getTabXPosition(), GameFlowClient.isResign());
+                    if (Connecting.connectedToServer) {
+                        Connecting.sendMessageToServer(clickedField.getTabYPosition(), clickedField.getTabXPosition(), GameFlowClient.isResign());
+
+                    }
 //                    GameFlowClient.chosenRow = clickedField.getTabYPosition();
 //                    GameFlowClient.chosenCol = clickedField.getTabXPosition();
 //                    }
@@ -755,6 +780,7 @@ public class CheckersGame extends SimpleApplication {
 
     private void removeCheckerNode(Node checkerToRemove, Field checkerField) {
 
+
         if ((Integer) checkerToRemove.getUserData("id") > 11) {
             black_node.detachChild(checkerToRemove);
         } else {
@@ -765,6 +791,8 @@ public class CheckersGame extends SimpleApplication {
         checkerField.setCheckerColor(GameFlowClient.EMPTY);
         checkerField.setCheckerId(-1);
 
+        checkerFieldToDelete = null;
+        checkerNodeToDelete = null;
     }
     //przenosi bierke
 
@@ -834,12 +862,18 @@ public class CheckersGame extends SimpleApplication {
 
         //zamien na damy jesli bierki sa na odpowiednich polach
         if (to.getCheckerColor() == GameFlowClient.WHITE && to.getTabYPosition() == 0) {
+            modelToChange = WHITE_QUEEN_CHECKER_MODEL;
+            checkerIdToChange = to.getCheckerId();
             to.setCheckerColor(GameFlowClient.WHITE_QUEEN);
-            changeModel(findCheckerById(to.getCheckerId()), WHITE_QUEEN_CHECKER_MODEL);
+
+//            changeModel(findCheckerById(to.getCheckerId()), WHITE_QUEEN_CHECKER_MODEL);
         }
         if (to.getCheckerColor() == GameFlowClient.BLACK && to.getTabYPosition() == 7) {
+            modelToChange = BLACK_QUEEN_CHECKER_MODEL;
+            checkerIdToChange = to.getCheckerId();
             to.setCheckerColor(GameFlowClient.BLACK_QUEEN);
-            changeModel(findCheckerById(to.getCheckerId()), BLACK_QUEEN_CHECKER_MODEL);
+
+//            changeModel(findCheckerById(to.getCheckerId()), BLACK_QUEEN_CHECKER_MODEL);
 
         }
 
@@ -858,6 +892,7 @@ public class CheckersGame extends SimpleApplication {
         //szybkosci i czas animacji
         motionControl.setInitialDuration(PATH_DURATION);//zatem 2 sek
         motionControl.setSpeed(PATH_SPEED);// 1 - 1 sekunda
+        animInProgress = true;
         motionControl.play();
     }
 
@@ -912,7 +947,8 @@ public class CheckersGame extends SimpleApplication {
         if (GameFlowClient.gameRunning && GameFlowClient.getMyColor() == GameFlowClient.getCurrentPlayer()) {
 
             if (chosenRow >= 0 && chosenCol >= 0) {
-                if (currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.WHITE) {
+                if (currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.WHITE
+                        || currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.WHITE_QUEEN) {
                     for (int i = 0; i < 12; i++) {
                         if (white_checkers_nodes[i].getUserData("row").equals(chosenRow)
                                 && white_checkers_nodes[i].getUserData("col").equals(chosenCol)) {
@@ -920,7 +956,8 @@ public class CheckersGame extends SimpleApplication {
                         }
                     }
                 }
-                if (currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.BLACK) {
+                if (currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.BLACK
+                        || currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.BLACK_QUEEN) {
                     for (int i = 0; i < 12; i++) {
                         if (black_checkers_nodes[i].getUserData("row").equals(chosenRow)
                                 && black_checkers_nodes[i].getUserData("col").equals(chosenCol)) {
@@ -1014,7 +1051,6 @@ public class CheckersGame extends SimpleApplication {
                     boardFields[moveFromRow][moveFromCol], boardFields[moveToRow][moveToCol]);
 
 
-
             /*
              * If move is performed by queen
              */
@@ -1087,8 +1123,12 @@ public class CheckersGame extends SimpleApplication {
                     int opponentCheckerCol = checkCol;
                     int opponentCheckerRow = checkRow;
                     System.out.println("oPP" + opponentCheckerRow + opponentCheckerCol);
-                    removeCheckerNode(findCheckerById(boardFields[opponentCheckerRow][opponentCheckerCol].getCheckerId()),
-                            boardFields[opponentCheckerRow][opponentCheckerCol]);// remove opponent
+
+                    checkerNodeToDelete = findCheckerById(boardFields[opponentCheckerRow][opponentCheckerCol].getCheckerId());
+                    checkerFieldToDelete = boardFields[opponentCheckerRow][opponentCheckerCol];
+
+//                    removeCheckerNode(findCheckerById(boardFields[opponentCheckerRow][opponentCheckerCol].getCheckerId()),
+//                            boardFields[opponentCheckerRow][opponentCheckerCol]);// remove opponent
                     // checker
                 }
 
@@ -1113,9 +1153,11 @@ public class CheckersGame extends SimpleApplication {
                     opponentCheckerRow = moveToRow + 1;
                     opponentCheckerCol = moveToCol + 1;
                 }
+                checkerNodeToDelete = findCheckerById(boardFields[opponentCheckerRow][opponentCheckerCol].getCheckerId());
+                checkerFieldToDelete = boardFields[opponentCheckerRow][opponentCheckerCol];
 
-                removeCheckerNode(findCheckerById(boardFields[opponentCheckerRow][opponentCheckerCol].getCheckerId()),
-                        boardFields[opponentCheckerRow][opponentCheckerCol]);// remove opponent
+//                removeCheckerNode(findCheckerById(boardFields[opponentCheckerRow][opponentCheckerCol].getCheckerId()),
+//                        boardFields[opponentCheckerRow][opponentCheckerCol]);// remove opponent
                 // checker
 
 
@@ -1155,20 +1197,23 @@ public class CheckersGame extends SimpleApplication {
     }
 
     private void changeModel(Node checkerModelNode, String changeTo) {
-        
-        Spatial checkerModelNodeSpatial = checkerModelNode.getChild(0);
-                checkerModelNode.detachChild(checkerModelNodeSpatial);
-                checkerModelNodeSpatial = assetManager.loadModel(changeTo);
-                                checkerModelNode.attachChild(checkerModelNodeSpatial);
 
-                
+        Spatial checkerModelNodeSpatial = checkerModelNode.getChild(0);
+        checkerModelNode.detachChild(checkerModelNodeSpatial);
+        checkerModelNodeSpatial = assetManager.loadModel(changeTo);
+        checkerModelNode.attachChild(checkerModelNodeSpatial);
+
+
 //                white_checkers_nodes[0].detachChild(white_checkers[0]);
 //                white_checkers[0] = assetManager.loadModel(WHITE_QUEEN_CHECKER_MODEL);
 //                white_checkers_nodes[0].attachChild(white_checkers[0]);
-        
-        
-        
+
+
+
 //        checkerModel = assetManager.loadModel(changeTo);
 
+    }
+
+    private void performBeating() {
     }
 }
