@@ -140,6 +140,13 @@ public class CheckersGame extends SimpleApplication {
     private static boolean gameCreated = false;
     GameFlowClient game;
 
+    /* modele*/
+    private static final String WHITE_CHECKER_MODEL = "Models/Ch_white/Ch_white.j3o";
+    private static final String WHITE_QUEEN_CHECKER_MODEL = "Models/Ch_white_queen/Ch_white_queen.j3o";
+    private static final String BLACK_CHECKER_MODEL = "Models/Ch_black/Ch_black.j3o";
+    private static final String BLACK_QUEEN_CHECKER_MODEL = "Models/Ch_black_queen/Ch_black_queen.j3o";
+    private static final String CHESSBOARD_MODEL = "Models/board/chessboard.j3o";
+
     /**
      * ***
      */
@@ -185,7 +192,7 @@ public class CheckersGame extends SimpleApplication {
         setDisplayStatView(false);
 
         /* LOAD BOARD*/
-        Spatial board = assetManager.loadModel("Models/board/chessboard.j3o");
+        Spatial board = assetManager.loadModel(CHESSBOARD_MODEL);
         board.scale(1f, 1f, 1f);
         board.rotate(0.0f, 0f, 0.0f);
         board.setLocalTranslation(0f, 0f, 0f);
@@ -318,6 +325,8 @@ public class CheckersGame extends SimpleApplication {
             }
             if (name.equals("Cam5") && !keyPressed) {
                 cam.setFrame(cam5Loc, cam5Left, cam5Up, cam5Dir);
+
+
             }
             if (name.equals("Click") && !keyPressed) {
 
@@ -400,11 +409,11 @@ public class CheckersGame extends SimpleApplication {
         float cell_pos_x = 0.042778164f;
         float cell_pos_z = 0.0f;
         for (int i = 0; i < 12; i++) {
-            white_checkers[i] = assetManager.loadModel("Models/Ch_white/Ch_white.j3o");
+            white_checkers[i] = assetManager.loadModel(WHITE_CHECKER_MODEL);
 //            white_checkers[i] = assetManager.
 //                    loadModel("Models/scalak_render_bialy_008/scalak_render_bialy_008.j3o");
 
-            black_checkers[i] = assetManager.loadModel("Models/Ch_black/Ch_black.j3o");
+            black_checkers[i] = assetManager.loadModel(BLACK_CHECKER_MODEL);
             white_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
             black_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
 
@@ -826,9 +835,12 @@ public class CheckersGame extends SimpleApplication {
         //zamien na damy jesli bierki sa na odpowiednich polach
         if (to.getCheckerColor() == GameFlowClient.WHITE && to.getTabYPosition() == 0) {
             to.setCheckerColor(GameFlowClient.WHITE_QUEEN);
+            changeModel(findCheckerById(to.getCheckerId()), WHITE_QUEEN_CHECKER_MODEL);
         }
         if (to.getCheckerColor() == GameFlowClient.BLACK && to.getTabYPosition() == 7) {
             to.setCheckerColor(GameFlowClient.BLACK_QUEEN);
+            changeModel(findCheckerById(to.getCheckerId()), BLACK_QUEEN_CHECKER_MODEL);
+
         }
 
 
@@ -1139,6 +1151,24 @@ public class CheckersGame extends SimpleApplication {
 
         return (moveFromCol - moveToCol >= 2 || moveFromCol - moveToCol <= -2);
 
+
+    }
+
+    private void changeModel(Node checkerModelNode, String changeTo) {
+        
+        Spatial checkerModelNodeSpatial = checkerModelNode.getChild(0);
+                checkerModelNode.detachChild(checkerModelNodeSpatial);
+                checkerModelNodeSpatial = assetManager.loadModel(changeTo);
+                                checkerModelNode.attachChild(checkerModelNodeSpatial);
+
+                
+//                white_checkers_nodes[0].detachChild(white_checkers[0]);
+//                white_checkers[0] = assetManager.loadModel(WHITE_QUEEN_CHECKER_MODEL);
+//                white_checkers_nodes[0].attachChild(white_checkers[0]);
+        
+        
+        
+//        checkerModel = assetManager.loadModel(changeTo);
 
     }
 }
