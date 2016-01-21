@@ -93,6 +93,10 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
 
         logger.log(Level.INFO, "Match #{0}: player #2 connected.", matchNumber);
 
+        //ustaw dane dotyczace swoich przeciwnikow
+        match.getWhitePlayer().setOpponentHostedConnection(match.getBlackPlayer().getMyHostedConnection());
+        match.getBlackPlayer().setOpponentHostedConnection(match.getWhitePlayer().getMyHostedConnection());
+
         //register server listener
         myServer.addMessageListener(match.getWhitePlayer(), MessageFromClient.class, MessageFromServer.class);
         myServer.addMessageListener(match.getBlackPlayer(), MessageFromClient.class, MessageFromServer.class);
