@@ -17,7 +17,6 @@ public class Connecting extends Thread {
 
     //logger
     private static final Logger logger = Logger.getLogger(CheckersGame.class.getName());
-    
     private static MessageFromClient messageToServer;
     private MessageFromServer messageFromServer;
     static boolean connectedToServer = false;
@@ -25,15 +24,12 @@ public class Connecting extends Thread {
     private static final int SERVER_PORT = 8901;
     private static final String HOST_NAME = "192.168.0.101";
 //        private static final String HOST_NAME = "localhost";
-
     private static Client myClient;
     private static boolean firstMessageIn = false;//pomocnicza ustawiana gdy odbierzemy wiadomosc z serwera
 
-    
-
     public Connecting() {
         messageToServer = new MessageFromClient();
-                messageFromServer = new MessageFromServer();
+        messageFromServer = new MessageFromServer();
 
         Serializer.registerClass(MessageFromClient.class);//konieczna serializacja wiadomosci
         Serializer.registerClass(MessageFromServer.class);
@@ -56,29 +52,29 @@ public class Connecting extends Thread {
             }
 
 
-            
+
             myClient.start();
             connectedToServer = true;
 
             while (connectedToServer) {
-                
+
                 GameFlowClient.setTryingToConnect(false);
                 GameFlowClient.setResign(false);
-                
+
 //                if(firstMessageIn == true){
 //                    
 //                    
 //                    
 //                    firstMessageIn = false;
 //                }
-                
-                if (GameFlowClient.isResign() == true ) {
+
+                if (GameFlowClient.isResign() == true) {
                     sendMessageToServer(-1, -1, GameFlowClient.isResign());
                     CheckersGame.window.startButton.setEnabled(true);
                     CheckersGame.window.stopButton.setEnabled(false);
                     break;
 
-                } else if ( messageFromServer.getWinner() != GameFlowClient.EMPTY) {
+                } else if (messageFromServer.getWinner() != GameFlowClient.EMPTY) {
                     if (messageFromServer.getWinner() == GameFlowClient.getMyColor()) {
                         CheckersGame.window.startButton.setEnabled(true);
                         CheckersGame.window.stopButton.setEnabled(false);
@@ -101,8 +97,6 @@ public class Connecting extends Thread {
         }
 
     }
-
-
 
     private void getDataFromServer(int[][] board, int chosenRow, int chosenCol, boolean gameRunning, int currentPlayer,
             CheckersMove[] possibleMoves, int myColor, int winner) {
@@ -127,8 +121,8 @@ public class Connecting extends Thread {
     public static void sendMessageToServer(int row, int col, boolean resign) {
         prepareMessageToServer(row, col, resign);
 
-        if((GameFlowClient.gameRunning && GameFlowClient.getMyColor() == GameFlowClient.getCurrentPlayer())){
-        myClient.send(messageToServer);
+        if ((GameFlowClient.gameRunning && GameFlowClient.getMyColor() == GameFlowClient.getCurrentPlayer())) {
+            myClient.send(messageToServer);
         }
 
     }
@@ -141,21 +135,30 @@ public class Connecting extends Thread {
 
     class ClientListener implements MessageListener<Client> {
 
-    public void messageReceived(Client source, Message m) {
+        public void messageReceived(Client source, Message m) {
             if (m instanceof MessageFromServer) {
-               
+
 //                firstMessageIn = true;
-                
+
                 messageFromServer = (MessageFromServer) m;
 
                 getDataFromServer(messageFromServer.getBoard(), messageFromServer.getChosenRow(),
                         messageFromServer.getChosenCol(), messageFromServer.isGameRunning(),
                         messageFromServer.getCurrentPlayer(), messageFromServer.getPossibleMoves(),
                         messageFromServer.getMyColor(), messageFromServer.getWinner());
-                logger.log(Level.INFO, "Client ID: {0}", myClient.getId());
-
                 logger.log(Level.INFO, "Ch col: {0}", messageFromServer.getChosenCol());
                 logger.log(Level.INFO, "Ch row: {0}", messageFromServer.getChosenRow());
+
+                System.out.println("ARRAY FROM SERVER: ");
+
+                int array[][] = messageFromServer.getBoard();
+                for (int i = 0; i < array.length; i++) {
+                    for (int j = 0; j < array[i].length; j++) {
+                        System.out.print(array[i][j]);
+                    }
+                    System.out.println();
+                }
+
             }
         }
     }

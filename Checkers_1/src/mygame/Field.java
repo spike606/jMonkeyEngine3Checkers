@@ -22,6 +22,15 @@ public class Field {
     private int tabYPosition;
     private int checkerId;//-1 - brak bierki na tym polu bo id bierek od 0
     private int checkerColor;//0 - brak bierki na tym polu
+    private int checkerQueenColor;//0 - brak bierki na tym polu
+
+    public int getCheckerQueenColor() {
+        return checkerQueenColor;
+    }
+
+    public void setCheckerQueenColor(int checkerQueenColor) {
+        this.checkerQueenColor = checkerQueenColor;
+    }
 
     public int getCheckerColor() {
         return checkerColor;
