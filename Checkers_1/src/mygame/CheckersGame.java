@@ -129,7 +129,7 @@ public class CheckersGame extends SimpleApplication {
     private final static int RESOLUTION_WIDTH = 640;//rozdzielczosc obrazu gry
     private final static int RESOLUTION_HEIGHT = 480;
     private final static int FRAMERATE = 60;
-    private final static int SAMPLES = 16;
+    private final static int SAMPLES = 0;
     private final static boolean VSYNC = true;
 
     /* swing*/
@@ -261,6 +261,19 @@ public class CheckersGame extends SimpleApplication {
                         checkerIdToChange = -1;
                     }
                     animInProgress = false;
+
+                    if (!GameFlowClient.gameRunning) {
+                        if (GameFlowClient.getWinner() == GameFlowClient.getMyColor()) {
+                            audioWinnerNode.playInstance(); // play each instance once!
+                            System.out.println("WYGRALEM");
+
+                        } else {
+                            audioLooserNode.playInstance(); // play each instance once!
+                            System.out.println("PRZEGRAŁEM");
+
+                        }
+                    }
+
                 } else {//gdy trwa przemieszczenie
                 }
             }
@@ -297,6 +310,7 @@ public class CheckersGame extends SimpleApplication {
         if (Connecting.connectedToServer && animInProgress == false) {
             refreshView();
         }
+
 
 
 //        System.out.println("Cam location: " + cam.getLocation());
@@ -657,9 +671,9 @@ public class CheckersGame extends SimpleApplication {
     private void selectChecker(Node checkerNode) {
         diselectAllCheckers();
         System.out.println("selected " + checkerNode.getUserData("id"));
-        if(white_node.hasChild(checkerNode) || black_node.hasChild(checkerNode)){
-                    checkerNode.addLight(blueLight);
-        checkerNode.setUserData("selected", true);
+        if (white_node.hasChild(checkerNode) || black_node.hasChild(checkerNode)) {
+            checkerNode.addLight(blueLight);
+            checkerNode.setUserData("selected", true);
         }
 
     }
@@ -784,7 +798,7 @@ public class CheckersGame extends SimpleApplication {
 
     private void removeCheckerNode(Node checkerToRemove, Field checkerField) {
 
-diselectAllCheckers();
+        diselectAllCheckers();
         if ((Integer) checkerToRemove.getUserData("id") > 11) {
             black_node.detachChild(checkerToRemove);
         } else {
@@ -956,16 +970,16 @@ diselectAllCheckers();
 
 
 
-                
+
 
 
                 if (currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.WHITE
                         || currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.WHITE_QUEEN) {
                     for (int i = 0; i < 12; i++) {
-                        if (((Integer)white_checkers_nodes[i].getUserData("row") == chosenRow)
-                                && ((Integer)white_checkers_nodes[i].getUserData("col") == chosenCol)) {
-                            if(white_node.hasChild(white_checkers_nodes[i])){
-                              selectChecker(white_checkers_nodes[i]);
+                        if (((Integer) white_checkers_nodes[i].getUserData("row") == chosenRow)
+                                && ((Integer) white_checkers_nodes[i].getUserData("col") == chosenCol)) {
+                            if (white_node.hasChild(white_checkers_nodes[i])) {
+                                selectChecker(white_checkers_nodes[i]);
 
                             }
 
@@ -975,11 +989,11 @@ diselectAllCheckers();
                 if (currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.BLACK
                         || currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.BLACK_QUEEN) {
                     for (int i = 0; i < 12; i++) {
-                        if (((Integer)black_checkers_nodes[i].getUserData("row") == chosenRow)
-                                && ((Integer)black_checkers_nodes[i].getUserData("col") == chosenCol)) {
-                            
-                            if(black_node.hasChild(black_checkers_nodes[i])){
-                              selectChecker(black_checkers_nodes[i]);
+                        if (((Integer) black_checkers_nodes[i].getUserData("row") == chosenRow)
+                                && ((Integer) black_checkers_nodes[i].getUserData("col") == chosenCol)) {
+
+                            if (black_node.hasChild(black_checkers_nodes[i])) {
+                                selectChecker(black_checkers_nodes[i]);
 
                             }
                         }
