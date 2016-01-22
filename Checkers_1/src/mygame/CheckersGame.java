@@ -307,6 +307,8 @@ public class CheckersGame extends SimpleApplication {
 
         }
 
+        System.out.println("ANIM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+ animInProgress);
+
         if (Connecting.connectedToServer && animInProgress == false) {
             refreshView();
         }
@@ -964,15 +966,10 @@ public class CheckersGame extends SimpleApplication {
         int chosenCol = GameFlowClient.getChosenCol();
 
         //zaznaczenie bierki jesli moj kolor i tylko tej ktora moze wykonac ruch - (dane z serwera)
-        if (GameFlowClient.gameRunning && GameFlowClient.getMyColor() == GameFlowClient.getCurrentPlayer()) {
+        if (GameFlowClient.gameRunning && GameFlowClient.getMyColor() == GameFlowClient.getCurrentPlayer()
+                && animInProgress == false) {
 
             if (chosenRow >= 0 && chosenCol >= 0) {
-
-
-
-
-
-
                 if (currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.WHITE
                         || currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.WHITE_QUEEN) {
                     for (int i = 0; i < 12; i++) {
