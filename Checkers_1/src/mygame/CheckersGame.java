@@ -144,8 +144,6 @@ public class CheckersGame extends SimpleApplication {
     public static boolean playLooser = false;
     public static boolean matchFinished = false;
     public static boolean startNextGame = false;
-
-
     /* modele*/
     private static final String WHITE_CHECKER_MODEL = "Models/Ch_white/Ch_white.j3o";
     private static final String WHITE_QUEEN_CHECKER_MODEL = "Models/Ch_white_queen/Ch_white_queen.j3o";
@@ -165,6 +163,15 @@ public class CheckersGame extends SimpleApplication {
     private static Field checkerFieldToDelete;
     private static String modelToChange;//model na jaki bedzie zmiana np czaarna dama
     private static int checkerIdToChange = -1;//id bierki do zmiany na dame
+
+    /*  LABELE*/
+    private static final String CONNECTING = "Connecting to server...";
+    private static final String CANT_CONNECT = "Can't connect to server!";
+    private static final String YOU_WON = "You won!";
+    private static final String YOU_LOOSE = "You lose!";
+    private static final String WAIT = "Wait for opoonent's move...";
+    private static final String MOVE = "Make your move.";
+    private static final String NO_INFO = "";
 
     /**
      * ***
@@ -314,7 +321,7 @@ public class CheckersGame extends SimpleApplication {
             refreshView();
         }
         playSound();
-        if ((GameFlowClient.isGameRunning() == false && matchFinished == true 
+        if ((GameFlowClient.isGameRunning() == false && matchFinished == true
                 && startNextGame == true)) {
 
 
@@ -322,7 +329,7 @@ public class CheckersGame extends SimpleApplication {
             matchFinished = false;
             startNextGame = false;
         }
-
+        setInfo();
 //        System.out.println("Cam location: " + cam.getLocation());
 //        System.out.println("Cam up : " + cam.getUp());
 //        System.out.println("Cam left : " + cam.getLeft());
@@ -1285,5 +1292,24 @@ public class CheckersGame extends SimpleApplication {
 
         }
 
+    }
+
+    private static void setInfo() {
+        if (GameFlowClient.gameRunning && GameFlowClient.getMyColor() == GameFlowClient.getCurrentPlayer()) {
+            window.infoLabel.setText(MOVE);
+        } else if (GameFlowClient.gameRunning && GameFlowClient.getMyColor() != GameFlowClient.getCurrentPlayer()) {
+            window.infoLabel.setText(WAIT);
+        } else if (!GameFlowClient.gameRunning && GameFlowClient.isTryingToConnect()) {
+            window.infoLabel.setText(CONNECTING);
+        } else if (!GameFlowClient.gameRunning && Connecting.connectedToServer == false) {
+            window.infoLabel.setText(CANT_CONNECT);
+        } else if (!GameFlowClient.gameRunning && GameFlowClient.getWinner() == GameFlowClient.getMyColor()) {
+            window.infoLabel.setText(YOU_WON);
+        } else if (!GameFlowClient.gameRunning && GameFlowClient.getWinner() != GameFlowClient.getMyColor()
+                && GameFlowClient.getWinner() != -1) {
+            window.infoLabel.setText(YOU_LOOSE);
+        } else if (!GameFlowClient.gameRunning && GameFlowClient.getWinner() != GameFlowClient.getMyColor()) {
+            window.infoLabel.setText(NO_INFO);
+        }
     }
 }
