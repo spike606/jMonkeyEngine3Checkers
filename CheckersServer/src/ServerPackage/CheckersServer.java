@@ -64,6 +64,7 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
         logger.log(Level.INFO, "Waiting for players...");
         logger.log(Level.INFO, "Number of threads {0}", Thread.activeCount());
 
+        logger.log(Level.INFO, "number of connections #{0}", myServer.getConnections().size());
 
         while (gotFirstPlayer == false) {
             try {
@@ -131,8 +132,9 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
 
     public void connectionRemoved(Server server, HostedConnection conn) {
         logger.log(Level.INFO, "Client out: {0}", conn.getId());
-
-        conn.close("");
+//	System.out.println("Close 1");
+//
+//        conn.close("");
 
 
 
