@@ -91,7 +91,7 @@ public class CheckersGame extends SimpleApplication {
     /* SWIATLA */
     private static final AmbientLight blueLight = new AmbientLight();//zaznaczona bierka
     private static final AmbientLight redLight = new AmbientLight();//bierka do bicia
-    private static final Vector3f sunLightDirection = new Vector3f(-0.9f, -1.2f, -1.0f);
+    private static final Vector3f sunLightDirection = new Vector3f(-1.3f, -1.9f, 0.0f);
     /* pomocnicze*/
     Vector3f selectedPointCoordinates;
     /*kolumny planszy*/
@@ -129,7 +129,7 @@ public class CheckersGame extends SimpleApplication {
     private final static int RESOLUTION_WIDTH = 640;//rozdzielczosc obrazu gry
     private final static int RESOLUTION_HEIGHT = 480;
     private final static int FRAMERATE = 60;
-    private final static int SAMPLES = 0;
+    private final static int SAMPLES = 16;
     private final static boolean VSYNC = true;
 
     /* swing*/
@@ -147,6 +147,12 @@ public class CheckersGame extends SimpleApplication {
     private static final String BLACK_QUEEN_CHECKER_MODEL = "Models/Ch_black_queen/Ch_black_queen.j3o";
     private static final String CHESSBOARD_MODEL = "Models/board/chessboard.j3o";
     private static final String SKY = "Textures/sky/space.dds";
+     
+    private static final String TICK_SOUND =  "Sounds/tick.wav" ;
+    private static final String WINNER_SOUND = "Sounds/winner.wav";
+    private static final String LOOSER_SOUND = "Sounds/looser.wav";
+
+    
     /**
      * * FLAGA DO ANIMACJI
      */
@@ -220,6 +226,7 @@ public class CheckersGame extends SimpleApplication {
         // You must add a directional light to make the model visible!
         DirectionalLight sun = new DirectionalLight();
         sun.setName("Sun");
+        sun.setColor(ColorRGBA.White);
         sun.setDirection(sunLightDirection.normalizeLocal());
         rootNode.addLight(sun);
 
@@ -924,22 +931,21 @@ public class CheckersGame extends SimpleApplication {
     private void initAudio() {
 
         gameAudioNode = new AudioNode();
-
-        audioTickNode = new AudioNode(assetManager, "Sounds/tick.wav", false);
+        audioTickNode = new AudioNode(assetManager, TICK_SOUND, false);
         audioTickNode.setPositional(false);
         audioTickNode.setLooping(false);
         audioTickNode.setVolume(2);
         gameAudioNode.attachChild(audioTickNode);
         rootNode.attachChild(gameAudioNode);
 
-        audioWinnerNode = new AudioNode(assetManager, "Sounds/winner.wav", false);
+        audioWinnerNode = new AudioNode(assetManager, WINNER_SOUND, false);
         audioWinnerNode.setPositional(false);
         audioWinnerNode.setLooping(false);
         audioWinnerNode.setVolume(3);
         gameAudioNode.attachChild(audioWinnerNode);
         rootNode.attachChild(gameAudioNode);
 
-        audioLooserNode = new AudioNode(assetManager, "Sounds/looser.wav", false);
+        audioLooserNode = new AudioNode(assetManager, LOOSER_SOUND, false);
         audioLooserNode.setPositional(false);
         audioLooserNode.setLooping(false);
         audioLooserNode.setVolume(3);
