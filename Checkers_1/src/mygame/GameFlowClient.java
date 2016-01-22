@@ -167,10 +167,6 @@ public class GameFlowClient {
 		resign = true;
 
 	}
-	public static void resignGameSend() {
-			connecting.sendMessageToServer(-1, -1, GameFlowClient.isResign());
-
-	}
 
 	
 }

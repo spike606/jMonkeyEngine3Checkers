@@ -72,17 +72,30 @@ public class Connecting extends Thread {
                     sendMessageToServer(-1, -1, GameFlowClient.isResign());
                     CheckersGame.window.startButton.setEnabled(true);
                     CheckersGame.window.stopButton.setEnabled(false);
-                    break;
 
-                } else if (messageFromServer.getWinner() != GameFlowClient.EMPTY) {
+
+                } else if (messageFromServer.getWinner() > 0) {
+                    System.out.println("WINNER: " + messageFromServer.getWinner());
+                    System.out.println("MY COLOR: " + GameFlowClient.getMyColor());
+
+
                     if (messageFromServer.getWinner() == GameFlowClient.getMyColor()) {
                         CheckersGame.window.startButton.setEnabled(true);
                         CheckersGame.window.stopButton.setEnabled(false);
+                        CheckersGame.playWinner = true;
+                        CheckersGame.matchFinished = true;
+
+                        System.out.println("wy");
+
 
                         break;
                     } else {
                         CheckersGame.window.startButton.setEnabled(true);
                         CheckersGame.window.stopButton.setEnabled(false);
+                        CheckersGame.playLooser = true;
+                        CheckersGame.matchFinished = true;
+
+                        System.out.println("prze");
 
                         break;
                     }
@@ -108,6 +121,13 @@ public class Connecting extends Thread {
         GameFlowClient.setPossibleMoves(possibleMoves);
         GameFlowClient.setMyColor(myColor);
         GameFlowClient.setWinner(winner);
+
+    }
+
+    private void setWinner(int winner, boolean gameRunning) {
+
+        GameFlowClient.setWinner(winner);
+        GameFlowClient.setGameRunning(gameRunning);
 
     }
 
@@ -142,24 +162,31 @@ public class Connecting extends Thread {
 //                firstMessageIn = true;
 
                 messageFromServer = (MessageFromServer) m;
-
-                getDataFromServer(messageFromServer.getBoard(), messageFromServer.getChosenRow(),
-                        messageFromServer.getChosenCol(), messageFromServer.isGameRunning(),
-                        messageFromServer.getCurrentPlayer(), messageFromServer.getPossibleMoves(),
-                        messageFromServer.getMyColor(), messageFromServer.getWinner());
+                if (messageFromServer.getWinner() > 0) {
+                    setWinner(messageFromServer.getWinner(),messageFromServer.isGameRunning());
+                } else {
+                    getDataFromServer(messageFromServer.getBoard(), messageFromServer.getChosenRow(),
+                            messageFromServer.getChosenCol(), messageFromServer.isGameRunning(),
+                            messageFromServer.getCurrentPlayer(), messageFromServer.getPossibleMoves(),
+                            messageFromServer.getMyColor(), messageFromServer.getWinner());
+                }
                 logger.log(Level.INFO, "Ch col: {0}", messageFromServer.getChosenCol());
                 logger.log(Level.INFO, "Ch row: {0}", messageFromServer.getChosenRow());
+                System.out.println("winner: " + messageFromServer.getWinner());
+                System.out.println("my color: " + messageFromServer.getMyColor());
 
-                System.out.println("ARRAY FROM SERVER: ");
 
-                int array[][] = messageFromServer.getBoard();
-                for (int i = 0; i < array.length; i++) {
-                    for (int j = 0; j < array[i].length; j++) {
-                        System.out.print(array[i][j]);
-                    }
-                    System.out.println();
-                }
 
+
+//                System.out.println("ARRAY FROM SERVER: ");
+//
+//                int array[][] = messageFromServer.getBoard();
+//                for (int i = 0; i < array.length; i++) {
+//                    for (int j = 0; j < array[i].length; j++) {
+//                        System.out.print(array[i][j]);
+//                    }
+//                    System.out.println();
+//                }
             }
         }
     }

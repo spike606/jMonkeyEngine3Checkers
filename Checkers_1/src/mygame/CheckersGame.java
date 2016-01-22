@@ -81,12 +81,12 @@ public class CheckersGame extends SimpleApplication {
     Node game_node = new Node("Game");//zawiera board i bierki
     Node board_node = new Node("boardNode");
     Node checkers_node = new Node("checkers_node");
-    Node white_node = new Node("whiteCheckersNode");//zawiera wszystkie biale
-    Node black_node = new Node("blackCheckersNode");
+    Node white_node;//zawiera wszystkie biale
+    Node black_node;
     Node[] black_checkers_nodes;//tablica z nodami kazdy ma bierke
     Node[] white_checkers_nodes;
-    Spatial[] black_checkers = new Spatial[12];//tablica spatiali
-    Spatial[] white_checkers = new Spatial[12];
+    Spatial[] black_checkers;//tablica spatiali
+    Spatial[] white_checkers;
 
     /* SWIATLA */
     private static final AmbientLight blueLight = new AmbientLight();//zaznaczona bierka
@@ -119,17 +119,17 @@ public class CheckersGame extends SimpleApplication {
     /**
      * *audio*
      */
-    private AudioNode gameAudioNode;
-    private AudioNode audioTickNode;
-    private AudioNode audioWinnerNode;
-    private AudioNode audioLooserNode;
+    private static AudioNode gameAudioNode;
+    private static AudioNode audioTickNode;
+    private static AudioNode audioWinnerNode;
+    private static AudioNode audioLooserNode;
     /**
      * ustawienia
      */
     private final static int RESOLUTION_WIDTH = 640;//rozdzielczosc obrazu gry
     private final static int RESOLUTION_HEIGHT = 480;
     private final static int FRAMERATE = 60;
-    private final static int SAMPLES = 16;
+    private final static int SAMPLES = 0;
     private final static boolean VSYNC = true;
 
     /* swing*/
@@ -139,6 +139,10 @@ public class CheckersGame extends SimpleApplication {
     //pomocnicze 
     private static boolean gameCreated = false;
     GameFlowClient game;
+    private static boolean restartGame = false;
+    public static boolean playWinner = false;
+    public static boolean playLooser = false;
+    public static boolean matchFinished = false;
 
     /* modele*/
     private static final String WHITE_CHECKER_MODEL = "Models/Ch_white/Ch_white.j3o";
@@ -147,12 +151,9 @@ public class CheckersGame extends SimpleApplication {
     private static final String BLACK_QUEEN_CHECKER_MODEL = "Models/Ch_black_queen/Ch_black_queen.j3o";
     private static final String CHESSBOARD_MODEL = "Models/board/chessboard.j3o";
     private static final String SKY = "Textures/sky/space.dds";
-     
-    private static final String TICK_SOUND =  "Sounds/tick.wav" ;
+    private static final String TICK_SOUND = "Sounds/tick.wav";
     private static final String WINNER_SOUND = "Sounds/winner.wav";
     private static final String LOOSER_SOUND = "Sounds/looser.wav";
-
-    
     /**
      * * FLAGA DO ANIMACJI
      */
@@ -197,6 +198,7 @@ public class CheckersGame extends SimpleApplication {
         });
 
         app.startCanvas();
+
 
     }
 
@@ -269,17 +271,7 @@ public class CheckersGame extends SimpleApplication {
                     }
                     animInProgress = false;
 
-                    if (!GameFlowClient.gameRunning) {
-                        if (GameFlowClient.getWinner() == GameFlowClient.getMyColor()) {
-                            audioWinnerNode.playInstance(); // play each instance once!
-                            System.out.println("WYGRALEM");
-
-                        } else {
-                            audioLooserNode.playInstance(); // play each instance once!
-                            System.out.println("PRZEGRAŁEM");
-
-                        }
-                    }
+//                    gameEndSound();
 
                 } else {//gdy trwa przemieszczenie
                 }
@@ -314,13 +306,19 @@ public class CheckersGame extends SimpleApplication {
 
         }
 
-        System.out.println("ANIM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"+ animInProgress);
+//        System.out.println("ANIM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + animInProgress);
 
         if (Connecting.connectedToServer && animInProgress == false) {
             refreshView();
         }
+        playSound();
+        if ((GameFlowClient.isGameRunning() == false && matchFinished && animInProgress == false)
+                || restartGame == true) {
 
 
+            restartGame();
+            matchFinished = false;
+        }
 
 //        System.out.println("Cam location: " + cam.getLocation());
 //        System.out.println("Cam up : " + cam.getUp());
@@ -447,6 +445,9 @@ public class CheckersGame extends SimpleApplication {
 
         black_checkers_nodes = new Node[12];
         white_checkers_nodes = new Node[12];
+
+        white_node = new Node("whiteCheckersNode");//zawiera wszystkie biale
+        black_node = new Node("blackCheckersNode");
         for (int i = 0; i < 12; i++) {
             white_checkers_nodes[i] = new Node("WhiteNode" + i);
             black_checkers_nodes[i] = new Node("BlackNode" + i);
@@ -456,9 +457,11 @@ public class CheckersGame extends SimpleApplication {
 
         float cell_pos_x = 0.042778164f;
         float cell_pos_z = 0.0f;
+        black_checkers = new Spatial[12];//tablica spatiali
+        white_checkers = new Spatial[12];
+
         for (int i = 0; i < 12; i++) {
             white_checkers[i] = assetManager.loadModel(WHITE_CHECKER_MODEL);
-//            white_checkers[i] = assetManager.
 //                    loadModel("Models/scalak_render_bialy_008/scalak_render_bialy_008.j3o");
 
             black_checkers[i] = assetManager.loadModel(BLACK_CHECKER_MODEL);
@@ -1251,6 +1254,33 @@ public class CheckersGame extends SimpleApplication {
 
     }
 
-    private void performBeating() {
+    private void restartGame() {
+        GameFlowClient.setWinner(-1);//bo gra juz sie zakonczyla 
+//        gameEndSound();
+        checkers_node.detachAllChildren();
+        setCoordinatesWhereCheckersCanBe();
+        setUpCheckers();
+        gameCreated = false;
+        restartGame = false;
+
+    }
+
+    public static void newGame() {
+        restartGame = true;
+    }
+
+    private void playSound() {
+        if (playWinner) {
+            audioWinnerNode.playInstance(); // play each instance once!
+            System.out.println("WYGRALEM");
+            playWinner = false;
+        }
+        if (playLooser) {
+            audioLooserNode.playInstance(); // play each instance once!
+            System.out.println("PRZEGRAŁEM");
+            playLooser = false;
+
+        }
+
     }
 }
