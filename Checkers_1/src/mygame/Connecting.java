@@ -83,6 +83,7 @@ public class Connecting extends Thread {
                         CheckersGame.window.startButton.setEnabled(true);
                         CheckersGame.window.stopButton.setEnabled(false);
                         CheckersGame.playWinner = true;
+//                        CheckersGame.animInProgress = true;//by najpierw animacja sie zakonczyla a dopiero nastapil reset gry
                         CheckersGame.matchFinished = true;
 
                         System.out.println("wy");
@@ -93,6 +94,7 @@ public class Connecting extends Thread {
                         CheckersGame.window.startButton.setEnabled(true);
                         CheckersGame.window.stopButton.setEnabled(false);
                         CheckersGame.playLooser = true;
+//                        CheckersGame.animInProgress = true;
                         CheckersGame.matchFinished = true;
 
                         System.out.println("prze");

@@ -143,6 +143,8 @@ public class CheckersGame extends SimpleApplication {
     public static boolean playWinner = false;
     public static boolean playLooser = false;
     public static boolean matchFinished = false;
+    public static boolean startNextGame = false;
+
 
     /* modele*/
     private static final String WHITE_CHECKER_MODEL = "Models/Ch_white/Ch_white.j3o";
@@ -312,12 +314,13 @@ public class CheckersGame extends SimpleApplication {
             refreshView();
         }
         playSound();
-        if ((GameFlowClient.isGameRunning() == false && matchFinished && animInProgress == false)
-                || restartGame == true) {
+        if ((GameFlowClient.isGameRunning() == false && matchFinished == true 
+                && startNextGame == true)) {
 
 
             restartGame();
             matchFinished = false;
+            startNextGame = false;
         }
 
 //        System.out.println("Cam location: " + cam.getLocation());

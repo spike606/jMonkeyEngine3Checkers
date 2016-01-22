@@ -158,6 +158,9 @@ public class CheckersUI extends javax.swing.JFrame {
 
     private void startButtonMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_startButtonMouseReleased
 			GameFlowClient.setTryingToConnect(true);
+                        if(CheckersGame.matchFinished == true){
+                            CheckersGame.startNextGame = true;
+                        }
 			GameFlowClient.startNewGame();    }//GEN-LAST:event_startButtonMouseReleased
 
     private void stopButtonMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_stopButtonMouseReleased
