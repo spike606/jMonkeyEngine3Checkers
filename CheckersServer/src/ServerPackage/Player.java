@@ -75,7 +75,7 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
                 // initial message
                 prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
                         match.gameFlow.getChosenRow(), true, match.gameFlow.getCurrentPlayer(), match.gameFlow.getPossibleMoves(),
-                        GameData.EMPTY, myColor);
+                        GameData.EMPTY, getMyColor());
 //                hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);//send message to client
                 myHostedConnection.getServer().broadcast(Filters.in(myHostedConnection), messageToClient);//send message to client
 
@@ -90,7 +90,7 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
 
                         prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
                                 match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
-                                match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), myColor);
+                                match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), getMyColor());
 //                        hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);
                         myHostedConnection.getServer().broadcast(Filters.equalTo(myHostedConnection), messageToClient);
 
@@ -100,7 +100,7 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
                     } else if (!match.gameFlow.isGameRunning() && match.gameFlow.getWinner() != GameData.EMPTY) {// game end
                         prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
                                 match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
-                                match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), myColor);
+                                match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), getMyColor());
 //                        hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);
                         myHostedConnection.getServer().broadcast(Filters.equalTo(myHostedConnection), messageToClient);
 
@@ -142,7 +142,8 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
     //listener - when message is received
     public void messageReceived(HostedConnection source, Message m) {
 
-        if (source == myHostedConnection && match.gameFlow.getCurrentPlayer() == myColor && match.gameFlow.isGameRunning() && firstMessageOut == true && m instanceof MessageFromClient) {
+        if (source == myHostedConnection && match.gameFlow.getCurrentPlayer() == myColor
+                && match.gameFlow.isGameRunning() && firstMessageOut == true && m instanceof MessageFromClient) {
 
             // receive message from client
             messageFromClient = (MessageFromClient) m;
@@ -157,16 +158,33 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
             // prepare and send answer to client
             prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
                     match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
-                    match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), myColor);
+                    match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), getMyColor());
 
+            System.out.println("curent player: " + match.gameFlow.getCurrentPlayer());
+            System.out.println("curent player: " + getMyColor());
 
-            //jezeli dlej mam prawo ruchu tzn ze jest jeszce bicie wiec wyslij wiadomosc do obydwu graczy by uaktualnic widok
-            if (match.gameFlow.getWinner() > 0) {
+            if (!match.gameFlow.isGameRunning() && match.gameFlow.getWinner() > 0) //jesli jest zwyciezca to wyslij wiadomosc do obydwu graczy
+            {
                 myHostedConnection.getServer().broadcast(Filters.in(myHostedConnection, opponentHostedConnection), messageToClient);
 
-            } else if (match.gameFlow.getCurrentPlayer() == this.myColor) {
+            } else //jezeli dlej mam prawo ruchu tzn ze jest jeszce bicie wiec wyslij wiadomosc do obydwu graczy by uaktualnic widok
+            if (match.gameFlow.getCurrentPlayer() == getMyColor()) {
 
-                myHostedConnection.getServer().broadcast(Filters.in(myHostedConnection, opponentHostedConnection), messageToClient);
+                //do mnie 
+                myHostedConnection.getServer().broadcast(Filters.equalTo(myHostedConnection), messageToClient);
+
+                //do przeciwnika - ze zmieniona wiadomoscia - ZMIANA KOLORU BO TO WIADOMOSC DO DRUGIEGO GRACZA!
+                // prepare and send answer to client
+                int color;
+                if (getMyColor() == 1) {
+                    color = 3;
+                } else {
+                    color = 1;
+                }
+                prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
+                        match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
+                        match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), color);
+                myHostedConnection.getServer().broadcast(Filters.equalTo(opponentHostedConnection), messageToClient);
 
 
             } else {//jesli nie to tylkoo do jednego
@@ -211,5 +229,13 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
 //        }
 //        System.out.println();
 //        System.out.println();
+    }
+
+    private synchronized int getMyColor() {
+        if (this.myColor == 1) {
+            return 1;
+        } else {
+            return 3;
+        }
     }
 }
