@@ -152,7 +152,7 @@ public class CheckersGame extends SimpleApplication {
      */
     //pomocnicze przy usuwaniu modeli by nastepowalo ono dopiero po zakonczeniu animacji, zmiana na dame rowniez
     private static Node checkerNodeToDelete;//id bierki ktora ma zostac usunieta
-    private static boolean animInProgress = false;
+    static boolean animInProgress = false;
     private static Field checkerFieldToDelete;
     private static String modelToChange;//model na jaki bedzie zmiana np czaarna dama
     private static int checkerIdToChange = -1;//id bierki do zmiany na dame
