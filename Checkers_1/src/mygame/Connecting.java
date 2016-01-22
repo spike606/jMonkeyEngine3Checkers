@@ -6,16 +6,20 @@ import java.io.IOException;
 
 import CommonPackageGame.*;
 import com.jme3.network.Client;
+import com.jme3.network.ClientStateListener;
+import com.jme3.network.ErrorListener;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
+import com.jme3.network.kernel.ConnectorException;
 import com.jme3.network.serializing.Serializer;
 import gameUI.CheckersUI;
 import java.net.ConnectException;
+import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Connecting extends Thread {
+public class Connecting extends Thread implements ErrorListener {
 
     //logger
     private static final Logger logger = Logger.getLogger(CheckersGame.class.getName());
@@ -45,6 +49,7 @@ public class Connecting extends Thread {
             try {
                 myClient = Network.connectToServer(HOST_NAME, SERVER_PORT);
                 myClient.addMessageListener(new ClientListener(), MessageFromClient.class, MessageFromServer.class);
+                myClient.addErrorListener(this);//by obsluzyc bledy zwiazane z zerwanym polaczeniem
                 myClient.start();
                 connectedToServer = true;
             } catch (ConnectException ex) {
@@ -161,7 +166,24 @@ public class Connecting extends Thread {
     @Override
     public void destroy() {
         myClient.close();
+        System.out.println(" ZAMYKAM");
+
         super.destroy();
+    }
+
+    public void handleError(Object source, Throwable t) {
+        if (t instanceof ConnectorException) {
+            System.out.println(" error out: ");
+            GameFlowClient.resignGame();
+            CheckersGame.matchFinished = true;
+            GameFlowClient.setGameRunning(false);
+            myClient.close();
+            CheckersGame.window.startButton.setEnabled(true);
+            CheckersGame.window.stopButton.setEnabled(false);
+            CheckersGame.window.infoLabel.setText(CheckersGame.CANT_CONNECT);
+
+        }
+
     }
 
     class ClientListener implements MessageListener<Client> {
