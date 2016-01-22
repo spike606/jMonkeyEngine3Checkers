@@ -145,10 +145,10 @@ public class GameFlow {
 			possibleMoves = boardData.getPossibleSecondBeating(currentPlayer, checkerMove.getMoveToRow(),
 					checkerMove.getMoveToCol());
 			if (possibleMoves != null) {
-				chosenRow = checkerMove.getMoveToRow(); // Since only one piece
-														// can be moved, select
-														// it.
-				chosenCol = checkerMove.getMoveToCol();
+//				chosenRow = checkerMove.getMoveToRow(); // Since only one piece
+//														// can be moved, select
+//														// it.
+//				chosenCol = checkerMove.getMoveToCol();
 				return;
 			}
 		}
@@ -184,19 +184,19 @@ public class GameFlow {
 		 * possible select that piece automatically
 		 */
 
-		if (possibleMoves != null) {
-			boolean sameSquare = true;
-			for (int i = 1; i < possibleMoves.length; i++)
-				if (possibleMoves[i].getMoveFromRow() != possibleMoves[0].getMoveFromRow()
-						|| possibleMoves[i].getMoveFromCol() != possibleMoves[0].getMoveFromCol()) {
-					sameSquare = false;
-					break;
-				}
-			if (sameSquare) {
-				chosenRow = possibleMoves[0].getMoveFromRow();
-				chosenCol = possibleMoves[0].getMoveFromCol();
-			}
-		}
+//		if (possibleMoves != null) {
+//			boolean sameSquare = true;
+//			for (int i = 1; i < possibleMoves.length; i++)
+//				if (possibleMoves[i].getMoveFromRow() != possibleMoves[0].getMoveFromRow()
+//						|| possibleMoves[i].getMoveFromCol() != possibleMoves[0].getMoveFromCol()) {
+//					sameSquare = false;
+//					break;
+//				}
+//			if (sameSquare) {
+//				chosenRow = possibleMoves[0].getMoveFromRow();
+//				chosenCol = possibleMoves[0].getMoveFromCol();
+//			}
+//		}
 	}
 
 }
