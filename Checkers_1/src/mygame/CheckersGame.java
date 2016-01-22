@@ -165,8 +165,8 @@ public class CheckersGame extends SimpleApplication {
     private static int checkerIdToChange = -1;//id bierki do zmiany na dame
 
     /*  LABELE*/
-    private static final String CONNECTING = "Connecting to server...";
-    private static final String CANT_CONNECT = "Can't connect to server!";
+    public static final String CONNECTING = "Looking for opponent...";
+    public static final String CANT_CONNECT = "Can't connect to server!";
     private static final String YOU_WON = "You won!";
     private static final String YOU_LOOSE = "You lose!";
     private static final String WAIT = "Wait for opoonent's move...";
@@ -321,6 +321,8 @@ public class CheckersGame extends SimpleApplication {
             refreshView();
         }
         playSound();
+        setInfo();
+
         if ((GameFlowClient.isGameRunning() == false && matchFinished == true
                 && startNextGame == true)) {
 
@@ -329,7 +331,6 @@ public class CheckersGame extends SimpleApplication {
             matchFinished = false;
             startNextGame = false;
         }
-        setInfo();
 //        System.out.println("Cam location: " + cam.getLocation());
 //        System.out.println("Cam up : " + cam.getUp());
 //        System.out.println("Cam left : " + cam.getLeft());
@@ -692,7 +693,7 @@ public class CheckersGame extends SimpleApplication {
     //dodaj/usun podswietlenie dla bierek
     private void selectChecker(Node checkerNode) {
         diselectAllCheckers();
-        System.out.println("selected " + checkerNode.getUserData("id"));
+//        System.out.println("selected " + checkerNode.getUserData("id"));
         if (white_node.hasChild(checkerNode) || black_node.hasChild(checkerNode)) {
             checkerNode.addLight(blueLight);
             checkerNode.setUserData("selected", true);
@@ -1266,6 +1267,7 @@ public class CheckersGame extends SimpleApplication {
 
     private void restartGame() {
         GameFlowClient.setWinner(-1);//bo gra juz sie zakonczyla 
+
 //        gameEndSound();
         checkers_node.detachAllChildren();
         setCoordinatesWhereCheckersCanBe();
@@ -1283,33 +1285,39 @@ public class CheckersGame extends SimpleApplication {
         if (playWinner) {
             audioWinnerNode.playInstance(); // play each instance once!
             System.out.println("WYGRALEM");
+            window.infoLabel.setText(YOU_WON);
             playWinner = false;
         }
         if (playLooser) {
             audioLooserNode.playInstance(); // play each instance once!
             System.out.println("PRZEGRAŁEM");
+            window.infoLabel.setText(YOU_LOOSE);
             playLooser = false;
 
         }
 
     }
 
-    private static void setInfo() {
-        if (GameFlowClient.gameRunning && GameFlowClient.getMyColor() == GameFlowClient.getCurrentPlayer()) {
+    private void setInfo() {
+//        if (!GameFlowClient.gameRunning && GameFlowClient.getWinner() != GameFlowClient.getMyColor() && window.infoLabel.isEnabled()) {
+//            window.infoLabel.setText(NO_INFO);
+//        }else
+//        if (!GameFlowClient.gameRunning && GameFlowClient.isTryingToConnect()) {
+//            window.infoLabel.setText(CONNECTING);//
+//        } else
+            if (GameFlowClient.gameRunning && GameFlowClient.getMyColor() == GameFlowClient.getCurrentPlayer()) {
             window.infoLabel.setText(MOVE);
         } else if (GameFlowClient.gameRunning && GameFlowClient.getMyColor() != GameFlowClient.getCurrentPlayer()) {
             window.infoLabel.setText(WAIT);
-        } else if (!GameFlowClient.gameRunning && GameFlowClient.isTryingToConnect()) {
-            window.infoLabel.setText(CONNECTING);
-        } else if (!GameFlowClient.gameRunning && Connecting.connectedToServer == false) {
-            window.infoLabel.setText(CANT_CONNECT);
-        } else if (!GameFlowClient.gameRunning && GameFlowClient.getWinner() == GameFlowClient.getMyColor()) {
-            window.infoLabel.setText(YOU_WON);
-        } else if (!GameFlowClient.gameRunning && GameFlowClient.getWinner() != GameFlowClient.getMyColor()
-                && GameFlowClient.getWinner() != -1) {
-            window.infoLabel.setText(YOU_LOOSE);
-        } else if (!GameFlowClient.gameRunning && GameFlowClient.getWinner() != GameFlowClient.getMyColor()) {
-            window.infoLabel.setText(NO_INFO);
+
+//        } else if (!GameFlowClient.gameRunning && Connecting.connectedToServer == false) {
+//            window.infoLabel.setText(CANT_CONNECT);
+//        } else if (!GameFlowClient.gameRunning && GameFlowClient.getWinner() == GameFlowClient.getMyColor()) {
+//            window.infoLabel.setText(YOU_WON);
+//        } else if (!GameFlowClient.gameRunning && GameFlowClient.getWinner() != GameFlowClient.getMyColor()
+//                && GameFlowClient.getWinner() != -1) {
+//            window.infoLabel.setText(YOU_LOOSE);//
+//        } 
         }
     }
 }

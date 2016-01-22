@@ -10,6 +10,8 @@ import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.network.serializing.Serializer;
+import gameUI.CheckersUI;
+import java.net.ConnectException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,18 +45,24 @@ public class Connecting extends Thread {
             try {
                 myClient = Network.connectToServer(HOST_NAME, SERVER_PORT);
                 myClient.addMessageListener(new ClientListener(), MessageFromClient.class, MessageFromServer.class);
-
-            } catch (IOException ex) {
-                logger.log(Level.SEVERE, null, ex);
+                myClient.start();
+                connectedToServer = true;
+            } catch (ConnectException ex) {
+                logger.log(Level.SEVERE, "CAN'T CONNECT TO SERVER!");
                 connectedToServer = false;
                 CheckersGame.window.startButton.setEnabled(true);
                 CheckersGame.window.stopButton.setEnabled(false);
+                CheckersGame.window.infoLabel.setText(CheckersGame.CANT_CONNECT);
+                GameFlowClient.setTryingToConnect(false);
+                threadRunning = false;
+
+            } catch (IOException ex) {
+                Logger.getLogger(Connecting.class.getName()).log(Level.SEVERE, null, ex);
             }
 
 
 
-            myClient.start();
-            connectedToServer = true;
+
 
             while (connectedToServer) {
 
@@ -165,7 +173,7 @@ public class Connecting extends Thread {
 
                 messageFromServer = (MessageFromServer) m;
                 if (messageFromServer.getWinner() > 0) {
-                    setWinner(messageFromServer.getWinner(),messageFromServer.isGameRunning());
+                    setWinner(messageFromServer.getWinner(), messageFromServer.isGameRunning());
                 } else {
                     getDataFromServer(messageFromServer.getBoard(), messageFromServer.getChosenRow(),
                             messageFromServer.getChosenCol(), messageFromServer.isGameRunning(),
@@ -176,7 +184,7 @@ public class Connecting extends Thread {
                 logger.log(Level.INFO, "Ch row: {0}", messageFromServer.getChosenRow());
                 System.out.println("winner: " + messageFromServer.getWinner());
                 System.out.println("my color: " + messageFromServer.getMyColor());
-
+                System.out.println("current player: " + messageFromServer.getCurrentPlayer());
 
 
 
