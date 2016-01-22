@@ -108,6 +108,22 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
                         threadRunning = false;// to kill current thread
 
                     }
+                    //gdy polaczenie przeciwnika zostalo zakoncozne np opuscil gre to wygrywam
+                    if (!myServer.getConnections().contains(opponentHostedConnection)) {
+                        match.gameFlow.setWinner(getMyColor());
+                        match.gameFlow.setCurrentPlayer(getMyColor());
+                        match.gameFlow.setGameRunning(false);
+
+                        // prepare and send answer to client
+                        prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
+                                match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
+                                match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), getMyColor());
+                        //do mnie bo przeciwnika juz nie ma
+                        myHostedConnection.getServer().broadcast(Filters.equalTo(myHostedConnection), messageToClient);
+
+                    }
+
+
                     try {
                         Thread.sleep(50);
                     } catch (InterruptedException ex) {

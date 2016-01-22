@@ -132,6 +132,11 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
 
     public void connectionRemoved(Server server, HostedConnection conn) {
         logger.log(Level.INFO, "Client out: {0}", conn.getId());
+        
+        //gdy polaczenie zakonczone to przeciwnik wygrywa
+    
+        
+        
 //	System.out.println("Close 1");
 //
 //        conn.close("");
