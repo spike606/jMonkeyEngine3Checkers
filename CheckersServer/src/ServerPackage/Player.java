@@ -117,6 +117,7 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
             }
 
 
+
         }
 
 
@@ -149,29 +150,34 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
             // process message from client
             match.gameFlow.makeClick(messageFromClient.getChosenRow(), messageFromClient.getChosenCol(),
                     messageFromClient.isResign());
+            System.out.println("RESIFN: " + messageFromClient.isResign());
+            System.out.println("winner: " + match.gameFlow.getWinner());
 
 
             // prepare and send answer to client
             prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
                     match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
                     match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), myColor);
-            
-            
-            //jezeli dlej mam prawo ruchu tzn ze jest jeszce bicie wiec wyslij wiadomosc do obydwu graczy by uaktualnic widok
-            if(match.gameFlow.getCurrentPlayer() == this.myColor){
-                
-                myHostedConnection.getServer().broadcast(Filters.in(myHostedConnection,opponentHostedConnection), messageToClient);
 
-                
-            }else {//jesli nie to tylkoo do jednego
-               myHostedConnection.getServer().broadcast(Filters.equalTo(myHostedConnection), messageToClient);
+
+            //jezeli dlej mam prawo ruchu tzn ze jest jeszce bicie wiec wyslij wiadomosc do obydwu graczy by uaktualnic widok
+            if (match.gameFlow.getWinner() > 0) {
+                myHostedConnection.getServer().broadcast(Filters.in(myHostedConnection, opponentHostedConnection), messageToClient);
+
+            } else if (match.gameFlow.getCurrentPlayer() == this.myColor) {
+
+                myHostedConnection.getServer().broadcast(Filters.in(myHostedConnection, opponentHostedConnection), messageToClient);
+
+
+            } else {//jesli nie to tylkoo do jednego
+                myHostedConnection.getServer().broadcast(Filters.equalTo(myHostedConnection), messageToClient);
 
             }
-            
-            
-            
-            
-            
+
+
+
+
+
 //                                    hostedConnection.send(messageToClient);
 
             firstMessageOut = false;
@@ -180,15 +186,19 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
     }
 
     public void checkResign(HostedConnection conn) {
-
-        if (!myServer.getConnections().contains(conn)) {
-            resign = true;
-            match.gameFlow.makeClick(-1, -1, resign);
-            threadRunning = false;
-        }
+//        if (!myServer.getConnections().contains(conn)) {
+//            resign = true;
+//            match.gameFlow.makeClick(-1, -1, resign);
+//            threadRunning = false;
+//            
+//                        // prepare and send answer to client - when resign
+//            prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
+//                    match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
+//                    match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), myColor);
+        //send to all
+//            myHostedConnection.getServer().broadcast(Filters.in(myHostedConnection, opponentHostedConnection), messageToClient);
+//        }
 //System.out.println(Arrays.deepToString(match.gameFlow.boardData.getBoard()));
-
-
 //        int[][] array = match.gameFlow.boardData.getBoard();
 //        System.out.println();
 //        System.out.println();
@@ -201,6 +211,5 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
 //        }
 //        System.out.println();
 //        System.out.println();
-
     }
 }
