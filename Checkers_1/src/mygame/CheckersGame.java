@@ -656,8 +656,12 @@ public class CheckersGame extends SimpleApplication {
     //dodaj/usun podswietlenie dla bierek
     private void selectChecker(Node checkerNode) {
         diselectAllCheckers();
-        checkerNode.addLight(blueLight);
+        System.out.println("selected " + checkerNode.getUserData("id"));
+        if(white_node.hasChild(checkerNode) || black_node.hasChild(checkerNode)){
+                    checkerNode.addLight(blueLight);
         checkerNode.setUserData("selected", true);
+        }
+
     }
 
     private void diselectChecker(Node checkerNode) {
@@ -780,7 +784,7 @@ public class CheckersGame extends SimpleApplication {
 
     private void removeCheckerNode(Node checkerToRemove, Field checkerField) {
 
-
+diselectAllCheckers();
         if ((Integer) checkerToRemove.getUserData("id") > 11) {
             black_node.detachChild(checkerToRemove);
         } else {
@@ -789,6 +793,8 @@ public class CheckersGame extends SimpleApplication {
 
         checkerField.setAccessible(true);
         checkerField.setCheckerColor(GameFlowClient.EMPTY);
+        checkerField.setCheckerQueenColor(GameFlowClient.EMPTY);
+
         checkerField.setCheckerId(-1);
 
         checkerFieldToDelete = null;
@@ -947,21 +953,35 @@ public class CheckersGame extends SimpleApplication {
         if (GameFlowClient.gameRunning && GameFlowClient.getMyColor() == GameFlowClient.getCurrentPlayer()) {
 
             if (chosenRow >= 0 && chosenCol >= 0) {
+
+
+
+                
+
+
                 if (currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.WHITE
                         || currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.WHITE_QUEEN) {
                     for (int i = 0; i < 12; i++) {
-                        if (white_checkers_nodes[i].getUserData("row").equals(chosenRow)
-                                && white_checkers_nodes[i].getUserData("col").equals(chosenCol)) {
-                            selectChecker(white_checkers_nodes[i]);
+                        if (((Integer)white_checkers_nodes[i].getUserData("row") == chosenRow)
+                                && ((Integer)white_checkers_nodes[i].getUserData("col") == chosenCol)) {
+                            if(white_node.hasChild(white_checkers_nodes[i])){
+                              selectChecker(white_checkers_nodes[i]);
+
+                            }
+
                         }
                     }
                 }
                 if (currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.BLACK
                         || currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.BLACK_QUEEN) {
                     for (int i = 0; i < 12; i++) {
-                        if (black_checkers_nodes[i].getUserData("row").equals(chosenRow)
-                                && black_checkers_nodes[i].getUserData("col").equals(chosenCol)) {
-                            selectChecker(black_checkers_nodes[i]);
+                        if (((Integer)black_checkers_nodes[i].getUserData("row") == chosenRow)
+                                && ((Integer)black_checkers_nodes[i].getUserData("col") == chosenCol)) {
+                            
+                            if(black_node.hasChild(black_checkers_nodes[i])){
+                              selectChecker(black_checkers_nodes[i]);
+
+                            }
                         }
                     }
                 }
@@ -980,14 +1000,14 @@ public class CheckersGame extends SimpleApplication {
         int moveToRow = 0;
         int moveToCol = 0;
         boolean movePerformed = false;
-        System.out.println("GAME ARRAY: ");
+//        System.out.println("GAME ARRAY: ");
 
         //wykonaj ruch jesli jest roznica
         for (int row = 0; row < boardFields.length; row++) {
             for (int col = 0; col < boardFields[row].length; col++) {
 
 
-                System.out.print(boardFields[row][col].getCheckerColor());
+//                System.out.print(boardFields[row][col].getCheckerColor());
 
 
 
@@ -1021,7 +1041,7 @@ public class CheckersGame extends SimpleApplication {
 
                 }
             }
-            System.out.println();
+//            System.out.println();
 
         }
 
