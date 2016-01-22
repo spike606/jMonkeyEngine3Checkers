@@ -121,7 +121,8 @@ public class Connecting extends Thread {
     public static void sendMessageToServer(int row, int col, boolean resign) {
         prepareMessageToServer(row, col, resign);
 
-        if ((GameFlowClient.gameRunning && GameFlowClient.getMyColor() == GameFlowClient.getCurrentPlayer())) {
+        if ((GameFlowClient.gameRunning && GameFlowClient.getMyColor() == GameFlowClient.getCurrentPlayer()
+                && CheckersGame.animInProgress == false)) {
             myClient.send(messageToServer);
         }
 
