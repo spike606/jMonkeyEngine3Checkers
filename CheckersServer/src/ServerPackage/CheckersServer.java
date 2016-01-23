@@ -13,6 +13,8 @@ import com.jme3.system.AppSettings;
 import com.jme3.system.JmeContext;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,6 +33,8 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
     private static boolean gotFirstPlayer = false;//pomocnicze
     private static boolean gotSecondPlayer = false;
     private static int newestConnection = 0; // pomocnicza do zdobycia najnowszego polaczenia
+    private static HashMap activeConnectionsMap;//mapa z aktywnymi polaczeniami/ aktywnymi w danej chwili klientami
+    private static int numberOfConnections;//liczba polaczen aktywych
 
     public static void main(String[] args) {
 
@@ -45,9 +49,11 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
     @Override
     public void simpleInitApp() {
         try {
+            activeConnectionsMap = new HashMap();
             myServer = Network.createServer(SERVER_PORT);
-            logger.log(Level.INFO, "CheckersGame server is running...");
             myServer.start();
+            logger.log(Level.INFO, "CheckersGame server is running...");
+            logger.log(Level.INFO, "Waiting for players...");
             myServer.addConnectionListener(new CheckersServer());
 
         } catch (IOException ex) {
@@ -59,90 +65,107 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
     public void simpleUpdate(float tpf) {
         //TODO: add update code
 
-        Match match = new Match(matchNumber);
-        logger.log(Level.INFO, "Waiting for players...");
-        logger.log(Level.INFO, "Number of threads {0}", Thread.activeCount());
+//        Match match = new Match(matchNumber);
+//        logger.log(Level.INFO, "Waiting for players...");
+//        logger.log(Level.INFO, "Number of threads {0}", Thread.activeCount());
         logger.log(Level.INFO, "number of connections #{0}", myServer.getConnections().size());
 
-        
-//         HashMap hm = new HashMap();
-//         hm.
-        
-        
-        
-        
-        
-        while (gotFirstPlayer == false) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-                logger.log(Level.SEVERE, null, ex);
+
+        //sprawdz czy liczba polaczen jest parzysta
+        if (numberOfConnections > 0) {
+
+            Iterator i = activeConnectionsMap.entrySet().iterator();
+
+            while (i.hasNext()) {
+                Map.Entry firstPlayer = (Map.Entry) i.next();
+
+                if (firstPlayer.getValue().equals(false)) {//gdy znajde gracza ktory nie ma przeciwnika to poszukaj dla niego pary
+                    Iterator j = activeConnectionsMap.entrySet().iterator();
+                    while (j.hasNext()) {
+                        Map.Entry secondPlayer = (Map.Entry) j.next();
+                        if (secondPlayer.getValue().equals(false) && firstPlayer.getValue().equals(false)//jezeli znajde pare wolnych to nowy mecz
+                                && (Integer) secondPlayer.getKey() != (Integer) firstPlayer.getKey()) {
+                            //uaktualnij dane w mapie
+                            activeConnectionsMap.put(firstPlayer.getKey(), true);
+                            activeConnectionsMap.put(secondPlayer.getKey(), true);
+
+                            //nowy mecz
+
+                            Match match = new Match(matchNumber);
+
+
+                            match.setWhitePlayer(new Player(myServer, myServer.getConnection((Integer) firstPlayer.getKey()), GameData.WHITE, match));
+                            logger.log(Level.INFO, "Match #{0}: player #1 connected.", matchNumber);
+                            match.setBlackPlayer(new Player(myServer, myServer.getConnection((Integer) secondPlayer.getKey()), GameData.BLACK, match));
+                            logger.log(Level.INFO, "Match #{0}: player #2 connected.", matchNumber);
+
+
+                            //ustaw dane dotyczace swoich przeciwnikow
+                            match.getWhitePlayer().setOpponentHostedConnection(match.getBlackPlayer().getMyHostedConnection());
+                            match.getBlackPlayer().setOpponentHostedConnection(match.getWhitePlayer().getMyHostedConnection());
+
+                            //register server listener
+                            myServer.addMessageListener(match.getWhitePlayer(), MessageFromClient.class, MessageFromServer.class);
+                            myServer.addMessageListener(match.getBlackPlayer(), MessageFromClient.class, MessageFromServer.class);
+
+                            match.getWhitePlayer().start();
+                            match.getBlackPlayer().start();
+                            matchNumber++;
+
+                            break;
+                        }
+                        System.out.println("1");
+
+                    }
+                    System.out.println("2");
+                }
+
+                System.out.println("3");
+
+
+//                i.remove(); // avoids a ConcurrentModificationException
             }
-//        logger.log(Level.INFO, "Number of threads1 {0}", Thread.activeCount());
-
         }
-        match.setWhitePlayer(new Player(myServer, myServer.getConnection(newestConnection), GameData.WHITE, match));
-        logger.log(Level.INFO, "Match #{0}: player #1 connected.", matchNumber);
-//        logger.log(Level.INFO, "Number of threads2 {0}", Thread.activeCount());
-					System.out.println("Connection!!!!:" + myServer.getConnection(newestConnection));
 
-        while (gotSecondPlayer == false) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-                logger.log(Level.SEVERE, null, ex);
-            }
-//        logger.log(Level.INFO, "Number of threads3 {0}", Thread.activeCount());
+//        while (gotSecondPlayer == false) {
+//            try {
+//                Thread.sleep(100);
+//            } catch (InterruptedException ex) {
+//                logger.log(Level.SEVERE, null, ex);
+//            }
+//    }
 
-        }
-        match.setBlackPlayer(new Player(myServer, myServer.getConnection(newestConnection), GameData.BLACK, match));
-//        logger.log(Level.INFO, "Number of threads4 {0}", Thread.activeCount());
-
-        logger.log(Level.INFO, "Match #{0}: player #2 connected.", matchNumber);
-
-        //ustaw dane dotyczace swoich przeciwnikow
-        match.getWhitePlayer().setOpponentHostedConnection(match.getBlackPlayer().getMyHostedConnection());
-        match.getBlackPlayer().setOpponentHostedConnection(match.getWhitePlayer().getMyHostedConnection());
-
-        //register server listener
-        myServer.addMessageListener(match.getWhitePlayer(), MessageFromClient.class, MessageFromServer.class);
-        myServer.addMessageListener(match.getBlackPlayer(), MessageFromClient.class, MessageFromServer.class);
-
-        match.getWhitePlayer().start();
-        match.getBlackPlayer().start();
-
-        gotFirstPlayer = false;
-        gotSecondPlayer = false;
-        matchNumber++;
-        newestConnection++;
 
     }
 
     public void connectionAdded(Server server, HostedConnection conn) {
         logger.log(Level.INFO, "Client Connected: {0}", conn.getId());
 //        int numberOfConnections = conn.getId() + 1;    
-        int numberOfConnections = server.getConnections().size();
+
+        activeConnectionsMap.put(conn.getId(), false);//id klienta i false - nie jest sparowany z przeciwnikiem
+
+        numberOfConnections = server.getConnections().size();
 
         logger.log(Level.INFO, "number of connectons: : {0}", numberOfConnections);
 
-
-        if (numberOfConnections > 0 && numberOfConnections % 2 != 0) {
-            gotFirstPlayer = true;
-        }
-        if (numberOfConnections > 0 && numberOfConnections % 2 == 0) {
-            gotSecondPlayer = true;
-            newestConnection++;
-        }
 
     }
 
     public void connectionRemoved(Server server, HostedConnection conn) {
         logger.log(Level.INFO, "Client out: {0}", conn.getId());
-        
+
+        //polaczenie zakonczone wiec usun klienta z listy aktywnych
+        activeConnectionsMap.remove(conn.getId());
+
+        //uaktualnij liczbe polaczen
+        numberOfConnections = server.getConnections().size();
+
+        logger.log(Level.INFO, "number of connectons: : {0}", numberOfConnections);
+
         //gdy polaczenie zakonczone to przeciwnik wygrywa
-    
-        
-        
+
+
+
 //	System.out.println("Close 1");
 //
 //        conn.close("");
