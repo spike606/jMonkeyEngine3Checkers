@@ -70,16 +70,16 @@ public class CheckersUI extends javax.swing.JFrame {
         gamePanel.setPreferredSize(new java.awt.Dimension(640, 480));
 
         startButton.setText("START");
-        startButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseReleased(java.awt.event.MouseEvent evt) {
-                startButtonMouseReleased(evt);
+        startButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                startButtonActionPerformed(evt);
             }
         });
 
         stopButton.setText("STOP");
-        stopButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseReleased(java.awt.event.MouseEvent evt) {
-                stopButtonMouseReleased(evt);
+        stopButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                stopButtonActionPerformed(evt);
             }
         });
 
@@ -156,17 +156,19 @@ public class CheckersUI extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void startButtonMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_startButtonMouseReleased
-			GameFlowClient.setTryingToConnect(true);
+    private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
+        			GameFlowClient.setTryingToConnect(true);
                         if(CheckersGame.matchFinished == true){
                             CheckersGame.startNextGame = true;
                         }
-			GameFlowClient.startNewGame();    }//GEN-LAST:event_startButtonMouseReleased
+			GameFlowClient.startNewGame();  
+    }//GEN-LAST:event_startButtonActionPerformed
 
-    private void stopButtonMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_stopButtonMouseReleased
-			GameFlowClient.resignGame();
+    private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
+        			GameFlowClient.resignGame();
 			Connecting.sendMessageToServer(-1, -1, GameFlowClient.isResign());
-                        logger.log(Level.INFO, "RESIGN");    }//GEN-LAST:event_stopButtonMouseReleased
+                        logger.log(Level.INFO, "RESIGN"); 
+    }//GEN-LAST:event_stopButtonActionPerformed
 
     /**
      * @param args the command line arguments
