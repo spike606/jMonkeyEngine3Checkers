@@ -12,6 +12,7 @@ import com.jme3.network.serializing.Serializer;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeContext;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,8 +47,6 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
         try {
             myServer = Network.createServer(SERVER_PORT);
             logger.log(Level.INFO, "CheckersGame server is running...");
-
-
             myServer.start();
             myServer.addConnectionListener(new CheckersServer());
 
@@ -63,9 +62,16 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
         Match match = new Match(matchNumber);
         logger.log(Level.INFO, "Waiting for players...");
         logger.log(Level.INFO, "Number of threads {0}", Thread.activeCount());
-
         logger.log(Level.INFO, "number of connections #{0}", myServer.getConnections().size());
 
+        
+//         HashMap hm = new HashMap();
+//         hm.
+        
+        
+        
+        
+        
         while (gotFirstPlayer == false) {
             try {
                 Thread.sleep(100);

@@ -136,7 +136,7 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
         }
 
 
-//        myHostedConnection.close("Client out");
+        myHostedConnection.close("Client out");
 //	System.out.println("Close 2");
 
     }
