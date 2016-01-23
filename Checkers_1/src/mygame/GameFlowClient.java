@@ -151,7 +151,7 @@ public class GameFlowClient {
 	public static void startNewGame() {
 
                 CheckersGame.window.startButton.setEnabled(false);
-		CheckersGame.window.stopButton.setEnabled(true);
+		CheckersGame.window.stopButton.setEnabled(false);
                 CheckersGame.window.infoLabel.setText(CheckersGame.CONNECTING);
                 
                 Connecting.firstMessageIn = false;

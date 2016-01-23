@@ -197,6 +197,7 @@ public class CheckersGame extends SimpleApplication {
                 window = new CheckersUI();
 
                 window.gamePanel.add(context.getCanvas());//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                window.stopButton.setEnabled(false);
                 window.pack();
                 try {
                     Thread.sleep(5000);//w celu jednoczesnego pojawienia sie okna i uruchomionego okna silnika
@@ -404,17 +405,17 @@ public class CheckersGame extends SimpleApplication {
 //                    float dist = results.getCollision(0).getDistance();
 //                    Vector3f pt = results.getCollision(0).getContactPoint();
                     selectedPointCoordinates = results.getClosestCollision().getContactPoint();
-                    if (selectedPointCoordinates.getX() < FIRST_COL_X && selectedPointCoordinates.getZ() < FIRST_COL_Z) {
-                        Field clickedField = getBoardField(selectedPointCoordinates);
+//                    if (selectedPointCoordinates.getX() < FIRST_COL_X && selectedPointCoordinates.getZ() < FIRST_COL_Z) {
+                    Field clickedField = getBoardField(selectedPointCoordinates);
 
-                        // The closest result is the target that the player picked:
-                        Node checkerNode = results.getClosestCollision().getGeometry().getParent().getParent().getParent().getParent().getParent();
+                    // The closest result is the target that the player picked:
+                    Node checkerNode = results.getClosestCollision().getGeometry().getParent().getParent().getParent().getParent().getParent();
 //                    if (!checkerNode.getName().equals("Root Node")) {
-                        if (Connecting.connectedToServer) {
-                            Connecting.sendMessageToServer(clickedField.getTabYPosition(), clickedField.getTabXPosition(), GameFlowClient.isResign());
+                    if (Connecting.connectedToServer) {
+                        Connecting.sendMessageToServer(clickedField.getTabYPosition(), clickedField.getTabXPosition(), GameFlowClient.isResign());
 
-                        }
                     }
+//                    }
 //                    GameFlowClient.chosenRow = clickedField.getTabYPosition();
 //                    GameFlowClient.chosenCol = clickedField.getTabXPosition();
 //                    }
@@ -765,12 +766,12 @@ public class CheckersGame extends SimpleApplication {
         for (int i = 0; i < 8; i++) {
             System.out.println(colZCoordinates[i]);
 
-            if (i == 0) {
-                if (colZCoordinates[i] < z_pos) {
-                    col--;
-                }
 
+            if (colZCoordinates[i] > z_pos) {
+                row--;
             }
+
+
         }
         if (row == 8) {//bo klikniecie nie bylo w przedziale bylo poza polami a nadal na szachownicy - mozliwy blad
             //wybrano wiec 7

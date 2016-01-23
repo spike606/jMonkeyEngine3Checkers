@@ -70,14 +70,14 @@ public class CheckersUI extends javax.swing.JFrame {
 
         gamePanel.setPreferredSize(new java.awt.Dimension(640, 480));
 
-        startButton.setText("START");
+        startButton.setText("PLAY");
         startButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 startButtonActionPerformed(evt);
             }
         });
 
-        stopButton.setText("STOP");
+        stopButton.setText("QUIT");
         stopButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 stopButtonActionPerformed(evt);
@@ -173,11 +173,11 @@ public class CheckersUI extends javax.swing.JFrame {
 
         if (Connecting.connectedToServer && !Connecting.firstMessageIn) {
             Connecting.myClient.close();
+            Connecting.connectedToServer = false;
                     System.out.println(" czy pol" + Connecting.myClient.isConnected());
 
             
             CheckersGame.window.startButton.setEnabled(true);
-            CheckersGame.window.stopButton.setEnabled(false);
             CheckersGame.window.infoLabel.setText(CheckersGame.NO_INFO);
             Connecting.firstMessageIn = false;
 
@@ -186,6 +186,7 @@ public class CheckersUI extends javax.swing.JFrame {
             Connecting.sendMessageToServer(-1, -1, GameFlowClient.isResign());
             logger.log(Level.INFO, "RESIGN");
         }
+            CheckersGame.window.stopButton.setEnabled(false);
 
     }//GEN-LAST:event_stopButtonActionPerformed
     /**

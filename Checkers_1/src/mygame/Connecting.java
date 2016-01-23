@@ -70,7 +70,7 @@ public class Connecting extends Thread implements ErrorListener {
 
 
             while (connectedToServer) {
-
+                CheckersGame.window.stopButton.setEnabled(true);
                 GameFlowClient.setTryingToConnect(false);
                 GameFlowClient.setResign(false);
 
