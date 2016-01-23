@@ -404,14 +404,16 @@ public class CheckersGame extends SimpleApplication {
 //                    float dist = results.getCollision(0).getDistance();
 //                    Vector3f pt = results.getCollision(0).getContactPoint();
                     selectedPointCoordinates = results.getClosestCollision().getContactPoint();
-                    Field clickedField = getBoardField(selectedPointCoordinates);
+                    if (selectedPointCoordinates.getX() < FIRST_COL_X && selectedPointCoordinates.getZ() < FIRST_COL_Z) {
+                        Field clickedField = getBoardField(selectedPointCoordinates);
 
-                    // The closest result is the target that the player picked:
-                    Node checkerNode = results.getClosestCollision().getGeometry().getParent().getParent().getParent().getParent().getParent();
+                        // The closest result is the target that the player picked:
+                        Node checkerNode = results.getClosestCollision().getGeometry().getParent().getParent().getParent().getParent().getParent();
 //                    if (!checkerNode.getName().equals("Root Node")) {
-                    if (Connecting.connectedToServer) {
-                        Connecting.sendMessageToServer(clickedField.getTabYPosition(), clickedField.getTabXPosition(), GameFlowClient.isResign());
+                        if (Connecting.connectedToServer) {
+                            Connecting.sendMessageToServer(clickedField.getTabYPosition(), clickedField.getTabXPosition(), GameFlowClient.isResign());
 
+                        }
                     }
 //                    GameFlowClient.chosenRow = clickedField.getTabYPosition();
 //                    GameFlowClient.chosenCol = clickedField.getTabXPosition();
@@ -750,19 +752,35 @@ public class CheckersGame extends SimpleApplication {
         float x_pos = pointCoordinates.getX();
         float z_pos = pointCoordinates.getZ();
 
+        System.out.println(pointCoordinates.getX());
 
         for (int i = 0; i < 8; i++) {
+            System.out.println(colXCoordinates[i]);
+
 
             if (colXCoordinates[i] > x_pos) {
                 col--;
             }
         }
         for (int i = 0; i < 8; i++) {
+            System.out.println(colZCoordinates[i]);
 
-            if (colZCoordinates[i] > z_pos) {
-                row--;
+            if (i == 0) {
+                if (colZCoordinates[i] < z_pos) {
+                    col--;
+                }
+
             }
         }
+        if (row == 8) {//bo klikniecie nie bylo w przedziale bylo poza polami a nadal na szachownicy - mozliwy blad
+            //wybrano wiec 7
+            row = 7;
+
+        }
+        if (col == 8) {
+            col = 7;
+        }
+
         logger.log(Level.INFO, "Col number: {0}, Row number: {1}", new Object[]{col, row});
 
         return boardFields[row][col];
@@ -1305,7 +1323,7 @@ public class CheckersGame extends SimpleApplication {
 //        if (!GameFlowClient.gameRunning && GameFlowClient.isTryingToConnect()) {
 //            window.infoLabel.setText(CONNECTING);//
 //        } else
-            if (GameFlowClient.gameRunning && GameFlowClient.getMyColor() == GameFlowClient.getCurrentPlayer()) {
+        if (GameFlowClient.gameRunning && GameFlowClient.getMyColor() == GameFlowClient.getCurrentPlayer()) {
             window.infoLabel.setText(MOVE);
         } else if (GameFlowClient.gameRunning && GameFlowClient.getMyColor() != GameFlowClient.getCurrentPlayer()) {
             window.infoLabel.setText(WAIT);
