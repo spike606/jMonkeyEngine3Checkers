@@ -25,13 +25,13 @@ public class Connecting extends Thread implements ErrorListener {
     private static final Logger logger = Logger.getLogger(CheckersGame.class.getName());
     private static MessageFromClient messageToServer;
     private MessageFromServer messageFromServer;
-    static boolean connectedToServer = false;
+    public static boolean connectedToServer = false;
     private volatile boolean threadRunning = true;
     private static final int SERVER_PORT = 8901;
     private static final String HOST_NAME = "192.168.0.101";
 //        private static final String HOST_NAME = "localhost";
-    private static Client myClient;
-    private static boolean firstMessageIn = false;//pomocnicza ustawiana gdy odbierzemy wiadomosc z serwera
+    public static Client myClient;
+    public static boolean firstMessageIn = false;//pomocnicza ustawiana gdy odbierzemy wiadomosc z serwera - wowczas wiadomo ze mecz sie rozpoczal
 
     public Connecting() {
         messageToServer = new MessageFromClient();
@@ -191,7 +191,7 @@ public class Connecting extends Thread implements ErrorListener {
         public void messageReceived(Client source, Message m) {
             if (m instanceof MessageFromServer) {
 
-//                firstMessageIn = true;
+                firstMessageIn = true;
 
                 messageFromServer = (MessageFromServer) m;
                 if (messageFromServer.getWinner() > 0) {

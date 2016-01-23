@@ -18,9 +18,10 @@ import mygame.GameFlowClient;
  */
 public class CheckersUI extends javax.swing.JFrame {
 
-        //logger
+    //logger
     private static final Logger logger = Logger.getLogger(CheckersUI.class.getName());
     CheckersGame app;
+
     /**
      * Creates new form CheckersUI
      */
@@ -157,19 +158,36 @@ public class CheckersUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
-        			GameFlowClient.setTryingToConnect(true);
-                        if(CheckersGame.matchFinished == true){
-                            CheckersGame.startNextGame = true;
-                        }
-			GameFlowClient.startNewGame();  
+        GameFlowClient.setTryingToConnect(true);
+        if (CheckersGame.matchFinished == true) {
+            CheckersGame.startNextGame = true;
+        }
+        GameFlowClient.startNewGame();
     }//GEN-LAST:event_startButtonActionPerformed
 
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
-        			GameFlowClient.resignGame();
-			Connecting.sendMessageToServer(-1, -1, GameFlowClient.isResign());
-                        logger.log(Level.INFO, "RESIGN"); 
-    }//GEN-LAST:event_stopButtonActionPerformed
 
+        System.out.println(" connecting" +Connecting.connectedToServer);
+        System.out.println(" firstmesagein" + Connecting.firstMessageIn);
+                    System.out.println(" czy pol" + Connecting.myClient.isConnected());
+
+        if (Connecting.connectedToServer && !Connecting.firstMessageIn) {
+            Connecting.myClient.close();
+                    System.out.println(" czy pol" + Connecting.myClient.isConnected());
+
+            
+            CheckersGame.window.startButton.setEnabled(true);
+            CheckersGame.window.stopButton.setEnabled(false);
+            CheckersGame.window.infoLabel.setText(CheckersGame.NO_INFO);
+            Connecting.firstMessageIn = false;
+
+        } else {
+            GameFlowClient.resignGame();
+            Connecting.sendMessageToServer(-1, -1, GameFlowClient.isResign());
+            logger.log(Level.INFO, "RESIGN");
+        }
+
+    }//GEN-LAST:event_stopButtonActionPerformed
     /**
      * @param args the command line arguments
      */

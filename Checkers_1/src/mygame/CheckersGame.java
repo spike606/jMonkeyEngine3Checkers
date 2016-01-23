@@ -171,7 +171,7 @@ public class CheckersGame extends SimpleApplication {
     private static final String YOU_LOOSE = "You lose!";
     private static final String WAIT = "Wait for opoonent's move...";
     private static final String MOVE = "Make your move.";
-    private static final String NO_INFO = "";
+    public static final String NO_INFO = "";
 
     /**
      * ***
