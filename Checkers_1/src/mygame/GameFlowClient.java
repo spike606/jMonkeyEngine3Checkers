@@ -53,6 +53,11 @@ public class GameFlowClient {
 	public static int getMyColor() {
 		return myColor;
 	}
+        public static String getMyColorString() {
+            if(myColor == WHITE)
+		return "White: ";
+            else return "Black: ";
+	}
 
 	public static void setMyColor(int myColor) {
 		GameFlowClient.myColor = myColor;

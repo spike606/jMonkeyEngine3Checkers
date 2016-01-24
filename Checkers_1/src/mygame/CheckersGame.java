@@ -1325,7 +1325,7 @@ public class CheckersGame extends SimpleApplication {
 //            window.infoLabel.setText(CONNECTING);//
 //        } else
         if (GameFlowClient.gameRunning && GameFlowClient.getMyColor() == GameFlowClient.getCurrentPlayer()) {
-            window.infoLabel.setText(MOVE);
+            window.infoLabel.setText(GameFlowClient.getMyColorString() + MOVE);
         } else if (GameFlowClient.gameRunning && GameFlowClient.getMyColor() != GameFlowClient.getCurrentPlayer()) {
             window.infoLabel.setText(WAIT);
 
