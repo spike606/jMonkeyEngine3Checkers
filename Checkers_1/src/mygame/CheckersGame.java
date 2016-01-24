@@ -1271,6 +1271,8 @@ public class CheckersGame extends SimpleApplication {
         Spatial checkerModelNodeSpatial = checkerModelNode.getChild(0);
         checkerModelNode.detachChild(checkerModelNodeSpatial);
         checkerModelNodeSpatial = assetManager.loadModel(changeTo);
+        checkerModelNodeSpatial.setShadowMode(ShadowMode.CastAndReceive);//dodaj cienie
+
         checkerModelNode.attachChild(checkerModelNodeSpatial);
 
 
