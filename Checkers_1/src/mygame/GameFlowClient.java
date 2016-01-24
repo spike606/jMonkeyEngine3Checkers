@@ -95,11 +95,11 @@ public class GameFlowClient {
 		GameFlowClient.currentPlayer = currentPlayer;
 	}
 
-	public static int[][] getBoard() {
+	public static synchronized int[][] getBoard() {
 		return board;
 	}
 
-	public static void setBoard(int[][] board) {
+	public static synchronized void setBoard(int[][] board) {
 		GameFlowClient.board = board;
 	}
 

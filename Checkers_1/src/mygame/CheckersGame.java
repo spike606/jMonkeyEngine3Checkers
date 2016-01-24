@@ -140,10 +140,11 @@ public class CheckersGame extends SimpleApplication {
     private static boolean gameCreated = false;
     GameFlowClient game;
     private static boolean restartGame = false;
-    public static boolean playWinner = false;
-    public static boolean playLooser = false;
-    public static boolean matchFinished = false;
-    public static boolean startNextGame = false;
+    public static  boolean playWinner = false;
+    public static  boolean playLooser = false;
+    public static  boolean matchFinished = false;
+    public static  boolean lastMove = false;//do wykonania ostatniego ruchu - refresh tylko raz
+    public static  boolean startNextGame = false;
     /* modele*/
     private static final String WHITE_CHECKER_MODEL = "Models/Ch_white/Ch_white.j3o";
     private static final String WHITE_QUEEN_CHECKER_MODEL = "Models/Ch_white_queen/Ch_white_queen.j3o";
@@ -319,11 +320,19 @@ public class CheckersGame extends SimpleApplication {
 //        System.out.println("ANIM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" + animInProgress);
 
         if (Connecting.connectedToServer && animInProgress == false) {
-            refreshView();
-        }
-        playSound();
-        setInfo();
+            System.out.println("1!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 
+            refreshView();
+
+        }
+
+
+        if (matchFinished && lastMove) {
+            System.out.println("2!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+            refreshView();
+            lastMove = false;
+        }
         if ((GameFlowClient.isGameRunning() == false && matchFinished == true
                 && startNextGame == true)) {
 
@@ -332,6 +341,8 @@ public class CheckersGame extends SimpleApplication {
             matchFinished = false;
             startNextGame = false;
         }
+        playSound();
+        setInfo();
 //        System.out.println("Cam location: " + cam.getLocation());
 //        System.out.println("Cam up : " + cam.getUp());
 //        System.out.println("Cam left : " + cam.getLeft());
@@ -1003,12 +1014,17 @@ public class CheckersGame extends SimpleApplication {
         int[][] currentBoardFromServer = GameFlowClient.getBoard();
         int chosenRow = GameFlowClient.getChosenRow();
         int chosenCol = GameFlowClient.getChosenCol();
+        System.out.println("in1");
+        System.out.println("choser row " + chosenRow + chosenCol);
 
         //zaznaczenie bierki jesli moj kolor i tylko tej ktora moze wykonac ruch - (dane z serwera)
         if (GameFlowClient.gameRunning && GameFlowClient.getMyColor() == GameFlowClient.getCurrentPlayer()
                 && animInProgress == false) {
+            System.out.println("in2");
 
             if (chosenRow >= 0 && chosenCol >= 0) {
+                System.out.println("in3");
+
                 if (currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.WHITE
                         || currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.WHITE_QUEEN) {
                     for (int i = 0; i < 12; i++) {
@@ -1052,22 +1068,29 @@ public class CheckersGame extends SimpleApplication {
         boolean movePerformed = false;
 //        System.out.println("GAME ARRAY: ");
 
+        System.out.println("ARRAY game: ");
+
+
+
         //wykonaj ruch jesli jest roznica
         for (int row = 0; row < boardFields.length; row++) {
             for (int col = 0; col < boardFields[row].length; col++) {
 
 
-//                System.out.print(boardFields[row][col].getCheckerColor());
+                System.out.print("gra " + boardFields[row][col].getCheckerColor());
+                System.out.print("serer" + currentBoardFromServer[row][col]);
 
 
 
 
                 if (boardFields[row][col].getCheckerColor() != currentBoardFromServer[row][col]) {
+                    System.out.println("in4 ");
 
                     //gdy jest roznica w tablicach - przemieszczenie
                     if (boardFields[row][col].getCheckerColor() > GameFlowClient.EMPTY) {
                         movePerformed = true;
 
+                        System.out.println("in5");
 
                         //POPRAWIC!!!!
 
@@ -1080,6 +1103,7 @@ public class CheckersGame extends SimpleApplication {
 //                        System.out.println("move gfrom col :" + moveFromCol);
                     }
                     if (boardFields[row][col].getCheckerColor() == GameFlowClient.EMPTY) {
+                        System.out.println("in6");
 
                         moveToRow = boardFields[row][col].getTabYPosition();
                         moveToCol = boardFields[row][col].getTabXPosition();
@@ -1091,12 +1115,13 @@ public class CheckersGame extends SimpleApplication {
 
                 }
             }
-//            System.out.println();
+            System.out.println();
 
         }
 
         if (movePerformed) {
             System.out.println("size" + possibleMoveFromRow.size());
+            System.out.println("in7");
 
             for (int i = 0; i < possibleMoveFromRow.size(); i++) {
                 System.out.println("possible move from row: " + possibleMoveFromRow.get(i));

@@ -98,6 +98,9 @@ public class Connecting extends Thread implements ErrorListener {
                         CheckersGame.playWinner = true;
 //                        CheckersGame.animInProgress = true;//by najpierw animacja sie zakonczyla a dopiero nastapil reset gry
                         CheckersGame.matchFinished = true;
+                        CheckersGame.lastMove = true;
+
+                        connectedToServer = false;
 
                         System.out.println("wy");
 
@@ -109,6 +112,9 @@ public class Connecting extends Thread implements ErrorListener {
                         CheckersGame.playLooser = true;
 //                        CheckersGame.animInProgress = true;
                         CheckersGame.matchFinished = true;
+                        CheckersGame.lastMove = true;
+
+                        connectedToServer = false;
 
                         System.out.println("prze");
 
@@ -194,14 +200,14 @@ public class Connecting extends Thread implements ErrorListener {
                 firstMessageIn = true;
 
                 messageFromServer = (MessageFromServer) m;
-                if (messageFromServer.getWinner() > 0) {
-                    setWinner(messageFromServer.getWinner(), messageFromServer.isGameRunning());
-                } else {
-                    getDataFromServer(messageFromServer.getBoard(), messageFromServer.getChosenRow(),
-                            messageFromServer.getChosenCol(), messageFromServer.isGameRunning(),
-                            messageFromServer.getCurrentPlayer(), messageFromServer.getPossibleMoves(),
-                            messageFromServer.getMyColor(), messageFromServer.getWinner());
-                }
+//                if (messageFromServer.getWinner() > 0) {
+//                    setWinner(messageFromServer.getWinner(), messageFromServer.isGameRunning());
+//                } else {
+                getDataFromServer(messageFromServer.getBoard(), messageFromServer.getChosenRow(),
+                        messageFromServer.getChosenCol(), messageFromServer.isGameRunning(),
+                        messageFromServer.getCurrentPlayer(), messageFromServer.getPossibleMoves(),
+                        messageFromServer.getMyColor(), messageFromServer.getWinner());
+//                }
                 logger.log(Level.INFO, "Ch col: {0}", messageFromServer.getChosenCol());
                 logger.log(Level.INFO, "Ch row: {0}", messageFromServer.getChosenRow());
                 System.out.println("winner: " + messageFromServer.getWinner());
@@ -210,15 +216,15 @@ public class Connecting extends Thread implements ErrorListener {
 
 
 
-//                System.out.println("ARRAY FROM SERVER: ");
-//
-//                int array[][] = messageFromServer.getBoard();
-//                for (int i = 0; i < array.length; i++) {
-//                    for (int j = 0; j < array[i].length; j++) {
-//                        System.out.print(array[i][j]);
-//                    }
-//                    System.out.println();
-//                }
+                System.out.println("ARRAY FROM SERVER: ");
+
+                int array[][] = messageFromServer.getBoard();
+                for (int i = 0; i < array.length; i++) {
+                    for (int j = 0; j < array[i].length; j++) {
+                        System.out.print(array[i][j]);
+                    }
+                    System.out.println();
+                }
             }
         }
     }
