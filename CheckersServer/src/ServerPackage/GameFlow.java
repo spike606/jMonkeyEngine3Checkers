@@ -82,7 +82,6 @@ public class GameFlow {
 	}
 
 	private void gameIsOver(int winner) {
-
 		gameRunning = false;
 		this.winner = winner;
 	}
@@ -176,6 +175,7 @@ public class GameFlow {
 		/*
 		 * Set default values - player has not yet selected a checker to move
 		 */
+                
 		chosenRow = -1;
 		chosenCol = -1;
 

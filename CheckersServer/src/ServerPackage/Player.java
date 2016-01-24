@@ -97,17 +97,18 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
 //                                                hostedConnection.send(messageToClient);
 
                         firstMessageOut = true;
-                    } else if (!match.gameFlow.isGameRunning() && match.gameFlow.getWinner() != GameData.EMPTY) {// game end
-                        prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
-                                match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
-                                match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), getMyColor());
-//                        hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);
-                        myHostedConnection.getServer().broadcast(Filters.equalTo(myHostedConnection), messageToClient);
-
-//                        hostedConnection.send(messageToClient);
-                        threadRunning = false;// to kill current thread
-
                     }
+//                    else if (!match.gameFlow.isGameRunning() && match.gameFlow.getWinner() != GameData.EMPTY) {// game end
+//                        prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
+//                                match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
+//                                match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), getMyColor());
+////                        hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);
+//                        myHostedConnection.getServer().broadcast(Filters.equalTo(myHostedConnection), messageToClient);
+//
+////                        hostedConnection.send(messageToClient);
+//                        threadRunning = false;// to kill current thread
+//
+//                    }
                     //gdy polaczenie przeciwnika zostalo zakoncozne np opuscil gre to wygrywam
                     if (!myServer.getConnections().contains(opponentHostedConnection)) {
                         match.gameFlow.setWinner(getMyColor());
@@ -120,7 +121,7 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
                                 match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), getMyColor());
                         //do mnie bo przeciwnika juz nie ma
                         myHostedConnection.getServer().broadcast(Filters.equalTo(myHostedConnection), messageToClient);
-
+                        threadRunning = false;
                     }
 
 
@@ -158,14 +159,14 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
 
     //listener - when message is received
     public void messageReceived(HostedConnection source, Message m) {
-					System.out.println("got message");
+        System.out.println("got message");
 
         if (source == myHostedConnection && match.gameFlow.getCurrentPlayer() == myColor
                 && match.gameFlow.isGameRunning() && firstMessageOut == true && m instanceof MessageFromClient) {
 
             // receive message from client
             messageFromClient = (MessageFromClient) m;
-					System.out.println("odebrane" + messageFromClient.getChosenRow() + messageFromClient.getChosenCol());
+            System.out.println("odebrane" + messageFromClient.getChosenRow() + messageFromClient.getChosenCol());
 
             // process message from client
             match.gameFlow.makeClick(messageFromClient.getChosenRow(), messageFromClient.getChosenCol(),
@@ -184,7 +185,9 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
 
             if (!match.gameFlow.isGameRunning() && match.gameFlow.getWinner() > 0) //jesli jest zwyciezca to wyslij wiadomosc do obydwu graczy
             {
+//                match.gameFlow.setCurrentPlayer(myColor);
                 myHostedConnection.getServer().broadcast(Filters.in(myHostedConnection, opponentHostedConnection), messageToClient);
+                threadRunning = false;
 
             } else //jezeli dlej mam prawo ruchu tzn ze jest jeszce bicie wiec wyslij wiadomosc do obydwu graczy by uaktualnic widok
             if (match.gameFlow.getCurrentPlayer() == getMyColor()) {
