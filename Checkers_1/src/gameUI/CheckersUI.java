@@ -167,6 +167,7 @@ public class CheckersUI extends javax.swing.JFrame {
 
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
 
+        if(GameFlowClient.getCurrentPlayer() == GameFlowClient.getMyColor()){
         System.out.println(" connecting" +Connecting.connectedToServer);
         System.out.println(" firstmesagein" + Connecting.firstMessageIn);
                     System.out.println(" czy pol" + Connecting.myClient.isConnected());
@@ -189,7 +190,7 @@ public class CheckersUI extends javax.swing.JFrame {
             logger.log(Level.INFO, "RESIGN");
         }
             CheckersGame.window.stopButton.setEnabled(false);
-
+        }
     }//GEN-LAST:event_stopButtonActionPerformed
     /**
      * @param args the command line arguments
