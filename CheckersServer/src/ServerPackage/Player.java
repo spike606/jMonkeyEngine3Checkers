@@ -158,12 +158,14 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
 
     //listener - when message is received
     public void messageReceived(HostedConnection source, Message m) {
+					System.out.println("got message");
 
         if (source == myHostedConnection && match.gameFlow.getCurrentPlayer() == myColor
                 && match.gameFlow.isGameRunning() && firstMessageOut == true && m instanceof MessageFromClient) {
 
             // receive message from client
             messageFromClient = (MessageFromClient) m;
+					System.out.println("odebrane" + messageFromClient.getChosenRow() + messageFromClient.getChosenCol());
 
             // process message from client
             match.gameFlow.makeClick(messageFromClient.getChosenRow(), messageFromClient.getChosenCol(),

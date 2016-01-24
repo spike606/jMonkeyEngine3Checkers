@@ -68,7 +68,7 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
 //        Match match = new Match(matchNumber);
 //        logger.log(Level.INFO, "Waiting for players...");
 //        logger.log(Level.INFO, "Number of threads {0}", Thread.activeCount());
-        logger.log(Level.INFO, "number of connections #{0}", myServer.getConnections().size());
+//        logger.log(Level.INFO, "number of connections #{0}", myServer.getConnections().size());
 
 
         //sprawdz czy liczba polaczen jest parzysta
@@ -114,13 +114,13 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
 
                             break;
                         }
-                        System.out.println("1");
+//                        System.out.println("1");
 
                     }
-                    System.out.println("2");
+//                    System.out.println("2");
                 }
 
-                System.out.println("3");
+//                System.out.println("3");
 
 
 //                i.remove(); // avoids a ConcurrentModificationException
