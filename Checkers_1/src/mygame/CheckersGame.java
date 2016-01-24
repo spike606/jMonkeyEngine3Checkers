@@ -140,11 +140,11 @@ public class CheckersGame extends SimpleApplication {
     private static boolean gameCreated = false;
     GameFlowClient game;
     private static boolean restartGame = false;
-    public static  boolean playWinner = false;
-    public static  boolean playLooser = false;
-    public static  boolean matchFinished = false;
-    public static  boolean lastMove = false;//do wykonania ostatniego ruchu - refresh tylko raz
-    public static  boolean startNextGame = false;
+    public static boolean playWinner = false;
+    public static boolean playLooser = false;
+    public static boolean matchFinished = false;
+    public static boolean lastMove = false;//do wykonania ostatniego ruchu - refresh tylko raz
+    public static boolean startNextGame = false;
     /* modele*/
     private static final String WHITE_CHECKER_MODEL = "Models/Ch_white/Ch_white.j3o";
     private static final String WHITE_QUEEN_CHECKER_MODEL = "Models/Ch_white_queen/Ch_white_queen.j3o";
@@ -281,9 +281,9 @@ public class CheckersGame extends SimpleApplication {
                         checkerIdToChange = -1;
                     }
                     animInProgress = false;
-                    if(!GameFlowClient.isGameRunning()){
+                    if (!GameFlowClient.isGameRunning()) {
                         Connecting.connectedToServer = false;
-                        Connecting.myClient.close();
+//                        Connecting.myClient.close();
                     }
 //                    gameEndSound();
 
@@ -336,9 +336,10 @@ public class CheckersGame extends SimpleApplication {
 //            refreshView();
 //            lastMove = false;
 //        }
-        if ((GameFlowClient.isGameRunning() == false && matchFinished == true
+//        if ((GameFlowClient.isGameRunning() == false && matchFinished == true
+//                && startNextGame == true)) {
+        if ((matchFinished == true
                 && startNextGame == true)) {
-
 
             restartGame();
             matchFinished = false;
