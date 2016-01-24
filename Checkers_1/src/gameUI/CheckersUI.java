@@ -174,7 +174,7 @@ public class CheckersUI extends javax.swing.JFrame {
 
         if (Connecting.connectedToServer && !Connecting.firstMessageIn) {
             Connecting.myClient.close();
-            Connecting.connectedToServer = false;
+//            Connecting.connectedToServer = false;
                     System.out.println(" czy pol" + Connecting.myClient.isConnected());
 
             
@@ -184,7 +184,7 @@ public class CheckersUI extends javax.swing.JFrame {
 
         } else {
             GameFlowClient.resignGame();
-                        Connecting.connectedToServer = false;
+//                        Connecting.connectedToServer = false;
 
             Connecting.sendMessageToServer(-1, -1, GameFlowClient.isResign());
             logger.log(Level.INFO, "RESIGN");
