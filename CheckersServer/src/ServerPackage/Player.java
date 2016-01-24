@@ -98,6 +98,18 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
 
                         firstMessageOut = true;
                     }
+                    if (!match.gameFlow.isGameRunning() && match.gameFlow.getWinner() > 0) //jesli jest zwyciezca to wyslij wiadomosc do obydwu graczy
+                    {
+                        // prepare and send answer to client
+                        prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
+                                match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
+                                match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), getMyColor());
+                        myHostedConnection.getServer().broadcast(Filters.in(myHostedConnection), messageToClient);
+
+
+                        threadRunning = false;
+
+                    }
 //                    else if (!match.gameFlow.isGameRunning() && match.gameFlow.getWinner() != GameData.EMPTY) {// game end
 //                        prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
 //                                match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
@@ -186,7 +198,9 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
             if (!match.gameFlow.isGameRunning() && match.gameFlow.getWinner() > 0) //jesli jest zwyciezca to wyslij wiadomosc do obydwu graczy
             {
 //                match.gameFlow.setCurrentPlayer(myColor);
-                myHostedConnection.getServer().broadcast(Filters.in(myHostedConnection, opponentHostedConnection), messageToClient);
+                myHostedConnection.getServer().broadcast(Filters.in(myHostedConnection), messageToClient);
+
+
                 threadRunning = false;
 
             } else //jezeli dlej mam prawo ruchu tzn ze jest jeszce bicie wiec wyslij wiadomosc do obydwu graczy by uaktualnic widok
