@@ -52,6 +52,8 @@ public class Connecting extends Thread implements ErrorListener {
                 myClient.addErrorListener(this);//by obsluzyc bledy zwiazane z zerwanym polaczeniem
                 myClient.start();
                 connectedToServer = true;
+                                CheckersGame.window.stopButton.setEnabled(true);
+
             } catch (ConnectException ex) {
                 logger.log(Level.SEVERE, "CAN'T CONNECT TO SERVER!");
                 connectedToServer = false;
@@ -70,7 +72,6 @@ public class Connecting extends Thread implements ErrorListener {
 
 
             while (connectedToServer) {
-                CheckersGame.window.stopButton.setEnabled(true);
                 GameFlowClient.setTryingToConnect(false);
                 GameFlowClient.setResign(false);
 
@@ -87,39 +88,6 @@ public class Connecting extends Thread implements ErrorListener {
                     CheckersGame.window.stopButton.setEnabled(false);
 
 
-                } else if (messageFromServer.getWinner() > 0) {
-                    System.out.println("WINNER: " + messageFromServer.getWinner());
-                    System.out.println("MY COLOR: " + GameFlowClient.getMyColor());
-
-
-                    if (messageFromServer.getWinner() == GameFlowClient.getMyColor()) {
-                        CheckersGame.window.startButton.setEnabled(true);
-                        CheckersGame.window.stopButton.setEnabled(false);
-                        CheckersGame.playWinner = true;
-//                        CheckersGame.animInProgress = true;//by najpierw animacja sie zakonczyla a dopiero nastapil reset gry
-                        CheckersGame.matchFinished = true;
-                        CheckersGame.lastMove = true;
-
-                        connectedToServer = false;
-
-                        System.out.println("wy");
-
-
-                        break;
-                    } else {
-                        CheckersGame.window.startButton.setEnabled(true);
-                        CheckersGame.window.stopButton.setEnabled(false);
-                        CheckersGame.playLooser = true;
-//                        CheckersGame.animInProgress = true;
-                        CheckersGame.matchFinished = true;
-                        CheckersGame.lastMove = true;
-
-                        connectedToServer = false;
-
-                        System.out.println("prze");
-
-                        break;
-                    }
                 }
                 try {
                     Thread.sleep(10);
@@ -208,6 +176,39 @@ public class Connecting extends Thread implements ErrorListener {
                         messageFromServer.getCurrentPlayer(), messageFromServer.getPossibleMoves(),
                         messageFromServer.getMyColor(), messageFromServer.getWinner());
 //                }
+
+                if (messageFromServer.getWinner() > 0) {
+                    System.out.println("WINNER: " + messageFromServer.getWinner());
+                    System.out.println("MY COLOR: " + GameFlowClient.getMyColor());
+
+
+                    if (messageFromServer.getWinner() == GameFlowClient.getMyColor()) {
+                        CheckersGame.window.startButton.setEnabled(true);
+                        CheckersGame.window.stopButton.setEnabled(false);
+                        CheckersGame.playWinner = true;
+//                        CheckersGame.animInProgress = true;//by najpierw animacja sie zakonczyla a dopiero nastapil reset gry
+                        CheckersGame.matchFinished = true;
+                        CheckersGame.lastMove = true;
+
+//                        connectedToServer = false;
+
+                        System.out.println("wy");
+
+
+                    } else {
+                        CheckersGame.window.startButton.setEnabled(true);
+                        CheckersGame.window.stopButton.setEnabled(false);
+                        CheckersGame.playLooser = true;
+//                        CheckersGame.animInProgress = true;
+                        CheckersGame.matchFinished = true;
+                        CheckersGame.lastMove = true;
+
+//                        connectedToServer = false;
+
+                        System.out.println("prze");
+
+                    }
+                }
                 logger.log(Level.INFO, "Ch col: {0}", messageFromServer.getChosenCol());
                 logger.log(Level.INFO, "Ch row: {0}", messageFromServer.getChosenRow());
                 System.out.println("winner: " + messageFromServer.getWinner());

@@ -183,6 +183,8 @@ public class CheckersUI extends javax.swing.JFrame {
 
         } else {
             GameFlowClient.resignGame();
+                        Connecting.connectedToServer = false;
+
             Connecting.sendMessageToServer(-1, -1, GameFlowClient.isResign());
             logger.log(Level.INFO, "RESIGN");
         }

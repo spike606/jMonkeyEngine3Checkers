@@ -281,7 +281,10 @@ public class CheckersGame extends SimpleApplication {
                         checkerIdToChange = -1;
                     }
                     animInProgress = false;
-
+                    if(!GameFlowClient.isGameRunning()){
+                        Connecting.connectedToServer = false;
+                        Connecting.myClient.close();
+                    }
 //                    gameEndSound();
 
                 } else {//gdy trwa przemieszczenie
@@ -327,12 +330,12 @@ public class CheckersGame extends SimpleApplication {
         }
 
 
-        if (matchFinished && lastMove) {
-            System.out.println("2!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-
-            refreshView();
-            lastMove = false;
-        }
+//        if (matchFinished && lastMove) {
+//            System.out.println("2!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+//
+//            refreshView();
+//            lastMove = false;
+//        }
         if ((GameFlowClient.isGameRunning() == false && matchFinished == true
                 && startNextGame == true)) {
 
