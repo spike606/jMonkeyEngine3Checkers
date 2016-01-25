@@ -281,10 +281,10 @@ public class CheckersGame extends SimpleApplication {
                         checkerIdToChange = -1;
                     }
                     animInProgress = false;
-//                    if (!GameFlowClient.isGameRunning()) {
-//                        Connecting.connectedToServer = false;
+                    if (!GameFlowClient.isGameRunning()) {
+                        Connecting.connectedToServer = false;
 //                        Connecting.myClient.close();
-//                    }
+                    }
 //                    gameEndSound();
 
                 } else {//gdy trwa przemieszczenie
