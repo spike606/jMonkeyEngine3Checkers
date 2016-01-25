@@ -27,7 +27,7 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
 
     //logger
     private static final Logger logger = Logger.getLogger(CheckersServer.class.getName());
-    private static final int SERVER_PORT = 8901;
+    private static final int SERVER_PORT = 8902;
     private static int matchNumber = 1;
     private static Server myServer;
     private static boolean gotFirstPlayer = false;//pomocnicze
