@@ -1,21 +1,15 @@
 package mygame;
 
 import java.io.IOException;
-
-
-
 import CommonPackageGame.*;
 import com.jme3.network.Client;
-import com.jme3.network.ClientStateListener;
 import com.jme3.network.ErrorListener;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Network;
 import com.jme3.network.kernel.ConnectorException;
 import com.jme3.network.serializing.Serializer;
-import gameUI.CheckersUI;
 import java.net.ConnectException;
-import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,15 +23,14 @@ public class Connecting extends Thread implements ErrorListener {
     private volatile boolean threadRunning = true;
     private static final int SERVER_PORT = 8902;
     private static final String HOST_NAME = "localhost";
-//        private static final String HOST_NAME = "localhost";
     public static Client myClient;
-    public static boolean firstMessageIn = false;//pomocnicza ustawiana gdy odbierzemy wiadomosc z serwera - wowczas wiadomo ze mecz sie rozpoczal
+    public static boolean firstMessageIn = false;//set when received first message from server
 
     public Connecting() {
         messageToServer = new MessageFromClient();
         messageFromServer = new MessageFromServer();
 
-        Serializer.registerClass(MessageFromClient.class);//konieczna serializacja wiadomosci
+        Serializer.registerClass(MessageFromClient.class);//serialization required by jme3
         Serializer.registerClass(MessageFromServer.class);
         Serializer.registerClass(CheckersMove.class);
 
@@ -49,10 +42,10 @@ public class Connecting extends Thread implements ErrorListener {
             try {
                 myClient = Network.connectToServer(HOST_NAME, SERVER_PORT);
                 myClient.addMessageListener(new ClientListener(), MessageFromClient.class, MessageFromServer.class);
-                myClient.addErrorListener(this);//by obsluzyc bledy zwiazane z zerwanym polaczeniem
+                myClient.addErrorListener(this);
                 myClient.start();
                 connectedToServer = true;
-                                CheckersGame.window.stopButton.setEnabled(true);
+                CheckersGame.window.stopButton.setEnabled(true);
 
             } catch (ConnectException ex) {
                 logger.log(Level.SEVERE, "CAN'T CONNECT TO SERVER!");
@@ -64,29 +57,23 @@ public class Connecting extends Thread implements ErrorListener {
                 threadRunning = false;
 
             } catch (IOException ex) {
-                Logger.getLogger(Connecting.class.getName()).log(Level.SEVERE, null, ex);
+                logger.log(Level.SEVERE, "CAN'T CONNECT TO SERVER!");
+                connectedToServer = false;
+                CheckersGame.window.startButton.setEnabled(true);
+                CheckersGame.window.stopButton.setEnabled(false);
+                CheckersGame.window.infoLabel.setText(CheckersGame.CANT_CONNECT);
+                GameFlowClient.setTryingToConnect(false);
+                threadRunning = false;
             }
-
-
-
-
-
+            
             while (connectedToServer) {
                 GameFlowClient.setTryingToConnect(false);
                 GameFlowClient.setResign(false);
-
-//                if(firstMessageIn == true){
-//                    
-//                    
-//                    
-//                    firstMessageIn = false;
-//                }
 
                 if (GameFlowClient.isResign() == true) {
                     sendMessageToServer(-1, -1, GameFlowClient.isResign());
                     CheckersGame.window.startButton.setEnabled(true);
                     CheckersGame.window.stopButton.setEnabled(false);
-
 
                 }
                 try {
@@ -113,13 +100,6 @@ public class Connecting extends Thread implements ErrorListener {
 
     }
 
-    private void setWinner(int winner, boolean gameRunning) {
-
-        GameFlowClient.setWinner(winner);
-        GameFlowClient.setGameRunning(gameRunning);
-
-    }
-
     private static void prepareMessageToServer(int row, int col, boolean resign) {
         messageToServer.setChosenCol(col);
         messageToServer.setChosenRow(row);
@@ -140,14 +120,11 @@ public class Connecting extends Thread implements ErrorListener {
     @Override
     public void destroy() {
         myClient.close();
-        System.out.println(" ZAMYKAM");
-
         super.destroy();
     }
 
     public void handleError(Object source, Throwable t) {
         if (t instanceof ConnectorException) {
-            System.out.println(" error out: ");
             GameFlowClient.resignGame();
             CheckersGame.matchFinished = true;
             GameFlowClient.setGameRunning(false);
@@ -168,63 +145,26 @@ public class Connecting extends Thread implements ErrorListener {
                 firstMessageIn = true;
 
                 messageFromServer = (MessageFromServer) m;
-//                if (messageFromServer.getWinner() > 0) {
-//                    setWinner(messageFromServer.getWinner(), messageFromServer.isGameRunning());
-//                } else {
+
                 getDataFromServer(messageFromServer.getBoard(), messageFromServer.getChosenRow(),
                         messageFromServer.getChosenCol(), messageFromServer.isGameRunning(),
                         messageFromServer.getCurrentPlayer(), messageFromServer.getPossibleMoves(),
                         messageFromServer.getMyColor(), messageFromServer.getWinner());
-//                }
 
                 if (messageFromServer.getWinner() > 0) {
-                    System.out.println("WINNER: " + messageFromServer.getWinner());
-                    System.out.println("MY COLOR: " + GameFlowClient.getMyColor());
-
-
                     if (messageFromServer.getWinner() == GameFlowClient.getMyColor()) {
                         CheckersGame.window.startButton.setEnabled(true);
                         CheckersGame.window.stopButton.setEnabled(false);
                         CheckersGame.playWinner = true;
-//                        CheckersGame.animInProgress = true;//by najpierw animacja sie zakonczyla a dopiero nastapil reset gry
                         CheckersGame.matchFinished = true;
                         CheckersGame.lastMove = true;
-
-//                        connectedToServer = false;
-
-                        System.out.println("wy");
-
-
                     } else {
                         CheckersGame.window.startButton.setEnabled(true);
                         CheckersGame.window.stopButton.setEnabled(false);
                         CheckersGame.playLooser = true;
-//                        CheckersGame.animInProgress = true;
                         CheckersGame.matchFinished = true;
                         CheckersGame.lastMove = true;
-
-//                        connectedToServer = false;
-
-                        System.out.println("prze");
-
                     }
-                }
-                logger.log(Level.INFO, "Ch col: {0}", messageFromServer.getChosenCol());
-                logger.log(Level.INFO, "Ch row: {0}", messageFromServer.getChosenRow());
-                System.out.println("winner: " + messageFromServer.getWinner());
-                System.out.println("my color: " + messageFromServer.getMyColor());
-                System.out.println("current player: " + messageFromServer.getCurrentPlayer());
-
-
-
-                System.out.println("ARRAY FROM SERVER: ");
-
-                int array[][] = messageFromServer.getBoard();
-                for (int i = 0; i < array.length; i++) {
-                    for (int j = 0; j < array[i].length; j++) {
-                        System.out.print(array[i][j]);
-                    }
-                    System.out.println();
                 }
             }
         }

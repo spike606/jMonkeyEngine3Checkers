@@ -4,13 +4,12 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.network.serializing.Serializable;
 
 /*
- * Class which represent move in the game (checker and queen)
+ * Class represent move in the game (checker and queen)
  */
 
 @Serializable
 public class CheckersMove extends AbstractMessage{
 
-//	private static final long serialVersionUID = 7989998894212425464L;
 	private int moveFromRow, moveFromCol; // coordinates of the checker to be
 											// moved
 	private int moveToRow, moveToCol; // coordinates where the checker will be

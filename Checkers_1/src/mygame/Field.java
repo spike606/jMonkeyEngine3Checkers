@@ -1,28 +1,20 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package mygame;
 
 import com.jme3.math.Vector3f;
 
 /**
- *
- * @author Krystus Klasa przechowuje informacje o polozeniu na tablicy (2D) oraz
- * polozeniu w swiecie 3D
+ * Class store info about 2D board and 3D board
  */
 public class Field {
 
-    //czy na to pole moze wejsc pionek
     private boolean accessible;
-    //lokalizacja w 3D
-    private Vector3f fieldWorldCoordinates;
-    //lokalizacja w tabllicy 2D
+    private Vector3f fieldWorldCoordinates;//3D location
+    // 2D location
     private int tabXPosition;
     private int tabYPosition;
-    private int checkerId;//-1 - brak bierki na tym polu bo id bierek od 0
-    private int checkerColor;//0 - brak bierki na tym polu
-    private int checkerQueenColor;//0 - brak bierki na tym polu
+    private int checkerId;//-1 - no checker on this field 
+    private int checkerColor;//0 - no checker on this field
+    private int checkerQueenColor;//0 - no checker on this field
 
     public int getCheckerQueenColor() {
         return checkerQueenColor;

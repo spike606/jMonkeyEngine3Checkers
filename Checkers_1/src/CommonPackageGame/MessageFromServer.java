@@ -1,13 +1,11 @@
 package CommonPackageGame;
 
 import com.jme3.network.AbstractMessage;
-//import java.io.Serializable;
 import com.jme3.network.serializing.Serializable;
 
 @Serializable
 public class MessageFromServer extends AbstractMessage {
 
-//	private static final long serialVersionUID = -5889903096874602732L;
 	private int[][] board = new int[8][8];// array of current board state
 	private boolean gameRunning;// flag
 	private int currentPlayer;// contain current player (BLACK or WHITE)
@@ -17,8 +15,7 @@ public class MessageFromServer extends AbstractMessage {
 	private int winner; // contain winner(BLACK or WHITE - 0, 1)
 	private int myColor;
 
-        public MessageFromServer() {}    // empty constructor
-
+        public MessageFromServer() {}    // empty constructor required by jme3
         
 	public int getMyColor() {
 		return myColor;

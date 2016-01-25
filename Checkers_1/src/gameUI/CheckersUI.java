@@ -1,21 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package gameUI;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.LookAndFeel;
-import javax.swing.UIManager;
 import mygame.CheckersGame;
 import mygame.Connecting;
 import mygame.GameFlowClient;
 
-/**
- *
- * @author Krystus
- */
+
 public class CheckersUI extends javax.swing.JFrame {
 
     //logger
@@ -167,65 +157,20 @@ public class CheckersUI extends javax.swing.JFrame {
 
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
 
-        if(GameFlowClient.getCurrentPlayer() == GameFlowClient.getMyColor()){
-        System.out.println(" connecting" +Connecting.connectedToServer);
-        System.out.println(" firstmesagein" + Connecting.firstMessageIn);
-                    System.out.println(" czy pol" + Connecting.myClient.isConnected());
-
-        if (Connecting.connectedToServer && !Connecting.firstMessageIn) {
-            Connecting.myClient.close();
-//            Connecting.connectedToServer = false;
-                    System.out.println(" czy pol" + Connecting.myClient.isConnected());
-
-            
+        if(GameFlowClient.getCurrentPlayer() == GameFlowClient.getMyColor()){//my turn so I can quit
+        if (Connecting.connectedToServer && !Connecting.firstMessageIn) {//not playing yet
+            Connecting.myClient.close();          
             CheckersGame.window.startButton.setEnabled(true);
             CheckersGame.window.infoLabel.setText(CheckersGame.NO_INFO);
             Connecting.firstMessageIn = false;
 
-        } else {
+        } else {//quit game
             GameFlowClient.resignGame();
-//                        Connecting.connectedToServer = false;
-
             Connecting.sendMessageToServer(-1, -1, GameFlowClient.isResign());
-            logger.log(Level.INFO, "RESIGN");
         }
             CheckersGame.window.stopButton.setEnabled(false);
         }
     }//GEN-LAST:event_stopButtonActionPerformed
-    /**
-     * @param args the command line arguments
-     */
-//    public static void main(String args[]) {
-//        /* Set the Nimbus look and feel */
-//        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-//        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-//         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-//         */
-//        try {
-//            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-//                if ("Metal".equals(info.getName())) {
-//                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-//                    break;
-//                }
-//            }
-//        } catch (ClassNotFoundException ex) {
-//            java.util.logging.Logger.getLogger(CheckersUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (InstantiationException ex) {
-//            java.util.logging.Logger.getLogger(CheckersUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (IllegalAccessException ex) {
-//            java.util.logging.Logger.getLogger(CheckersUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-//            java.util.logging.Logger.getLogger(CheckersUI.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-//        }
-//        //</editor-fold>
-//
-//        /* Create and display the form */
-//        java.awt.EventQueue.invokeLater(new Runnable() {
-//            public void run() {
-//                new CheckersUI().setVisible(true);
-//            }
-//        });
-//    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel buttonsPanel;
     public javax.swing.JPanel gamePanel;

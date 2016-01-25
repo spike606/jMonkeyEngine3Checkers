@@ -3,7 +3,7 @@ package mygame;
 import CommonPackageGame.*;
 
 /*
- * Class used to manage the game flow, stores game data used on client side
+ * Class used to manage the gameflow, stores game data used on client side
  */
 public class GameFlowClient {
 
@@ -161,12 +161,9 @@ public class GameFlowClient {
                 
                 Connecting.firstMessageIn = false;
 		connecting = new Connecting();
-                            //register listener
 		connecting.start();
 
-
 	}
-
 	/*
 	 * Performed after clicking button STOP
 	 */
@@ -174,6 +171,5 @@ public class GameFlowClient {
 		resign = true;
 
 	}
-
 	
 }
