@@ -144,10 +144,6 @@ public class GameFlow {
             possibleMoves = boardData.getPossibleSecondBeating(currentPlayer, checkerMove.getMoveToRow(),
                     checkerMove.getMoveToCol());
             if (possibleMoves != null) {
-//				chosenRow = checkerMove.getMoveToRow(); // Since only one piece
-//														// can be moved, select
-//														// it.
-//				chosenCol = checkerMove.getMoveToCol();
                 return;
             }
         }
@@ -180,27 +176,7 @@ public class GameFlow {
         /*
          * Set default values - player has not yet selected a checker to move
          */
-
         chosenRow = -1;
         chosenCol = -1;
-
-        /*
-         * If all legal moves use the same piece, it means only one move is
-         * possible select that piece automatically
-         */
-
-//		if (possibleMoves != null) {
-//			boolean sameSquare = true;
-//			for (int i = 1; i < possibleMoves.length; i++)
-//				if (possibleMoves[i].getMoveFromRow() != possibleMoves[0].getMoveFromRow()
-//						|| possibleMoves[i].getMoveFromCol() != possibleMoves[0].getMoveFromCol()) {
-//					sameSquare = false;
-//					break;
-//				}
-//			if (sameSquare) {
-//				chosenRow = possibleMoves[0].getMoveFromRow();
-//				chosenCol = possibleMoves[0].getMoveFromCol();
-//			}
-//		}
     }
 }

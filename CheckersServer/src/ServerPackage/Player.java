@@ -1,26 +1,16 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package ServerPackage;
 
 import CommonPackageServer.CheckersMove;
 import CommonPackageServer.MessageFromClient;
 import CommonPackageServer.MessageFromServer;
-import com.jme3.network.ConnectionListener;
 import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import com.jme3.network.Server;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author Krystus
- */
 public class Player extends Thread implements MessageListener<HostedConnection> {
 
     //logger
@@ -35,7 +25,7 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
     private MessageFromClient messageFromClient;
     private volatile boolean threadRunning = true;// flag to kill thread
     private boolean resign = false;// used when out or pressed stop
-    private boolean firstMessageOut = false;//pomocnicza ustawiana gdy wyslana zostala wiado do klienta i czekamy na odp
+    private boolean firstMessageOut = false;
 
     public Player(Server myServer, HostedConnection myHostedConnection, int color, Match match) {
         this.messageFromClient = new MessageFromClient();
@@ -44,11 +34,7 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
         this.myColor = color;
         this.match = match;
         this.myServer = myServer;
-
         this.myConnectionId = myHostedConnection.getId();
-//         hostedConnection.getServer().addConnectionListener(this);
-
-
     }
 
     public HostedConnection getMyHostedConnection() {
@@ -76,29 +62,20 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
                 prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
                         match.gameFlow.getChosenRow(), true, match.gameFlow.getCurrentPlayer(), match.gameFlow.getPossibleMoves(),
                         GameData.EMPTY, getMyColor());
-//                hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);//send message to client
                 myHostedConnection.getServer().broadcast(Filters.in(myHostedConnection), messageToClient);//send message to client
 
-//                        hostedConnection.send(messageToClient);
-
-                while (true && threadRunning) {// TODO:??
-
-
-                    checkResign(myHostedConnection);
+                while (true && threadRunning) {
 
                     if (match.gameFlow.getCurrentPlayer() == myColor && match.gameFlow.isGameRunning() && firstMessageOut == false) {
 
                         prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
                                 match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
                                 match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), getMyColor());
-//                        hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);
                         myHostedConnection.getServer().broadcast(Filters.equalTo(myHostedConnection), messageToClient);
-
-//                                                hostedConnection.send(messageToClient);
 
                         firstMessageOut = true;
                     }
-                    if (!match.gameFlow.isGameRunning() && match.gameFlow.getWinner() > 0) //jesli jest zwyciezca to wyslij wiadomosc do obydwu graczy
+                    if (!match.gameFlow.isGameRunning() && match.gameFlow.getWinner() > 0) //got winner
                     {
                         // prepare and send answer to client
                         prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
@@ -110,18 +87,8 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
                         threadRunning = false;
 
                     }
-//                    else if (!match.gameFlow.isGameRunning() && match.gameFlow.getWinner() != GameData.EMPTY) {// game end
-//                        prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
-//                                match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
-//                                match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), getMyColor());
-////                        hostedConnection.getServer().broadcast(Filters.in(hostedConnection), messageToClient);
-//                        myHostedConnection.getServer().broadcast(Filters.equalTo(myHostedConnection), messageToClient);
-//
-////                        hostedConnection.send(messageToClient);
-//                        threadRunning = false;// to kill current thread
-//
-//                    }
-                    //gdy polaczenie przeciwnika zostalo zakoncozne np opuscil gre to wygrywam
+
+                    //when opponent is out you win
                     if (!myServer.getConnections().contains(opponentHostedConnection)) {
                         match.gameFlow.setWinner(getMyColor());
                         match.gameFlow.setCurrentPlayer(getMyColor());
@@ -131,12 +98,9 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
                         prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
                                 match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
                                 match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), getMyColor());
-                        //do mnie bo przeciwnika juz nie ma
                         myHostedConnection.getServer().broadcast(Filters.equalTo(myHostedConnection), messageToClient);
                         threadRunning = false;
                     }
-
-
                     try {
                         Thread.sleep(50);
                     } catch (InterruptedException ex) {
@@ -144,14 +108,8 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
                     }
                 }
             }
-
-
         }
-
-
         myHostedConnection.close("Client out");
-//	System.out.println("Close 2");
-
     }
 
     private void prepareMessageToClient(int[][] board, int chosenCol, int chosenRow, boolean gameRunning,
@@ -171,46 +129,34 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
 
     //listener - when message is received
     public void messageReceived(HostedConnection source, Message m) {
-        System.out.println("got message");
 
         if (source == myHostedConnection && match.gameFlow.getCurrentPlayer() == myColor
                 && match.gameFlow.isGameRunning() && firstMessageOut == true && m instanceof MessageFromClient) {
 
             // receive message from client
             messageFromClient = (MessageFromClient) m;
-            System.out.println("odebrane" + messageFromClient.getChosenRow() + messageFromClient.getChosenCol());
 
             // process message from client
             match.gameFlow.makeClick(messageFromClient.getChosenRow(), messageFromClient.getChosenCol(),
                     messageFromClient.isResign());
-            System.out.println("RESIFN: " + messageFromClient.isResign());
-            System.out.println("winner: " + match.gameFlow.getWinner());
-
 
             // prepare and send answer to client
             prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
                     match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
                     match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), getMyColor());
 
-            System.out.println("curent player: " + match.gameFlow.getCurrentPlayer());
-            System.out.println("curent player: " + getMyColor());
-
-            if (!match.gameFlow.isGameRunning() && match.gameFlow.getWinner() > 0) //jesli jest zwyciezca to wyslij wiadomosc do obydwu graczy
+            if (!match.gameFlow.isGameRunning() && match.gameFlow.getWinner() > 0) //got winner
             {
-//                match.gameFlow.setCurrentPlayer(myColor);
                 myHostedConnection.getServer().broadcast(Filters.in(myHostedConnection), messageToClient);
-
-
                 threadRunning = false;
 
-            } else //jezeli dlej mam prawo ruchu tzn ze jest jeszce bicie wiec wyslij wiadomosc do obydwu graczy by uaktualnic widok
+            } else //I can still move so (beating) so send message to players to refresh view
             if (match.gameFlow.getCurrentPlayer() == getMyColor()) {
 
-                //do mnie 
+                //to me 
                 myHostedConnection.getServer().broadcast(Filters.equalTo(myHostedConnection), messageToClient);
 
-                //do przeciwnika - ze zmieniona wiadomoscia - ZMIANA KOLORU BO TO WIADOMOSC DO DRUGIEGO GRACZA!
-                // prepare and send answer to client
+                //to opponent - diffrent color
                 int color;
                 if (getMyColor() == 1) {
                     color = 3;
@@ -222,49 +168,11 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
                         match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), color);
                 myHostedConnection.getServer().broadcast(Filters.equalTo(opponentHostedConnection), messageToClient);
 
-
-            } else {//jesli nie to tylkoo do jednego
+            } else {
                 myHostedConnection.getServer().broadcast(Filters.equalTo(myHostedConnection), messageToClient);
-
             }
-
-
-
-
-
-//                                    hostedConnection.send(messageToClient);
-
             firstMessageOut = false;
         }
-
-    }
-
-    public void checkResign(HostedConnection conn) {
-//        if (!myServer.getConnections().contains(conn)) {
-//            resign = true;
-//            match.gameFlow.makeClick(-1, -1, resign);
-//            threadRunning = false;
-//            
-//                        // prepare and send answer to client - when resign
-//            prepareMessageToClient(match.gameFlow.boardData.getBoard(), match.gameFlow.getChosenCol(),
-//                    match.gameFlow.getChosenRow(), match.gameFlow.isGameRunning(), match.gameFlow.getCurrentPlayer(),
-//                    match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), myColor);
-        //send to all
-//            myHostedConnection.getServer().broadcast(Filters.in(myHostedConnection, opponentHostedConnection), messageToClient);
-//        }
-//System.out.println(Arrays.deepToString(match.gameFlow.boardData.getBoard()));
-//        int[][] array = match.gameFlow.boardData.getBoard();
-//        System.out.println();
-//        System.out.println();
-//
-//        for (int i = 0; i < array.length; i++) {
-//            for (int j = 0; j < array[i].length; j++) {
-//                System.out.print(array[i][j]);
-//            }
-//            System.out.println();
-//        }
-//        System.out.println();
-//        System.out.println();
     }
 
     private synchronized int getMyColor() {

@@ -7,7 +7,7 @@ import java.util.ArrayList;
 /*
  * Class used to store data about board - pawns location etc
  */
-public class GameData {
+public final class GameData {
 
     // figures on the board
     static final int EMPTY = 0, WHITE = 1, WHITE_QUEEN = 2, BLACK = 3, BLACK_QUEEN = 4;
