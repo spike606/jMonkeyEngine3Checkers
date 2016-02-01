@@ -148,16 +148,18 @@ public class CheckersUI extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void startButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startButtonActionPerformed
+       if(CheckersGame.animInProgress == false){
         GameFlowClient.setTryingToConnect(true);
         if (CheckersGame.matchFinished == true) {
             CheckersGame.startNextGame = true;
         }
         GameFlowClient.startNewGame();
+       }
     }//GEN-LAST:event_startButtonActionPerformed
 
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
 
-        if(GameFlowClient.getCurrentPlayer() == GameFlowClient.getMyColor()){//my turn so I can quit
+        if(GameFlowClient.getCurrentPlayer() == GameFlowClient.getMyColor() && CheckersGame.animInProgress == false){//my turn so I can quit
         if (Connecting.connectedToServer && !Connecting.firstMessageIn) {//not playing yet
             Connecting.myClient.close();          
             CheckersGame.window.startButton.setEnabled(true);

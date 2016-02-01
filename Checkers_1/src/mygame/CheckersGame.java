@@ -34,7 +34,6 @@ import java.util.ArrayList;
 
 public class CheckersGame extends SimpleApplication {
 
-
     //front camera
     private static final Vector3f cam1Loc = new Vector3f(-6.2657156f, 14.529437f, 8.240483f);
     private static final Vector3f cam1Dir = new Vector3f(-0.0028091485f, -0.7335623f, -0.67961645f);
@@ -60,9 +59,8 @@ public class CheckersGame extends SimpleApplication {
     private static final Vector3f cam5Dir = new Vector3f(0.37362808f, -0.82820004f, 0.4177161f);
     private static final Vector3f cam5Up = new Vector3f(0.55454195f, 0.5604297f, 0.6151437f);
     private static final Vector3f cam5Left = new Vector3f(0.7435626f, -0.0018061101f, -0.6686639f);
-    /*STALE DO POZYCJONOWANIA*/
-    private final static float CELL_POS_Y = 1.4552078f;//height
     /*COORDINATES*/
+    private final static float CELL_POS_Y = 1.4552078f;//height
     private static final float FIRST_COL_X = 0.9304199f;
     private static final float COL_X_DIFF = 1.809f;
     private static final float FIRST_COL_Z = 0.9129584f;
@@ -123,8 +121,8 @@ public class CheckersGame extends SimpleApplication {
     /*SETTINGS*/
     private final static int RESOLUTION_WIDTH = 640;//rozdzielczosc obrazu gry
     private final static int RESOLUTION_HEIGHT = 480;
-    private final static int FRAMERATE = 60;
-    private final static int SAMPLES = 8;//antyaliasing
+    private final static int FRAMERATE = 90;
+    private final static int SAMPLES = 16;//antyaliasing
     private final static boolean VSYNC = true;
     /*FLAGS*/
     private static boolean gameCreated = false;
@@ -134,7 +132,7 @@ public class CheckersGame extends SimpleApplication {
     public static boolean lastMove = false;//do wykonania ostatniego ruchu - refresh tylko raz
     public static boolean startNextGame = false;
     private static boolean restartGame = false;
-    static boolean animInProgress = false;
+    public static boolean animInProgress = false;
     private static Node checkerNodeToDelete;//id bierki ktora ma zostac usunieta
     private static Field checkerFieldToDelete;
     private static String modelToChange;//model na jaki bedzie zmiana np czaarna dama
@@ -146,7 +144,6 @@ public class CheckersGame extends SimpleApplication {
     GameFlowClient game;
     private Field[][] boardFields = new Field[8][8];
 
-    
     public static void main(String[] args) {
 
         AppSettings gameSettings = new AppSettings(true);
@@ -220,7 +217,7 @@ public class CheckersGame extends SimpleApplication {
 
         //sky
         rootNode.attachChild(SkyFactory.createSky(assetManager, SKY, false));
-        
+
         /* Camera 1 */
         cam.setFrame(cam1Loc, cam1Left, cam1Up, cam1Dir);
         //Disable flycam
@@ -355,7 +352,7 @@ public class CheckersGame extends SimpleApplication {
 
         white_node = new Node("whiteCheckersNode");//contains all white
         black_node = new Node("blackCheckersNode");
-        
+
         for (int i = 0; i < 12; i++) {
             white_checkers_nodes[i] = new Node("WhiteNode" + i);
             black_checkers_nodes[i] = new Node("BlackNode" + i);
@@ -587,7 +584,7 @@ public class CheckersGame extends SimpleApplication {
             checkerNode.addLight(blueLight);
             checkerNode.setUserData("selected", true);
         }
-   }
+    }
 
     private void diselectChecker(Node checkerNode) {
         checkerNode.removeLight(blueLight);
@@ -607,6 +604,7 @@ public class CheckersGame extends SimpleApplication {
         }
     }
     //transform 3D coordinates to 2D
+
     private Field getBoardField(Vector3f pointCoordinates) {
         int col = 8;
         int row = 8;
@@ -774,7 +772,7 @@ public class CheckersGame extends SimpleApplication {
         }
 
 
-        
+
         nodeToMove.setUserData("row", to.getTabYPosition());
         nodeToMove.setUserData("col", to.getTabXPosition());
 
@@ -887,7 +885,7 @@ public class CheckersGame extends SimpleApplication {
                 }
             }
         }
-        
+
         if (movePerformed) {
             for (int i = 0; i < possibleMoveFromRow.size(); i++) {
                 if (boardFields[possibleMoveFromRow.get(i)][possibleMoveFromCol.get(i)].getCheckerColor()
@@ -898,101 +896,103 @@ public class CheckersGame extends SimpleApplication {
                     moveFromCol = possibleMoveFromCol.get(i);
                 }
             }
-            moveCheckerNode(findCheckerById(boardFields[moveFromRow][moveFromCol].getCheckerId()),
-                    boardFields[moveFromRow][moveFromCol], boardFields[moveToRow][moveToCol]);
+            if (!(moveFromRow == 0 && moveFromCol == 0)) {
+                moveCheckerNode(findCheckerById(boardFields[moveFromRow][moveFromCol].getCheckerId()),
+                        boardFields[moveFromRow][moveFromCol], boardFields[moveToRow][moveToCol]);
 
 
-            /*
-             * If move is performed by queen
-             */
-            if (boardFields[moveToRow][moveToCol].getCheckerColor() == GameFlowClient.WHITE_QUEEN
-                    || boardFields[moveToRow][moveToCol].getCheckerColor() == GameFlowClient.BLACK_QUEEN) {
+                /*
+                 * If move is performed by queen
+                 */
+                if (boardFields[moveToRow][moveToCol].getCheckerColor() == GameFlowClient.WHITE_QUEEN
+                        || boardFields[moveToRow][moveToCol].getCheckerColor() == GameFlowClient.BLACK_QUEEN) {
 
-                boolean beating = true;
-                int checkRow = moveFromRow;// start checking from 
-                int checkCol = moveFromCol;
-                if (moveFromRow < moveToRow && moveFromCol < moveToCol) {
-                    while (checkCol < moveToCol && checkRow < moveToRow) {
-                        checkCol++;
-                        checkRow++;
-                        if (checkRow == moveToRow && checkCol == moveToCol) {
-                            beating = false;
-                            break;
+                    boolean beating = true;
+                    int checkRow = moveFromRow;// start checking from 
+                    int checkCol = moveFromCol;
+                    if (moveFromRow < moveToRow && moveFromCol < moveToCol) {
+                        while (checkCol < moveToCol && checkRow < moveToRow) {
+                            checkCol++;
+                            checkRow++;
+                            if (checkRow == moveToRow && checkCol == moveToCol) {
+                                beating = false;
+                                break;
+                            }
+                            if (boardFields[checkRow][checkCol].getCheckerColor() != GameFlowClient.EMPTY) {
+                                break;
+                            }
                         }
-                        if (boardFields[checkRow][checkCol].getCheckerColor() != GameFlowClient.EMPTY) {
-                            break;
+
+                    } else if (moveFromRow < moveToRow && moveFromCol > moveToCol) {
+                        while (checkCol > moveToCol && checkRow < moveToRow) {
+                            checkCol--;
+                            checkRow++;
+                            if (checkRow == moveToRow && checkCol == moveToCol) {
+                                beating = false;
+                                break;
+                            }
+                            if (boardFields[checkRow][checkCol].getCheckerColor() != GameFlowClient.EMPTY) {
+                                break;
+                            }
                         }
+
+                    } else if (moveFromRow > moveToRow && moveFromCol < moveToCol) {
+                        while (checkCol < moveToCol && checkRow > moveToRow) {
+                            checkCol++;
+                            checkRow--;
+                            if (checkRow == moveToRow && checkCol == moveToCol) {
+                                beating = false;
+                                break;
+                            }
+                            if (boardFields[checkRow][checkCol].getCheckerColor() != GameFlowClient.EMPTY) {
+                                break;
+                            }
+                        }
+
+                    } else if (moveFromRow > moveToRow && moveFromCol > moveToCol) {
+                        while (checkCol > moveToCol && checkRow > moveToRow) {
+
+                            checkCol--;
+                            checkRow--;
+                            if (checkRow == moveToRow && checkCol == moveToCol) {
+                                beating = false;
+                                break;
+                            }
+                            if (boardFields[checkRow][checkCol].getCheckerColor() != GameFlowClient.EMPTY) {
+                                break;
+                            }
+                        }
+
                     }
-
-                } else if (moveFromRow < moveToRow && moveFromCol > moveToCol) {
-                    while (checkCol > moveToCol && checkRow < moveToRow) {
-                        checkCol--;
-                        checkRow++;
-                        if (checkRow == moveToRow && checkCol == moveToCol) {
-                            beating = false;
-                            break;
-                        }
-                        if (boardFields[checkRow][checkCol].getCheckerColor() != GameFlowClient.EMPTY) {
-                            break;
-                        }
+                    if (beating == true) {
+                        int opponentCheckerCol = checkCol;
+                        int opponentCheckerRow = checkRow;
+                        checkerNodeToDelete = findCheckerById(boardFields[opponentCheckerRow][opponentCheckerCol].getCheckerId());
+                        checkerFieldToDelete = boardFields[opponentCheckerRow][opponentCheckerCol];
                     }
+                } else if (isMoveBeating(moveFromRow, moveToCol, moveFromCol, moveToRow)) //normal beating
+                {
+                    int opponentCheckerRow = 0;
+                    int opponentCheckerCol = 0;
 
-                } else if (moveFromRow > moveToRow && moveFromCol < moveToCol) {
-                    while (checkCol < moveToCol && checkRow > moveToRow) {
-                        checkCol++;
-                        checkRow--;
-                        if (checkRow == moveToRow && checkCol == moveToCol) {
-                            beating = false;
-                            break;
-                        }
-                        if (boardFields[checkRow][checkCol].getCheckerColor() != GameFlowClient.EMPTY) {
-                            break;
-                        }
+                    if (moveFromRow < moveToRow && moveFromCol < moveToCol) {
+                        opponentCheckerRow = moveToRow - 1;
+                        opponentCheckerCol = moveToCol - 1;
+                    } else if (moveFromRow < moveToRow && moveFromCol > moveToCol) {
+                        opponentCheckerRow = moveToRow - 1;
+                        opponentCheckerCol = moveToCol + 1;
+                    } else if (moveFromRow > moveToRow && moveFromCol < moveToCol) {
+                        opponentCheckerRow = moveToRow + 1;
+                        opponentCheckerCol = moveToCol - 1;
+                    } else if (moveFromRow > moveToRow && moveFromCol > moveToCol) {
+                        opponentCheckerRow = moveToRow + 1;
+                        opponentCheckerCol = moveToCol + 1;
                     }
-
-                } else if (moveFromRow > moveToRow && moveFromCol > moveToCol) {
-                    while (checkCol > moveToCol && checkRow > moveToRow) {
-
-                        checkCol--;
-                        checkRow--;
-                        if (checkRow == moveToRow && checkCol == moveToCol) {
-                            beating = false;
-                            break;
-                        }
-                        if (boardFields[checkRow][checkCol].getCheckerColor() != GameFlowClient.EMPTY) {
-                            break;
-                        }
-                    }
-
-                }
-                if (beating == true) {
-                    int opponentCheckerCol = checkCol;
-                    int opponentCheckerRow = checkRow;
                     checkerNodeToDelete = findCheckerById(boardFields[opponentCheckerRow][opponentCheckerCol].getCheckerId());
                     checkerFieldToDelete = boardFields[opponentCheckerRow][opponentCheckerCol];
                 }
-            } else if (isMoveBeating(moveFromRow, moveToCol, moveFromCol, moveToRow)) //normal beating
-            {
-                int opponentCheckerRow = 0;
-                int opponentCheckerCol = 0;
 
-                if (moveFromRow < moveToRow && moveFromCol < moveToCol) {
-                    opponentCheckerRow = moveToRow - 1;
-                    opponentCheckerCol = moveToCol - 1;
-                } else if (moveFromRow < moveToRow && moveFromCol > moveToCol) {
-                    opponentCheckerRow = moveToRow - 1;
-                    opponentCheckerCol = moveToCol + 1;
-                } else if (moveFromRow > moveToRow && moveFromCol < moveToCol) {
-                    opponentCheckerRow = moveToRow + 1;
-                    opponentCheckerCol = moveToCol - 1;
-                } else if (moveFromRow > moveToRow && moveFromCol > moveToCol) {
-                    opponentCheckerRow = moveToRow + 1;
-                    opponentCheckerCol = moveToCol + 1;
-                }
-                checkerNodeToDelete = findCheckerById(boardFields[opponentCheckerRow][opponentCheckerCol].getCheckerId());
-                checkerFieldToDelete = boardFields[opponentCheckerRow][opponentCheckerCol];
             }
-
         }
         movePerformed = false;
     }
