@@ -83,7 +83,6 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
                                 match.gameFlow.getPossibleMoves(), match.gameFlow.getWinner(), getMyColor());
                         myHostedConnection.getServer().broadcast(Filters.in(myHostedConnection), messageToClient);
 
-
                         threadRunning = false;
 
                     }
@@ -124,6 +123,7 @@ public class Player extends Thread implements MessageListener<HostedConnection> 
         messageToClient.setWinner(winner);
         messageToClient.setGameRunning(gameRunning);
         messageToClient.setMyColor(myColor);
+        messageToClient.setReliable(true);
 
     }
 
