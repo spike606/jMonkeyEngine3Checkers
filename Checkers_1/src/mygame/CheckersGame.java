@@ -22,7 +22,6 @@ import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.renderer.queue.RenderQueue.ShadowMode;
 import com.jme3.scene.Node;
-import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import com.jme3.system.AppSettings;
 import com.jme3.system.JmeCanvasContext;
@@ -78,15 +77,15 @@ public class CheckersGame extends SimpleApplication {
     private final static int SHADOWMAP_SIZE = 2048;
     /* NODES*/
     //ROOTNODE
-    Node game_node = new Node("Game");//conatins board and pawns
-    Node board_node = new Node("boardNode");
-    Node checkers_node = new Node("checkers_node");
-    Node white_node;//all white checkers
-    Node black_node;
-    Node[] black_checkers_nodes;
-    Node[] white_checkers_nodes;
-    Spatial[] black_checkers;
-    Spatial[] white_checkers;
+    Node gameNode = new Node("Game");//conatins board and pawns
+    Node boardNode = new Node("boardNode");
+    Node checkersNode = new Node("checkers_node");
+    Node whiteNode;//all white checkers
+    Node blackNode;
+    Node[] blackCheckersNodes;
+    Node[] whiteCheckersNodes;
+    Spatial[] blackCheckers;
+    Spatial[] whiteCheckers;
     /*AUDIO NODES*/
     private static AudioNode gameAudioNode;
     private static AudioNode audioTickNode;
@@ -121,7 +120,7 @@ public class CheckersGame extends SimpleApplication {
     /*SETTINGS*/
     private final static int RESOLUTION_WIDTH = 640;//rozdzielczosc obrazu gry
     private final static int RESOLUTION_HEIGHT = 480;
-    private final static int FRAMERATE = 90;
+    private final static int FRAMERATE = 60;
     private final static int SAMPLES = 16;//antyaliasing
     private final static boolean VSYNC = true;
     /*FLAGS*/
@@ -132,7 +131,7 @@ public class CheckersGame extends SimpleApplication {
     public static boolean lastMove = false;//do wykonania ostatniego ruchu - refresh tylko raz
     public static boolean startNextGame = false;
     private static boolean restartGame = false;
-    public static boolean animInProgress = false;
+    public volatile static boolean animInProgress = false;
     private static Node checkerNodeToDelete;//id bierki ktora ma zostac usunieta
     private static Field checkerFieldToDelete;
     private static String modelToChange;//model na jaki bedzie zmiana np czaarna dama
@@ -179,8 +178,8 @@ public class CheckersGame extends SimpleApplication {
     public void simpleInitApp() {
 
         /* INFO OFF*/
-        setDisplayFps(false);
-        setDisplayStatView(false);
+//        setDisplayFps(false);
+//        setDisplayStatView(false);
 
         /* LOAD BOARD*/
         Spatial board = assetManager.loadModel(CHESSBOARD_MODEL);
@@ -189,9 +188,9 @@ public class CheckersGame extends SimpleApplication {
         board.setLocalTranslation(0f, 0f, 0f);
         board.setShadowMode(ShadowMode.CastAndReceive);
 
-        board_node.attachChild(board);
-        game_node.attachChild(board_node);
-        rootNode.attachChild(game_node);
+        boardNode.attachChild(board);
+        gameNode.attachChild(boardNode);
+        rootNode.attachChild(gameNode);
 
         /* LIGHTS*/
         blueLight.setColor(ColorRGBA.Blue.mult(1f));
@@ -206,14 +205,6 @@ public class CheckersGame extends SimpleApplication {
         DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(assetManager, SHADOWMAP_SIZE, 1);
         dlsr.setLight(sun);
         viewPort.addProcessor(dlsr);
-        DirectionalLightShadowFilter dlsf = new DirectionalLightShadowFilter(assetManager, SHADOWMAP_SIZE, 1);
-        dlsf.setLight(sun);
-        dlsf.setEnabled(true);
-        /* adding filtr - no antyaliasing ?!!!!! */
-//        FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
-//        fpp.addFilter(dlsf);
-//        fpp.setNumSamples(8); 
-//        viewPort.addProcessor(fpp);
 
         //sky
         rootNode.attachChild(SkyFactory.createSky(assetManager, SKY, false));
@@ -269,7 +260,7 @@ public class CheckersGame extends SimpleApplication {
             game = new GameFlowClient();
             gameCreated = true;
         }
-        if (Connecting.connectedToServer && animInProgress == false) {
+        if (Connecting.connectedToServer && animInProgress == false || lastMove) {
             refreshView();
         }
         if ((matchFinished == true
@@ -278,9 +269,13 @@ public class CheckersGame extends SimpleApplication {
             restartGame();
             matchFinished = false;
             startNextGame = false;
+            animInProgress = false;
         }
         playSound();
         setInfo();
+
+
+
     }
 
     /**
@@ -327,7 +322,7 @@ public class CheckersGame extends SimpleApplication {
                 Ray ray = new Ray(click3d, dir);
 
                 // Collect intersections between ray and all nodes in results list.
-                game_node.collideWith(ray, results);// intersectiaons only pawns with board
+                gameNode.collideWith(ray, results);// intersectiaons only pawns with board
 
                 if (results.size() > 0) {
                     selectedPointCoordinates = results.getClosestCollision().getContactPoint();
@@ -347,240 +342,240 @@ public class CheckersGame extends SimpleApplication {
         Quaternion roll180 = new Quaternion();
         roll180.fromAngleAxis(-FastMath.PI, Vector3f.UNIT_Y);
 
-        black_checkers_nodes = new Node[12];
-        white_checkers_nodes = new Node[12];
+        blackCheckersNodes = new Node[12];
+        whiteCheckersNodes = new Node[12];
 
-        white_node = new Node("whiteCheckersNode");//contains all white
-        black_node = new Node("blackCheckersNode");
+        whiteNode = new Node("whiteCheckersNode");//contains all white
+        blackNode = new Node("blackCheckersNode");
 
         for (int i = 0; i < 12; i++) {
-            white_checkers_nodes[i] = new Node("WhiteNode" + i);
-            black_checkers_nodes[i] = new Node("BlackNode" + i);
+            whiteCheckersNodes[i] = new Node("WhiteNode" + i);
+            blackCheckersNodes[i] = new Node("BlackNode" + i);
             //rotate black
-            black_checkers_nodes[i].rotate(roll180);
+            blackCheckersNodes[i].rotate(roll180);
         }
 
-        black_checkers = new Spatial[12];//tablica spatiali
-        white_checkers = new Spatial[12];
+        blackCheckers = new Spatial[12];//tablica spatiali
+        whiteCheckers = new Spatial[12];
 
         for (int i = 0; i < 12; i++) {
-            white_checkers[i] = assetManager.loadModel(WHITE_CHECKER_MODEL);
-            black_checkers[i] = assetManager.loadModel(BLACK_CHECKER_MODEL);
-            white_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
-            black_checkers[i].setShadowMode(ShadowMode.CastAndReceive);
+            whiteCheckers[i] = assetManager.loadModel(WHITE_CHECKER_MODEL);
+            blackCheckers[i] = assetManager.loadModel(BLACK_CHECKER_MODEL);
+            whiteCheckers[i].setShadowMode(ShadowMode.CastAndReceive);
+            blackCheckers[i].setShadowMode(ShadowMode.CastAndReceive);
 
-            white_checkers_nodes[i].attachChild(white_checkers[i]);
-            white_checkers_nodes[i].setUserData("id", i);
-            white_checkers_nodes[i].setUserData("selected", false);
+            whiteCheckersNodes[i].attachChild(whiteCheckers[i]);
+            whiteCheckersNodes[i].setUserData("id", i);
+            whiteCheckersNodes[i].setUserData("selected", false);
 
-            black_checkers_nodes[i].attachChild(black_checkers[i]);
-            black_checkers_nodes[i].setUserData("id", i + 12);
-            black_checkers_nodes[i].setUserData("selected", false);
+            blackCheckersNodes[i].attachChild(blackCheckers[i]);
+            blackCheckersNodes[i].setUserData("id", i + 12);
+            blackCheckersNodes[i].setUserData("selected", false);
 
-            white_node.attachChild(white_checkers_nodes[i]);
-            black_node.attachChild(black_checkers_nodes[i]);
+            whiteNode.attachChild(whiteCheckersNodes[i]);
+            blackNode.attachChild(blackCheckersNodes[i]);
         }
 
         //starting positions for checkers and info in boardFields
-        white_checkers_nodes[0].setLocalTranslation(boardFields[7][6].getFieldWorldCoordinates());
+        whiteCheckersNodes[0].setLocalTranslation(boardFields[7][6].getFieldWorldCoordinates());
         boardFields[7][6].setCheckerId(0);
         boardFields[7][6].setCheckerColor(GameFlowClient.WHITE);
         boardFields[7][6].setCheckerQueenColor(GameFlowClient.WHITE_QUEEN);
-        white_checkers_nodes[0].setUserData("row", 7);
-        white_checkers_nodes[0].setUserData("col", 6);
+        whiteCheckersNodes[0].setUserData("row", 7);
+        whiteCheckersNodes[0].setUserData("col", 6);
 
-        white_checkers_nodes[1].setLocalTranslation(boardFields[7][4].getFieldWorldCoordinates());
+        whiteCheckersNodes[1].setLocalTranslation(boardFields[7][4].getFieldWorldCoordinates());
         boardFields[7][4].setCheckerId(1);
         boardFields[7][4].setCheckerColor(GameFlowClient.WHITE);
         boardFields[7][4].setCheckerQueenColor(GameFlowClient.WHITE_QUEEN);
-        white_checkers_nodes[1].setUserData("row", 7);
-        white_checkers_nodes[1].setUserData("col", 4);
+        whiteCheckersNodes[1].setUserData("row", 7);
+        whiteCheckersNodes[1].setUserData("col", 4);
 
-        white_checkers_nodes[2].setLocalTranslation(boardFields[7][2].getFieldWorldCoordinates());
+        whiteCheckersNodes[2].setLocalTranslation(boardFields[7][2].getFieldWorldCoordinates());
         boardFields[7][2].setCheckerId(2);
         boardFields[7][2].setCheckerColor(GameFlowClient.WHITE);
         boardFields[7][2].setCheckerQueenColor(GameFlowClient.WHITE_QUEEN);
-        white_checkers_nodes[2].setUserData("row", 7);
-        white_checkers_nodes[2].setUserData("col", 2);
+        whiteCheckersNodes[2].setUserData("row", 7);
+        whiteCheckersNodes[2].setUserData("col", 2);
 
-        white_checkers_nodes[3].setLocalTranslation(boardFields[7][0].getFieldWorldCoordinates());
+        whiteCheckersNodes[3].setLocalTranslation(boardFields[7][0].getFieldWorldCoordinates());
         boardFields[7][0].setCheckerId(3);
         boardFields[7][0].setCheckerColor(GameFlowClient.WHITE);
         boardFields[7][0].setCheckerQueenColor(GameFlowClient.WHITE_QUEEN);
-        white_checkers_nodes[3].setUserData("row", 7);
-        white_checkers_nodes[3].setUserData("col", 0);
+        whiteCheckersNodes[3].setUserData("row", 7);
+        whiteCheckersNodes[3].setUserData("col", 0);
 
-        white_checkers_nodes[4].setLocalTranslation(boardFields[6][7].getFieldWorldCoordinates());
+        whiteCheckersNodes[4].setLocalTranslation(boardFields[6][7].getFieldWorldCoordinates());
         boardFields[6][7].setCheckerId(4);
         boardFields[6][7].setCheckerColor(GameFlowClient.WHITE);
         boardFields[6][7].setCheckerQueenColor(GameFlowClient.WHITE_QUEEN);
 
-        white_checkers_nodes[4].setUserData("row", 6);
-        white_checkers_nodes[4].setUserData("col", 7);
+        whiteCheckersNodes[4].setUserData("row", 6);
+        whiteCheckersNodes[4].setUserData("col", 7);
 
-        white_checkers_nodes[5].setLocalTranslation(boardFields[6][5].getFieldWorldCoordinates());
+        whiteCheckersNodes[5].setLocalTranslation(boardFields[6][5].getFieldWorldCoordinates());
         boardFields[6][5].setCheckerId(5);
         boardFields[6][5].setCheckerColor(GameFlowClient.WHITE);
         boardFields[6][5].setCheckerQueenColor(GameFlowClient.WHITE_QUEEN);
 
-        white_checkers_nodes[5].setUserData("row", 6);
-        white_checkers_nodes[5].setUserData("col", 5);
+        whiteCheckersNodes[5].setUserData("row", 6);
+        whiteCheckersNodes[5].setUserData("col", 5);
 
-        white_checkers_nodes[6].setLocalTranslation(boardFields[6][3].getFieldWorldCoordinates());
+        whiteCheckersNodes[6].setLocalTranslation(boardFields[6][3].getFieldWorldCoordinates());
         boardFields[6][3].setCheckerId(6);
         boardFields[6][3].setCheckerColor(GameFlowClient.WHITE);
         boardFields[6][3].setCheckerQueenColor(GameFlowClient.WHITE_QUEEN);
 
-        white_checkers_nodes[6].setUserData("row", 6);
-        white_checkers_nodes[6].setUserData("col", 3);
+        whiteCheckersNodes[6].setUserData("row", 6);
+        whiteCheckersNodes[6].setUserData("col", 3);
 
-        white_checkers_nodes[7].setLocalTranslation(boardFields[6][1].getFieldWorldCoordinates());
+        whiteCheckersNodes[7].setLocalTranslation(boardFields[6][1].getFieldWorldCoordinates());
         boardFields[6][1].setCheckerId(7);
         boardFields[6][1].setCheckerColor(GameFlowClient.WHITE);
         boardFields[6][1].setCheckerQueenColor(GameFlowClient.WHITE_QUEEN);
 
-        white_checkers_nodes[7].setUserData("row", 6);
-        white_checkers_nodes[7].setUserData("col", 1);
+        whiteCheckersNodes[7].setUserData("row", 6);
+        whiteCheckersNodes[7].setUserData("col", 1);
 
-        white_checkers_nodes[8].setLocalTranslation(boardFields[5][6].getFieldWorldCoordinates());
+        whiteCheckersNodes[8].setLocalTranslation(boardFields[5][6].getFieldWorldCoordinates());
         boardFields[5][6].setCheckerId(8);
         boardFields[5][6].setCheckerColor(GameFlowClient.WHITE);
         boardFields[5][6].setCheckerQueenColor(GameFlowClient.WHITE_QUEEN);
 
-        white_checkers_nodes[8].setUserData("row", 5);
-        white_checkers_nodes[8].setUserData("col", 6);
+        whiteCheckersNodes[8].setUserData("row", 5);
+        whiteCheckersNodes[8].setUserData("col", 6);
 
-        white_checkers_nodes[9].setLocalTranslation(boardFields[5][4].getFieldWorldCoordinates());
+        whiteCheckersNodes[9].setLocalTranslation(boardFields[5][4].getFieldWorldCoordinates());
         boardFields[5][4].setCheckerId(9);
         boardFields[5][4].setCheckerColor(GameFlowClient.WHITE);
         boardFields[5][4].setCheckerQueenColor(GameFlowClient.WHITE_QUEEN);
 
-        white_checkers_nodes[9].setUserData("row", 5);
-        white_checkers_nodes[9].setUserData("col", 4);
+        whiteCheckersNodes[9].setUserData("row", 5);
+        whiteCheckersNodes[9].setUserData("col", 4);
 
-        white_checkers_nodes[10].setLocalTranslation(boardFields[5][2].getFieldWorldCoordinates());
+        whiteCheckersNodes[10].setLocalTranslation(boardFields[5][2].getFieldWorldCoordinates());
         boardFields[5][2].setCheckerId(10);
         boardFields[5][2].setCheckerColor(GameFlowClient.WHITE);
         boardFields[5][2].setCheckerQueenColor(GameFlowClient.WHITE_QUEEN);
 
-        white_checkers_nodes[10].setUserData("row", 5);
-        white_checkers_nodes[10].setUserData("col", 2);
+        whiteCheckersNodes[10].setUserData("row", 5);
+        whiteCheckersNodes[10].setUserData("col", 2);
 
-        white_checkers_nodes[11].setLocalTranslation(boardFields[5][0].getFieldWorldCoordinates());
+        whiteCheckersNodes[11].setLocalTranslation(boardFields[5][0].getFieldWorldCoordinates());
         boardFields[5][0].setCheckerId(11);
         boardFields[5][0].setCheckerColor(GameFlowClient.WHITE);
         boardFields[5][0].setCheckerQueenColor(GameFlowClient.WHITE_QUEEN);
 
-        white_checkers_nodes[11].setUserData("row", 5);
-        white_checkers_nodes[11].setUserData("col", 0);
+        whiteCheckersNodes[11].setUserData("row", 5);
+        whiteCheckersNodes[11].setUserData("col", 0);
 
 
-        black_checkers_nodes[0].setLocalTranslation(boardFields[0][7].getFieldWorldCoordinates());
+        blackCheckersNodes[0].setLocalTranslation(boardFields[0][7].getFieldWorldCoordinates());
         boardFields[0][7].setCheckerId(12);
         boardFields[0][7].setCheckerColor(GameFlowClient.BLACK);
         boardFields[0][7].setCheckerQueenColor(GameFlowClient.BLACK_QUEEN);
 
-        black_checkers_nodes[0].setUserData("row", 0);
-        black_checkers_nodes[0].setUserData("col", 7);
+        blackCheckersNodes[0].setUserData("row", 0);
+        blackCheckersNodes[0].setUserData("col", 7);
 
-        black_checkers_nodes[1].setLocalTranslation(boardFields[0][5].getFieldWorldCoordinates());
+        blackCheckersNodes[1].setLocalTranslation(boardFields[0][5].getFieldWorldCoordinates());
         boardFields[0][5].setCheckerId(13);
         boardFields[0][5].setCheckerColor(GameFlowClient.BLACK);
         boardFields[0][5].setCheckerQueenColor(GameFlowClient.BLACK_QUEEN);
 
-        black_checkers_nodes[1].setUserData("row", 0);
-        black_checkers_nodes[1].setUserData("col", 5);
+        blackCheckersNodes[1].setUserData("row", 0);
+        blackCheckersNodes[1].setUserData("col", 5);
 
-        black_checkers_nodes[2].setLocalTranslation(boardFields[0][3].getFieldWorldCoordinates());
+        blackCheckersNodes[2].setLocalTranslation(boardFields[0][3].getFieldWorldCoordinates());
         boardFields[0][3].setCheckerId(14);
         boardFields[0][3].setCheckerColor(GameFlowClient.BLACK);
         boardFields[0][3].setCheckerQueenColor(GameFlowClient.BLACK_QUEEN);
 
-        black_checkers_nodes[2].setUserData("row", 0);
-        black_checkers_nodes[2].setUserData("col", 3);
+        blackCheckersNodes[2].setUserData("row", 0);
+        blackCheckersNodes[2].setUserData("col", 3);
 
-        black_checkers_nodes[3].setLocalTranslation(boardFields[0][1].getFieldWorldCoordinates());
+        blackCheckersNodes[3].setLocalTranslation(boardFields[0][1].getFieldWorldCoordinates());
         boardFields[0][1].setCheckerId(15);
         boardFields[0][1].setCheckerColor(GameFlowClient.BLACK);
         boardFields[0][1].setCheckerQueenColor(GameFlowClient.BLACK_QUEEN);
 
-        black_checkers_nodes[3].setUserData("row", 0);
-        black_checkers_nodes[3].setUserData("col", 1);
+        blackCheckersNodes[3].setUserData("row", 0);
+        blackCheckersNodes[3].setUserData("col", 1);
 
-        black_checkers_nodes[4].setLocalTranslation(boardFields[1][6].getFieldWorldCoordinates());
+        blackCheckersNodes[4].setLocalTranslation(boardFields[1][6].getFieldWorldCoordinates());
         boardFields[1][6].setCheckerId(16);
         boardFields[1][6].setCheckerColor(GameFlowClient.BLACK);
         boardFields[1][6].setCheckerQueenColor(GameFlowClient.BLACK_QUEEN);
 
-        black_checkers_nodes[4].setUserData("row", 1);
-        black_checkers_nodes[4].setUserData("col", 6);
+        blackCheckersNodes[4].setUserData("row", 1);
+        blackCheckersNodes[4].setUserData("col", 6);
 
-        black_checkers_nodes[5].setLocalTranslation(boardFields[1][4].getFieldWorldCoordinates());
+        blackCheckersNodes[5].setLocalTranslation(boardFields[1][4].getFieldWorldCoordinates());
         boardFields[1][4].setCheckerId(17);
         boardFields[1][4].setCheckerColor(GameFlowClient.BLACK);
         boardFields[1][4].setCheckerQueenColor(GameFlowClient.BLACK_QUEEN);
 
-        black_checkers_nodes[5].setUserData("row", 1);
-        black_checkers_nodes[5].setUserData("col", 4);
+        blackCheckersNodes[5].setUserData("row", 1);
+        blackCheckersNodes[5].setUserData("col", 4);
 
-        black_checkers_nodes[6].setLocalTranslation(boardFields[1][2].getFieldWorldCoordinates());
+        blackCheckersNodes[6].setLocalTranslation(boardFields[1][2].getFieldWorldCoordinates());
         boardFields[1][2].setCheckerId(18);
         boardFields[1][2].setCheckerColor(GameFlowClient.BLACK);
         boardFields[1][2].setCheckerQueenColor(GameFlowClient.BLACK_QUEEN);
 
-        black_checkers_nodes[6].setUserData("row", 1);
-        black_checkers_nodes[6].setUserData("col", 2);
+        blackCheckersNodes[6].setUserData("row", 1);
+        blackCheckersNodes[6].setUserData("col", 2);
 
-        black_checkers_nodes[7].setLocalTranslation(boardFields[1][0].getFieldWorldCoordinates());
+        blackCheckersNodes[7].setLocalTranslation(boardFields[1][0].getFieldWorldCoordinates());
         boardFields[1][0].setCheckerId(19);
         boardFields[1][0].setCheckerColor(GameFlowClient.BLACK);
         boardFields[1][0].setCheckerQueenColor(GameFlowClient.BLACK_QUEEN);
 
-        black_checkers_nodes[7].setUserData("row", 1);
-        black_checkers_nodes[7].setUserData("col", 0);
+        blackCheckersNodes[7].setUserData("row", 1);
+        blackCheckersNodes[7].setUserData("col", 0);
 
-        black_checkers_nodes[8].setLocalTranslation(boardFields[2][7].getFieldWorldCoordinates());
+        blackCheckersNodes[8].setLocalTranslation(boardFields[2][7].getFieldWorldCoordinates());
         boardFields[2][7].setCheckerId(20);
         boardFields[2][7].setCheckerColor(GameFlowClient.BLACK);
         boardFields[2][7].setCheckerQueenColor(GameFlowClient.BLACK_QUEEN);
 
-        black_checkers_nodes[8].setUserData("row", 2);
-        black_checkers_nodes[8].setUserData("col", 7);
+        blackCheckersNodes[8].setUserData("row", 2);
+        blackCheckersNodes[8].setUserData("col", 7);
 
-        black_checkers_nodes[9].setLocalTranslation(boardFields[2][5].getFieldWorldCoordinates());
+        blackCheckersNodes[9].setLocalTranslation(boardFields[2][5].getFieldWorldCoordinates());
         boardFields[2][5].setCheckerId(21);
         boardFields[2][5].setCheckerColor(GameFlowClient.BLACK);
         boardFields[2][5].setCheckerQueenColor(GameFlowClient.BLACK_QUEEN);
 
-        black_checkers_nodes[9].setUserData("row", 2);
-        black_checkers_nodes[9].setUserData("col", 5);
+        blackCheckersNodes[9].setUserData("row", 2);
+        blackCheckersNodes[9].setUserData("col", 5);
 
-        black_checkers_nodes[10].setLocalTranslation(boardFields[2][3].getFieldWorldCoordinates());
+        blackCheckersNodes[10].setLocalTranslation(boardFields[2][3].getFieldWorldCoordinates());
         boardFields[2][3].setCheckerId(22);
         boardFields[2][3].setCheckerColor(GameFlowClient.BLACK);
         boardFields[2][3].setCheckerQueenColor(GameFlowClient.BLACK_QUEEN);
 
-        black_checkers_nodes[10].setUserData("row", 2);
-        black_checkers_nodes[10].setUserData("col", 3);
+        blackCheckersNodes[10].setUserData("row", 2);
+        blackCheckersNodes[10].setUserData("col", 3);
 
-        black_checkers_nodes[11].setLocalTranslation(boardFields[2][1].getFieldWorldCoordinates());
+        blackCheckersNodes[11].setLocalTranslation(boardFields[2][1].getFieldWorldCoordinates());
         boardFields[2][1].setCheckerId(23);
         boardFields[2][1].setCheckerColor(GameFlowClient.BLACK);
         boardFields[2][1].setCheckerQueenColor(GameFlowClient.BLACK_QUEEN);
 
-        black_checkers_nodes[11].setUserData("row", 2);
-        black_checkers_nodes[11].setUserData("col", 1);
+        blackCheckersNodes[11].setUserData("row", 2);
+        blackCheckersNodes[11].setUserData("col", 1);
 
-        checkers_node.attachChild(white_node);
-        checkers_node.attachChild(black_node);
+        checkersNode.attachChild(whiteNode);
+        checkersNode.attachChild(blackNode);
 
-        game_node.attachChild(checkers_node);
+        gameNode.attachChild(checkersNode);
 
     }
 
     private void selectChecker(Node checkerNode) {
         diselectAllCheckers();
-        if (white_node.hasChild(checkerNode) || black_node.hasChild(checkerNode)) {
+        if (whiteNode.hasChild(checkerNode) || blackNode.hasChild(checkerNode)) {
             checkerNode.addLight(blueLight);
             checkerNode.setUserData("selected", true);
         }
@@ -594,11 +589,11 @@ public class CheckersGame extends SimpleApplication {
     private void diselectAllCheckers() {
 
         for (int i = 0; i < 12; i++) {
-            if (white_checkers_nodes[i].getUserData("selected")) {
-                diselectChecker(white_checkers_nodes[i]);
+            if (whiteCheckersNodes[i].getUserData("selected")) {
+                diselectChecker(whiteCheckersNodes[i]);
             }
-            if (black_checkers_nodes[i].getUserData("selected")) {
-                diselectChecker(black_checkers_nodes[i]);
+            if (blackCheckersNodes[i].getUserData("selected")) {
+                diselectChecker(blackCheckersNodes[i]);
             }
 
         }
@@ -629,7 +624,6 @@ public class CheckersGame extends SimpleApplication {
             if (colZCoordinates[i] > z_pos) {
                 row--;
             }
-
 
         }
         //bard frame
@@ -688,9 +682,9 @@ public class CheckersGame extends SimpleApplication {
 
         diselectAllCheckers();
         if ((Integer) checkerToRemove.getUserData("id") > 11) {
-            black_node.detachChild(checkerToRemove);
+            blackNode.detachChild(checkerToRemove);
         } else {
-            white_node.detachChild(checkerToRemove);
+            whiteNode.detachChild(checkerToRemove);
         }
 
         checkerField.setAccessible(true);
@@ -770,9 +764,6 @@ public class CheckersGame extends SimpleApplication {
             checkerIdToChange = to.getCheckerId();
             to.setCheckerColor(GameFlowClient.BLACK_QUEEN);
         }
-
-
-
         nodeToMove.setUserData("row", to.getTabYPosition());
         nodeToMove.setUserData("col", to.getTabXPosition());
 
@@ -836,10 +827,10 @@ public class CheckersGame extends SimpleApplication {
                 if (currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.WHITE
                         || currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.WHITE_QUEEN) {
                     for (int i = 0; i < 12; i++) {
-                        if (((Integer) white_checkers_nodes[i].getUserData("row") == chosenRow)
-                                && ((Integer) white_checkers_nodes[i].getUserData("col") == chosenCol)) {
-                            if (white_node.hasChild(white_checkers_nodes[i])) {
-                                selectChecker(white_checkers_nodes[i]);
+                        if (((Integer) whiteCheckersNodes[i].getUserData("row") == chosenRow)
+                                && ((Integer) whiteCheckersNodes[i].getUserData("col") == chosenCol)) {
+                            if (whiteNode.hasChild(whiteCheckersNodes[i])) {
+                                selectChecker(whiteCheckersNodes[i]);
                             }
                         }
                     }
@@ -847,10 +838,10 @@ public class CheckersGame extends SimpleApplication {
                 if (currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.BLACK
                         || currentBoardFromServer[chosenRow][chosenCol] == GameFlowClient.BLACK_QUEEN) {
                     for (int i = 0; i < 12; i++) {
-                        if (((Integer) black_checkers_nodes[i].getUserData("row") == chosenRow)
-                                && ((Integer) black_checkers_nodes[i].getUserData("col") == chosenCol)) {
-                            if (black_node.hasChild(black_checkers_nodes[i])) {
-                                selectChecker(black_checkers_nodes[i]);
+                        if (((Integer) blackCheckersNodes[i].getUserData("row") == chosenRow)
+                                && ((Integer) blackCheckersNodes[i].getUserData("col") == chosenCol)) {
+                            if (blackNode.hasChild(blackCheckersNodes[i])) {
+                                selectChecker(blackCheckersNodes[i]);
                             }
                         }
                     }
@@ -993,6 +984,7 @@ public class CheckersGame extends SimpleApplication {
                 }
 
             }
+            lastMove = false;
         }
         movePerformed = false;
     }
@@ -1000,11 +992,11 @@ public class CheckersGame extends SimpleApplication {
     private Node findCheckerById(int checkerId) {
 
         for (int i = 0; i < 12; i++) {
-            if ((Integer) white_checkers_nodes[i].getUserData("id") == checkerId) {
-                return white_checkers_nodes[i];
+            if ((Integer) whiteCheckersNodes[i].getUserData("id") == checkerId) {
+                return whiteCheckersNodes[i];
             }
-            if ((Integer) black_checkers_nodes[i].getUserData("id") == checkerId) {
-                return black_checkers_nodes[i];
+            if ((Integer) blackCheckersNodes[i].getUserData("id") == checkerId) {
+                return blackCheckersNodes[i];
             }
 
         }
@@ -1026,7 +1018,7 @@ public class CheckersGame extends SimpleApplication {
 
     private void restartGame() {
         GameFlowClient.setWinner(-1);
-        checkers_node.detachAllChildren();
+        checkersNode.detachAllChildren();
         setCoordinatesWhereCheckersCanBe();
         setUpCheckers();
         gameCreated = false;

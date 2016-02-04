@@ -159,18 +159,20 @@ public class CheckersUI extends javax.swing.JFrame {
 
     private void stopButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stopButtonActionPerformed
 
-        if(GameFlowClient.getCurrentPlayer() == GameFlowClient.getMyColor() && CheckersGame.animInProgress == false){//my turn so I can quit
+        if(GameFlowClient.getCurrentPlayer() == 0 || GameFlowClient.getCurrentPlayer() == GameFlowClient.getMyColor() && CheckersGame.animInProgress == false){//my turn so I can quit
         if (Connecting.connectedToServer && !Connecting.firstMessageIn) {//not playing yet
             Connecting.myClient.close();          
             CheckersGame.window.startButton.setEnabled(true);
             CheckersGame.window.infoLabel.setText(CheckersGame.NO_INFO);
             Connecting.firstMessageIn = false;
+            Connecting.connectedToServer = false;
 
         } else {//quit game
             GameFlowClient.resignGame();
             Connecting.sendMessageToServer(-1, -1, GameFlowClient.isResign());
         }
             CheckersGame.window.stopButton.setEnabled(false);
+            CheckersGame.animInProgress = false;
         }
     }//GEN-LAST:event_stopButtonActionPerformed
     // Variables declaration - do not modify//GEN-BEGIN:variables

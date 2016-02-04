@@ -19,7 +19,7 @@ public class Connecting extends Thread implements ErrorListener {
     private static final Logger logger = Logger.getLogger(CheckersGame.class.getName());
     private static MessageFromClient messageToServer;
     private MessageFromServer messageFromServer;
-    public static boolean connectedToServer = false;
+    public volatile static boolean connectedToServer = false;
     private volatile boolean threadRunning = true;
     private static final int SERVER_PORT = 8902;
     private static final String HOST_NAME = "localhost";
@@ -81,6 +81,7 @@ public class Connecting extends Thread implements ErrorListener {
                 } catch (InterruptedException ex) {
                     Logger.getLogger(Connecting.class.getName()).log(Level.SEVERE, null, ex);
                 }
+
             }
             threadRunning = false;
         }
@@ -104,6 +105,7 @@ public class Connecting extends Thread implements ErrorListener {
         messageToServer.setChosenCol(col);
         messageToServer.setChosenRow(row);
         messageToServer.setResign(resign);
+        messageToServer.setReliable(true);
 
     }
 
@@ -165,6 +167,9 @@ public class Connecting extends Thread implements ErrorListener {
                         CheckersGame.matchFinished = true;
                         CheckersGame.lastMove = true;
                     }
+                       connectedToServer = false;
+                       CheckersGame.animInProgress = false;
+                       Connecting.firstMessageIn = false;
                 }
             }
         }
