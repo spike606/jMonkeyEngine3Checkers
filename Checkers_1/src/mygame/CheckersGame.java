@@ -178,8 +178,8 @@ public class CheckersGame extends SimpleApplication {
     public void simpleInitApp() {
 
         /* INFO OFF*/
-//        setDisplayFps(false);
-//        setDisplayStatView(false);
+        setDisplayFps(false);
+        setDisplayStatView(false);
 
         /* LOAD BOARD*/
         Spatial board = assetManager.loadModel(CHESSBOARD_MODEL);
@@ -288,7 +288,6 @@ public class CheckersGame extends SimpleApplication {
         inputManager.addMapping("Cam4", new KeyTrigger(KeyInput.KEY_4));
         inputManager.addMapping("Cam5", new KeyTrigger(KeyInput.KEY_5));
         inputManager.addMapping("Click", new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-
         // Add the names to the action listener.
         inputManager.addListener(actionListener, "Cam1", "Cam2", "Cam3", "Cam4", "Cam5", "Click");
 
@@ -607,19 +606,13 @@ public class CheckersGame extends SimpleApplication {
         float x_pos = pointCoordinates.getX();
         float z_pos = pointCoordinates.getZ();
 
-        System.out.println(pointCoordinates.getX());
-
         for (int i = 0; i < 8; i++) {
-            System.out.println(colXCoordinates[i]);
-
 
             if (colXCoordinates[i] > x_pos) {
                 col--;
             }
         }
         for (int i = 0; i < 8; i++) {
-            System.out.println(colZCoordinates[i]);
-
 
             if (colZCoordinates[i] > z_pos) {
                 row--;

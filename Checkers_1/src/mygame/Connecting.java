@@ -22,7 +22,7 @@ public class Connecting extends Thread implements ErrorListener {
     public volatile static boolean connectedToServer = false;
     private volatile boolean threadRunning = true;
     private static final int SERVER_PORT = 8902;
-    private static final String HOST_NAME = "localhost";
+    private static final String HOST_NAME = "192.168.0.101";
     public static Client myClient;
     public static boolean firstMessageIn = false;//set when received first message from server
 
