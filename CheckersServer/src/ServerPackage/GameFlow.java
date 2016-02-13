@@ -16,47 +16,47 @@ public class GameFlow {
     CheckersMove[] possibleMoves;// array with possible moves for current
     // player
 
-    public synchronized int getChosenRow() {
+    synchronized int getChosenRow() {
         return chosenRow;
     }
 
-    public synchronized int getCurrentPlayer() {
+    synchronized int getCurrentPlayer() {
         return currentPlayer;
     }
 
-    public synchronized void setCurrentPlayer(int currentPlayer) {
+    synchronized void setCurrentPlayer(int currentPlayer) {
         this.currentPlayer = currentPlayer;
     }
 
-    public synchronized void setChosenRow(int chosenRow) {
+    synchronized void setChosenRow(int chosenRow) {
         this.chosenRow = chosenRow;
     }
 
-    public synchronized int getChosenCol() {
+    synchronized int getChosenCol() {
         return chosenCol;
     }
 
-    public synchronized void setChosenCol(int chosenCol) {
+    synchronized void setChosenCol(int chosenCol) {
         this.chosenCol = chosenCol;
     }
 
-    public synchronized CheckersMove[] getPossibleMoves() {
+    synchronized CheckersMove[] getPossibleMoves() {
         return possibleMoves;
     }
 
-    public synchronized int getWinner() {
+    synchronized int getWinner() {
         return winner;
     }
 
-    public synchronized boolean isGameRunning() {
+    synchronized boolean isGameRunning() {
         return gameRunning;
     }
 
-    public synchronized void setGameRunning(boolean gameRunning) {
+    synchronized void setGameRunning(boolean gameRunning) {
         this.gameRunning = gameRunning;
     }
 
-    public synchronized void setWinner(int winner) {
+    synchronized void setWinner(int winner) {
         this.winner = winner;
     }
 

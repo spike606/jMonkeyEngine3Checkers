@@ -26,7 +26,7 @@ public final class GameData {
     /*
      * Set up board on start
      */
-    public void setElementsOnStart() {
+    void setElementsOnStart() {
         for (int row = 0; row < 8; row++) {
             for (int col = 0; col < 8; col++) {
                 if (row % 2 != col % 2) {
@@ -45,14 +45,14 @@ public final class GameData {
     }
 
     // get current checker on selected field
-    public int getFieldOnBoard(int row, int col) {
+    int getFieldOnBoard(int row, int col) {
         return board[row][col];
     }
 
     /*
      * Make the move, move is not null and is legal.
      */
-    public void makeMove(CheckersMove move) {
+    void makeMove(CheckersMove move) {
 
         /*
          * If move is performed by queen
@@ -73,7 +73,7 @@ public final class GameData {
 
     }
 
-    private void removeOpponentCheckerIfBeating(CheckersMove move) {// checks
+    private void removeOpponentCheckerIfBeating(CheckersMove move) {// check
         // queens
         // move and
         // remove
@@ -217,14 +217,13 @@ public final class GameData {
     /*
      * Make an array containing possible moves
      */
-    public CheckersMove[] getPossibleMovesForPlayer(int player) {
+    CheckersMove[] getPossibleMovesForPlayer(int player) {
 
         if (player != WHITE && player != BLACK) {
             return null;
         }
 
-        int playerQueen; // The constant representing a queen belonging to
-        // player.
+        int playerQueen;
         if (player == WHITE) {
             playerQueen = WHITE_QUEEN;
         } else {
@@ -234,7 +233,7 @@ public final class GameData {
         // temporary array for possible moves
         ArrayList<CheckersMove> moves = new ArrayList<CheckersMove>();
 
-        // check possible beating - if so player must to beat
+        // check possible beating
         checkPossibleBeating(moves, player, playerQueen);
 
         // if no beating is possible check for regular moves
@@ -682,7 +681,7 @@ public final class GameData {
     /*
      * If beating was performed check if another beating is possible
      */
-    public CheckersMove[] getPossibleSecondBeating(int player, int rowFrom, int colFrom) {
+    CheckersMove[] getPossibleSecondBeating(int player, int rowFrom, int colFrom) {
 
         if (player != WHITE && player != BLACK) {
             return null;

@@ -63,14 +63,14 @@ public class CheckersServer extends SimpleApplication implements ConnectionListe
             while (i.hasNext()) {
                 Map.Entry firstPlayer = (Map.Entry) i.next();
 
-                if (firstPlayer.getValue().equals(false)) {//when find player with no opponent start looking for opponent
+                if (firstPlayer.getValue().equals(false)) {//start looking for opponent
                     Iterator j = activeConnectionsMap.entrySet().iterator();
                     while (j.hasNext()) {
                         Map.Entry secondPlayer = (Map.Entry) j.next();
                         if (secondPlayer.getValue().equals(false) && firstPlayer.getValue().equals(false)//create a match
                                 && (Integer) secondPlayer.getKey() != (Integer) firstPlayer.getKey()) {
                             
-                            activeConnectionsMap.put(firstPlayer.getKey(), true);//now players have opponent
+                            activeConnectionsMap.put(firstPlayer.getKey(), true);
                             activeConnectionsMap.put(secondPlayer.getKey(), true);
 
                             Match match = new Match(matchNumber);
